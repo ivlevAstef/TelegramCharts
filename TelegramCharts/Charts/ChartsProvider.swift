@@ -59,6 +59,7 @@ public class ChartsProvider
         }
 
         let timestamps = timestampColumn.dropFirst().compactMap{ $0.value }
+        assert(timestamps == timestamps.sorted(), "Invalid data. Timestamps doen't sort.")
 
         var result: [Chart] = []
 
