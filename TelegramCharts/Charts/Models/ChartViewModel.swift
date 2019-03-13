@@ -51,6 +51,26 @@ public class ChartViewModel
         self.color = color
     }
 
+    internal func calculateAABBInInterval(from: Chart.Date, to: Chart.Date) -> Chart.AABB? {
+        var minValue: Chart.Value = Chart.Value.max
+        var maxValue: Chart.Value = Chart.Value.min
+
+        var hasPoints: Bool = false
+        for point in points {
+            if from <= point.date && point.date <= to {
+                minValue = min(minValue, point.value)
+                maxValue = max(maxValue, point.value)
+                hasPoints = true
+            }
+        }
+
+        if hasPoints {
+            return Chart.AABB(minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue)
+        }
+        
+        return nil
+    }
+
     internal func calculateUIPoints(for rect: CGRect) -> [CGPoint] {
         return calculateUIPoints(for: rect, aabb: aabb)
     }

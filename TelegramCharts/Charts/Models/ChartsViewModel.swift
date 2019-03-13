@@ -36,6 +36,9 @@ public class ChartsViewModel
     internal var visibleaabb: Chart.AABB? {
         return calculateAABB(for: visibleCharts)
     }
+    internal var visibleInIntervalAABB: Chart.AABB? {
+        return calculateAABBInInterval(for: visibleCharts, from: interval.from, to: interval.to)
+    }
 
     private var updateListeners: [WeakRef<ChartsUpdateListener>] = []
 
@@ -98,6 +101,20 @@ public class ChartsViewModel
             let minValue = minValue, let maxValue = maxValue
         {
             return Chart.AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
+        }
+
+        return nil
+    }
+
+    private func calculateAABBInInterval(for charts: [ChartViewModel], from: Chart.Date, to: Chart.Date) -> Chart.AABB? {
+        let aabbs = charts.compactMap { $0.calculateAABBInInterval(from: from, to: to) }
+
+        let minValue = aabbs.map { $0.minValue }.min()
+        let maxValue = aabbs.map { $0.maxValue }.max()
+
+        if let minValue = minValue, let maxValue = maxValue
+        {
+            return Chart.AABB(minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue)
         }
 
         return nil
