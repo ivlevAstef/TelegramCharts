@@ -56,16 +56,17 @@ internal class MainViewController: UITableViewController, Stylizing
 
     private func processChartsResult(_ result: ChartsProvider.Result) {
         switch result {
-        case .success(let charts):
-            configureChartsViewModel(use: charts)
+        case .success(let charts2D):
+            configureChartsViewModel(use: charts2D)
         case .failed:
             showError()
         }
     }
 
-    private func configureChartsViewModel(use charts: [Chart])
+    private func configureChartsViewModel(use charts2D: [[Chart]])
     {
-        chartsViewModel = ChartsViewModel(charts: charts)
+        // TODO: need other screen, for select?
+        chartsViewModel = ChartsViewModel(charts: charts2D[4])
         tableView.reloadData()
     }
 
@@ -127,7 +128,7 @@ internal class MainViewController: UITableViewController, Stylizing
                 let infoChartCell: InfoChartTableViewCell = dequeueReusableCell(for: indexPath)
                 infoChartCell.setColor(chart.color)
                 infoChartCell.setChartName(chart.name)
-                infoChartCell.setCheckmark(chart.isEnabled)
+                infoChartCell.setCheckmark(chart.isVisible)
                 cell = infoChartCell
             }
         case 1:
@@ -153,7 +154,7 @@ internal class MainViewController: UITableViewController, Stylizing
                 fatalError("Charts view models mismatch chart for index: \(index)")
             }
 
-            chart.isEnabled.toggle()
+            self.chartsViewModel?.toogleChart(chart)
             tableView.reloadRows(at: [indexPath], with: .none)
         }
     }

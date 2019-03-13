@@ -9,53 +9,98 @@
 import Foundation
 import UIKit
 
+public protocol ChartsUpdateListener: class
+{
+    func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
+    func chartsIntervalIsChanged(_ viewModel: ChartsViewModel)
+}
+
 public class ChartsViewModel
 {
-    private static let zeroDate = Date(timeIntervalSince1970: 0)
     public struct Interval
     {
-        let from: Date
-        let to: Date
+        let from: Chart.Date
+        let to: Chart.Date
     }
 
     public private(set) var charts: [ChartViewModel]
-    public private(set) var interval: Interval = Interval(from: ChartsViewModel.zeroDate, to: ChartsViewModel.zeroDate)
-    public var fullInterval: Interval? {
-        let dates = charts.flatMap { $0.points.compactMap { $0.date } }
-        if let min = dates.min(), let max = dates.max() {
-            return Interval(from: min, to: max)
-        }
-        return nil
+    public var visibleCharts: [ChartViewModel] {
+        return charts.filter { $0.isVisible }
     }
 
-    internal var updateCallback: ((_ viewModel: ChartsViewModel) -> Void)?
+    public private(set) var interval: Interval = Interval(from: 0, to: 0)
+
+    internal private(set) lazy var aabb: Chart.AABB? = {
+        return calculateAABB(for: charts)
+    }()
+    internal var visibleaabb: Chart.AABB? {
+        return calculateAABB(for: visibleCharts)
+    }
+
+    private var updateListeners: [WeakRef<ChartsUpdateListener>] = []
 
     public init(charts: [Chart]) {
         self.charts = charts.map { chart in
             let points = chart.points.map { ChartViewModel.Point(date: $0.date, value: $0.value) }
             return ChartViewModel(name: chart.name, points: points, color: UIColor(hex: chart.color))
         }
+
+        if let aabb = self.aabb {
+            self.interval = Interval(from: aabb.minDate, to: aabb.maxDate)
+        }
+    }
+
+    public func registerUpdateListener(_ listener: ChartsUpdateListener)
+    {
+        if !updateListeners.contains(where: { $0.value === listener }) {
+            updateListeners.append(WeakRef(listener))
+        }
+
+        updateListeners.removeAll(where: { $0.value == nil })
+    }
+
+    public func unregisterUpdateListener(_ listener: ChartsUpdateListener)
+    {
+        updateListeners.removeAll(where: { $0.value === listener })
+        updateListeners.removeAll(where: { $0.value == nil })
+    }
+
+    public func toogleChart(_ chart: ChartViewModel) {
+        assert(charts.contains(where: { $0 === chart }), "Doen't found chart in data")
+        chart.isVisible.toggle()
+        updateListeners.forEach { $0.value?.chartsVisibleIsChanged(self) }
     }
 
     public func enableChart(_ chart: ChartViewModel) {
-        chart.isEnabled = true
-        dataChanged()
         assert(charts.contains(where: { $0 === chart }), "Doen't found chart in data")
+        chart.isVisible = true
+        updateListeners.forEach { $0.value?.chartsVisibleIsChanged(self) }
     }
 
     public func disableChart(_ chart: ChartViewModel) {
-        chart.isEnabled = false
-        dataChanged()
         assert(charts.contains(where: { $0 === chart }), "Doen't found chart in data")
+        chart.isVisible = false
+        updateListeners.forEach { $0.value?.chartsVisibleIsChanged(self) }
     }
 
     public func updateInterval(_ interval: Interval) {
         self.interval = interval
-        self.dataChanged()
+        updateListeners.forEach { $0.value?.chartsIntervalIsChanged(self) }
     }
 
-    private func dataChanged() {
-        updateCallback?(self)
+    private func calculateAABB(for charts: [ChartViewModel]) -> Chart.AABB? {
+        let minDate = charts.map { $0.aabb.minDate }.min()
+        let maxDate = charts.map { $0.aabb.maxDate }.max()
+        let minValue = charts.map { $0.aabb.minValue }.min()
+        let maxValue = charts.map { $0.aabb.maxValue }.max()
+
+        if let minDate = minDate, let maxDate = maxDate,
+            let minValue = minValue, let maxValue = maxValue
+        {
+            return Chart.AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
+        }
+
+        return nil
     }
 
 }

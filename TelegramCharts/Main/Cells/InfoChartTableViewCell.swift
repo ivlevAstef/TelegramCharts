@@ -16,6 +16,7 @@ internal class InfoChartTableViewCell: UITableViewCell, Stylizing
     @IBOutlet private var chartNameLabel: UILabel!
 
     private var colorViewColor: UIColor?
+    private var selectedColorViewColor: UIColor?
 
     internal func applyStyle(_ style: Style) {
         colorView.layer.cornerRadius = 4.0
@@ -23,8 +24,9 @@ internal class InfoChartTableViewCell: UITableViewCell, Stylizing
         chartNameLabel.textColor = style.textColor
         tintColor = style.activeElementColor
 
+        selectedColorViewColor = style.selectedColor
         selectedBackgroundView = UIView(frame: .zero)
-        selectedBackgroundView?.backgroundColor = style.selectedColor
+        selectedBackgroundView?.backgroundColor = .clear
     }
 
     internal func setColor(_ color: UIColor) {
@@ -47,5 +49,13 @@ internal class InfoChartTableViewCell: UITableViewCell, Stylizing
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
         colorView.backgroundColor = self.colorViewColor
+
+        UIView.animate(withDuration: 0.1, delay: 0.2, animations: {
+            if highlighted {
+                self.selectedBackgroundView?.backgroundColor = self.selectedColorViewColor
+            } else {
+                self.selectedBackgroundView?.backgroundColor = .clear
+            }
+        })
     }
 }

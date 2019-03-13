@@ -10,12 +10,9 @@ import Foundation
 
 public class ChartsProvider
 {
-    // unsafe
-    private static let chartIndex: Int = 4
-
     public enum Result
     {
-        case success(_ charts: [Chart])
+        case success(_ charts2D: [[Chart]])
         case failed
     }
 
@@ -25,12 +22,13 @@ public class ChartsProvider
                 completion(.failed)
                 return
             }
-            guard let charts = self.loadChartsFromFile() else {
+            guard let rawCharts2D = self.loadChartsFromFile() else {
                 completion(.failed)
                 return
             }
 
-            completion(.success(self.convertToModel(charts[ChartsProvider.chartIndex])))
+            let charts2D = rawCharts2D.map{ self.convertToModel($0) }
+            completion(.success(charts2D))
         }
     }
 
@@ -79,7 +77,7 @@ public class ChartsProvider
 
             let points = zip(timestamps, values).map { pair -> Chart.Point in
                 let (timestamp, value) = pair
-                return Chart.Point(date: Date(timeIntervalSince1970: Double(timestamp)), value: Int(value))
+                return Chart.Point(date: timestamp, value: Int(value))
             }
 
             result.append(Chart(name: name, points: points, color: color))
