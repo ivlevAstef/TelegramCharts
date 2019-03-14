@@ -28,11 +28,15 @@ public class IntervalView: UIView
 
     private var isBeganMovedLeftSlider: Bool = false
     private var isBeganMovedRightSlider: Bool = false
-    private var tapOffset: CGFloat = 0.0
+    private var isBeganMovedCenterSlider: Bool = false
+    private var tapLeftOffset: CGFloat = 0.0
+    private var tapRightOffset: CGFloat = 0.0
 
     public init() {
         super.init(frame: .zero)
+        
         self.backgroundColor = .clear
+        self.clipsToBounds = true
 
         self.isUserInteractionEnabled = true
         self.isMultipleTouchEnabled = false
@@ -42,7 +46,7 @@ public class IntervalView: UIView
     {
         chartsViewModel = charts
         charts.registerUpdateListener(self)
-        
+
         chartLayers.forEach { $0.layer.removeFromSuperlayer() }
         chartLayers.removeAll()
         for chart in charts.charts {
@@ -161,15 +165,28 @@ public class IntervalView: UIView
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
 
         func updateInterval() {
+            let newLeftX = min(tapPosition.x - tapLeftOffset, rightX)
+            let newRightX = max(tapPosition.x - tapRightOffset, leftX)
             if isBeganMovedLeftSlider {
-                let newLeftX = min(tapPosition.x - tapOffset, rightX)
                 let newFrom = max(aabb.minDate, aabb.calculateDate(x: newLeftX, rect: rect))
                 chartsViewModel.updateInterval(ChartsViewModel.Interval(from: newFrom, to: interval.to))
             }
             if isBeganMovedRightSlider {
-                let newRightX = max(tapPosition.x - tapOffset, leftX)
                 let newTo = min(aabb.maxDate, aabb.calculateDate(x: newRightX, rect: rect))
                 chartsViewModel.updateInterval(ChartsViewModel.Interval(from: interval.from, to: newTo))
+            }
+            if isBeganMovedCenterSlider {
+                var newFrom = aabb.calculateDate(x: newLeftX, rect: rect)
+                var newTo = aabb.calculateDate(x: newRightX, rect: rect)
+                if newFrom < aabb.minDate {
+                    newTo += (aabb.minDate - newFrom)
+                    newFrom = aabb.minDate
+                }
+                if newTo > aabb.maxDate {
+                    newFrom -= (newTo - aabb.maxDate)
+                    newTo = aabb.maxDate
+                }
+                chartsViewModel.updateInterval(ChartsViewModel.Interval(from: newFrom, to: newTo))
             }
         }
 
@@ -177,24 +194,19 @@ public class IntervalView: UIView
         case .began:
             let leftDistance = abs(tapPosition.x - leftX)
             let rightDistance = abs(tapPosition.x - rightX)
-            var isLeft: Bool = false
-            var isRight: Bool = false
             // only if leftX == rightX
             if leftDistance == rightDistance && leftDistance < Consts.sliderTouchWidth * 0.5 {
-                isLeft = tapPosition.x <= leftX
-                isRight = tapPosition.x > rightX
+                isBeganMovedLeftSlider = tapPosition.x <= leftX
+                isBeganMovedRightSlider = tapPosition.x > rightX
             } else {
-                isLeft = leftDistance < rightDistance && leftDistance < Consts.sliderTouchWidth * 0.5
-                isRight = rightDistance < leftDistance && rightDistance < Consts.sliderTouchWidth * 0.5
+                isBeganMovedLeftSlider = leftDistance < rightDistance && leftDistance < Consts.sliderTouchWidth * 0.5
+                isBeganMovedRightSlider = rightDistance < leftDistance && rightDistance < Consts.sliderTouchWidth * 0.5
             }
+            tapLeftOffset = tapPosition.x - leftX
+            tapRightOffset = tapPosition.x - rightX
             
-            if isLeft {
-                isBeganMovedLeftSlider = true
-                tapOffset = tapPosition.x - leftX
-            } else if isRight {
-                isBeganMovedRightSlider = true
-                tapOffset = tapPosition.x - rightX
-            }
+            let notSideSlider = isBeganMovedLeftSlider == false && isBeganMovedRightSlider == false
+            isBeganMovedCenterSlider = notSideSlider && leftX < tapPosition.x && tapPosition.x < rightX
         case .changed:
             updateInterval()
         case .ended:
@@ -203,6 +215,7 @@ public class IntervalView: UIView
         default:
             isBeganMovedLeftSlider = false
             isBeganMovedRightSlider = false
+            isBeganMovedCenterSlider = false
         }
     }
 

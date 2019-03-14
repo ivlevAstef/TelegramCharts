@@ -24,24 +24,26 @@ internal final class ChartLayerWrapper
     }
     
     internal func update(aabb: Chart.AABB, animated: Bool) {
-        let newPath = makePath(aabb: aabb)
-        
-        if animated && nil != layer.path {
-            let animation = CABasicAnimation(keyPath: "path")
-            animation.duration = 5.25
-            animation.toValue = newPath.cgPath
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-            animation.fillMode = .forwards
-            layer.add(animation, forKey: "path")
-        } else {
-            layer.path = newPath.cgPath
-        }
-        
-        let animation = CABasicAnimation(keyPath: "strokeColor")
-        animation.duration = animated ? 5.25 : 0.01
-        animation.toValue = (chartViewModel.isVisible ? chartViewModel.color : UIColor.clear).cgColor
-        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-        layer.add(animation, forKey: "strokeColor")
+        let newPath = chartViewModel.isVisible ? makePath(aabb: aabb) : nil
+        layer.path = newPath?.cgPath
+//        let newPath = makePath(aabb: aabb)
+//
+//        if animated && nil != layer.path {
+//            let animation = CABasicAnimation(keyPath: "path")
+//            animation.duration = 0.25
+//            animation.toValue = newPath.cgPath
+//            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+//            animation.fillMode = .forwards
+//            layer.add(animation, forKey: nil)
+//        } else {
+//            layer.path = newPath.cgPath
+//        }
+
+//        let animation = CABasicAnimation(keyPath: "strokeColor")
+//        animation.duration = animated ? 0.25 : 0.01
+//        animation.toValue = (chartViewModel.isVisible ? chartViewModel.color : UIColor.clear).cgColor
+//        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+//        layer.add(animation, forKey: nil)
     }
     
     private func makePath(aabb: Chart.AABB) -> UIBezierPath

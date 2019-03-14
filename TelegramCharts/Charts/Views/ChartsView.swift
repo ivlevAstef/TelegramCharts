@@ -62,11 +62,11 @@ extension ChartsView: ChartsUpdateListener
 {
     public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
     {
-        //updateCharts()
+        updateCharts()
     }
 
     public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel)
     {
-        //updateCharts()
+        updateCharts()
     }
 }

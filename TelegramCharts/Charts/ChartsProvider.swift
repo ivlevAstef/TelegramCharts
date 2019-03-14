@@ -61,14 +61,16 @@ public class ChartsProvider
 
         var result: [Chart] = []
 
-        for (id, type) in rawCharts.types where type == "line" {
-            guard let name = rawCharts.names[id], let color = rawCharts.colors[id] else {
+        for column in rawCharts.columns {
+            guard let id = column[safe: 0]?.name else {
                 continue
             }
-            guard let column = rawCharts.columns.first(where: { $0[safe: 0]?.name == id }) else {
+            
+            guard let name = rawCharts.names[id], let type = rawCharts.types[id], let color = rawCharts.colors[id] else {
                 continue
             }
-            if column.isEmpty {
+            
+            if column.isEmpty && type != "line" && id != timestampId {
                 continue
             }
 
