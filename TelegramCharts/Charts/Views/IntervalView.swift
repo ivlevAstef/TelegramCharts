@@ -12,7 +12,7 @@ private enum Consts
 {
     internal static let sliderWidth: CGFloat = 10.0
 
-    internal static let sliderTouchWidth: CGFloat = 20.0
+    internal static let sliderTouchWidth: CGFloat = 32.0
 }
 
 public class IntervalView: UIView

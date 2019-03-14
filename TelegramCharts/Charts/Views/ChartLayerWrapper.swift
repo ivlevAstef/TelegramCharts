@@ -70,15 +70,18 @@ internal final class ChartLayerWrapper
     }
 }
 
-private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate {
+private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
+{
+    private let uniqueKey: String = UUID().uuidString
+    
     private weak var parentLayer: CALayer?
     private var selfRetain: CASaveStateAnimation?
     
     internal func startAnimation(on layer: CALayer) {
         parentLayer = layer
-        
+        isRemovedOnCompletion = false
         delegate = self
-        layer.add(self, forKey: nil)
+        layer.add(self, forKey: uniqueKey)
     }
     
     @objc
@@ -88,7 +91,8 @@ private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate {
     
     @objc
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        selfRetain = nil
         parentLayer?.setValue(toValue, forKey: keyPath!)
+        selfRetain = nil
+        parentLayer?.removeAnimation(forKey: uniqueKey)
     }
 }

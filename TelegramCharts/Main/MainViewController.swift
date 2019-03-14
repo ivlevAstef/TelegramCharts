@@ -84,6 +84,14 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return cellHeight(for: indexPath)
+    }
+    
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return cellHeight(for: indexPath)
+    }
+    
+    private func cellHeight(for indexPath: IndexPath) -> CGFloat {
         switch indexPath.section {
         case 0:
             if 0 == indexPath.row {
