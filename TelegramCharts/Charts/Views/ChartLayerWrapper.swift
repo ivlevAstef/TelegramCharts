@@ -24,26 +24,32 @@ internal final class ChartLayerWrapper
     }
     
     internal func update(aabb: Chart.AABB, animated: Bool) {
-        let newPath = chartViewModel.isVisible ? makePath(aabb: aabb) : nil
-        layer.path = newPath?.cgPath
-//        let newPath = makePath(aabb: aabb)
-//
-//        if animated && nil != layer.path {
-//            let animation = CABasicAnimation(keyPath: "path")
-//            animation.duration = 0.25
-//            animation.toValue = newPath.cgPath
-//            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-//            animation.fillMode = .forwards
-//            layer.add(animation, forKey: nil)
-//        } else {
-//            layer.path = newPath.cgPath
-//        }
+        let newPath = makePath(aabb: aabb)
 
-//        let animation = CABasicAnimation(keyPath: "strokeColor")
-//        animation.duration = animated ? 0.25 : 0.01
-//        animation.toValue = (chartViewModel.isVisible ? chartViewModel.color : UIColor.clear).cgColor
-//        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-//        layer.add(animation, forKey: nil)
+        layer.removeAllAnimations()
+        
+        if animated && nil != layer.path {
+            let animation = CASaveStateAnimation(keyPath: "path")
+            animation.duration = 0.25
+            animation.toValue = newPath.cgPath
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.fillMode = .both
+            animation.startAnimation(on: layer)
+        } else {
+            layer.path = newPath.cgPath
+        }
+        
+        let newOpacity: Float = chartViewModel.isVisible ? 1.0 : 0.0
+        if animated {
+            let animation = CASaveStateAnimation(keyPath: "opacity")
+            animation.duration = 0.25
+            animation.toValue = newOpacity
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.fillMode = .both
+            animation.startAnimation(on: layer)
+        } else {
+            layer.opacity = newOpacity
+        }
     }
     
     private func makePath(aabb: Chart.AABB) -> UIBezierPath
@@ -61,5 +67,28 @@ internal final class ChartLayerWrapper
         }
         
         return path
+    }
+}
+
+private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate {
+    private weak var parentLayer: CALayer?
+    private var selfRetain: CASaveStateAnimation?
+    
+    internal func startAnimation(on layer: CALayer) {
+        parentLayer = layer
+        
+        delegate = self
+        layer.add(self, forKey: nil)
+    }
+    
+    @objc
+    func animationDidStart(_ anim: CAAnimation) {
+        selfRetain = self
+    }
+    
+    @objc
+    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        selfRetain = nil
+        parentLayer?.setValue(toValue, forKey: keyPath!)
     }
 }

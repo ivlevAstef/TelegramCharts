@@ -37,10 +37,10 @@ public class ChartsView: UIView
             layer.addSublayer(chartLayer.layer)
         }
 
-        updateCharts()
+        updateCharts(animated: false)
     }
 
-    private func updateCharts()
+    private func updateCharts(animated: Bool)
     {
         guard let aabb = chartsVisibleAABB else {
             return
@@ -48,7 +48,7 @@ public class ChartsView: UIView
         
         for chartLayer in chartLayers {
             chartLayer.layer.frame = self.bounds
-            chartLayer.update(aabb: aabb, animated: true)
+            chartLayer.update(aabb: aabb, animated: animated)
         }
     }
 
@@ -62,11 +62,11 @@ extension ChartsView: ChartsUpdateListener
 {
     public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
     {
-        updateCharts()
+        updateCharts(animated: true)
     }
 
     public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel)
     {
-        updateCharts()
+        updateCharts(animated: false)
     }
 }
