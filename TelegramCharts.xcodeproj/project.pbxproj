@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABB87D3B223A393B00E31808 /* ChartLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */; };
+		ABB87D3C223A393B00E31808 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D3A223A393B00E31808 /* ChartsView.swift */; };
 		BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE712E2235FBEA00068579 /* AppDelegate.swift */; };
 		BACE71312235FBEA00068579 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71302235FBEA00068579 /* MainViewController.swift */; };
 		BACE71432235FC3A00068579 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71422235FC3A00068579 /* ChartViewModel.swift */; };
@@ -28,13 +30,14 @@
 		BACE716C22363AD500068579 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BACE716622363AD500068579 /* Main.storyboard */; };
 		BACE716F22363E1900068579 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE716E22363E1900068579 /* Chart.swift */; };
 		BACE71712238BB5E00068579 /* IntervalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71702238BB5E00068579 /* IntervalView.swift */; };
-		BACE71732238BBF400068579 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71722238BBF400068579 /* ChartsView.swift */; };
 		BACE71772238D18300068579 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71762238D18300068579 /* WeakRef.swift */; };
 		BACE71792238DB6C00068579 /* Charts+AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71782238DB6C00068579 /* Charts+AABB.swift */; };
 		BACE717B2238DFCC00068579 /* ChartsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE717A2238DFCC00068579 /* ChartsStyle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartLayerWrapper.swift; sourceTree = "<group>"; };
+		ABB87D3A223A393B00E31808 /* ChartsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		BACE712B2235FBEA00068579 /* TelegramCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BACE712E2235FBEA00068579 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BACE71302235FBEA00068579 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -58,7 +61,6 @@
 		BACE716822363AD500068579 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BACE716E22363E1900068579 /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		BACE71702238BB5E00068579 /* IntervalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalView.swift; sourceTree = "<group>"; };
-		BACE71722238BBF400068579 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		BACE71762238D18300068579 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
 		BACE71782238DB6C00068579 /* Charts+AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Charts+AABB.swift"; sourceTree = "<group>"; };
 		BACE717A2238DFCC00068579 /* ChartsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsStyle.swift; sourceTree = "<group>"; };
@@ -75,6 +77,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AB003D7C223A34120098C75E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */,
+				ABB87D3A223A393B00E31808 /* ChartsView.swift */,
+				BACE714E223612DC00068579 /* ChartsWithIntervalView.swift */,
+				BACE71702238BB5E00068579 /* IntervalView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		BACE71222235FBEA00068579 = {
 			isa = PBXGroup;
 			children = (
@@ -106,11 +119,9 @@
 		BACE71402235FC0000068579 /* Charts */ = {
 			isa = PBXGroup;
 			children = (
+				AB003D7C223A34120098C75E /* Views */,
 				BACE71412235FC1300068579 /* Models */,
 				BACE71472236010E00068579 /* ChartsProvider.swift */,
-				BACE714E223612DC00068579 /* ChartsWithIntervalView.swift */,
-				BACE71702238BB5E00068579 /* IntervalView.swift */,
-				BACE71722238BBF400068579 /* ChartsView.swift */,
 				BACE717A2238DFCC00068579 /* ChartsStyle.swift */,
 			);
 			path = Charts;
@@ -267,13 +278,14 @@
 				BACE71312235FBEA00068579 /* MainViewController.swift in Sources */,
 				BACE716F22363E1900068579 /* Chart.swift in Sources */,
 				BACE715C22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift in Sources */,
-				BACE71732238BBF400068579 /* ChartsView.swift in Sources */,
 				BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */,
 				BACE715E22362E4B00068579 /* Array+SafeGet.swift in Sources */,
 				BACE714D223602E400068579 /* Style+Styles.swift in Sources */,
 				BACE71432235FC3A00068579 /* ChartViewModel.swift in Sources */,
 				BACE7152223613B300068579 /* SwitchStyleModeTableViewCell.swift in Sources */,
+				ABB87D3B223A393B00E31808 /* ChartLayerWrapper.swift in Sources */,
 				BACE7154223613C200068579 /* InfoChartTableViewCell.swift in Sources */,
+				ABB87D3C223A393B00E31808 /* ChartsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

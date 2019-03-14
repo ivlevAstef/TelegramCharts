@@ -24,6 +24,7 @@ public class IntervalView: UIView
     private var chartsVisibleAABB: Chart.AABB? {
         return chartsViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1)
     }
+    private var chartLayers: [ChartLayerWrapper] = []
 
     private var isBeganMovedLeftSlider: Bool = false
     private var isBeganMovedRightSlider: Bool = false
@@ -34,16 +35,23 @@ public class IntervalView: UIView
         self.backgroundColor = .clear
 
         self.isUserInteractionEnabled = true
-        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(gesture(_:)))
-        gestureRecognizer.minimumPressDuration = 0.0
-        self.addGestureRecognizer(gestureRecognizer)
+        self.isMultipleTouchEnabled = false
     }
 
     public func setCharts(_ charts: ChartsViewModel)
     {
         chartsViewModel = charts
         charts.registerUpdateListener(self)
+        
+        chartLayers.forEach { $0.layer.removeFromSuperlayer() }
+        chartLayers.removeAll()
+        for chart in charts.charts {
+            let chartLayer = ChartLayerWrapper(chartViewModel: chart)
+            chartLayers.append(chartLayer)
+            layer.addSublayer(chartLayer.layer)
+        }
 
+        updateCharts()
         setNeedsDisplay()
     }
 
@@ -56,25 +64,19 @@ public class IntervalView: UIView
 
         if let chartsViewModel = chartsViewModel, let aabb = chartsVisibleAABB
         {
-            drawCharts(chartsViewModel: chartsViewModel, aabb: aabb, rect: rect, context: context)
             drawInterval(chartsViewModel: chartsViewModel, aabb: aabb, rect: rect, context: context)
         }
     }
-
-    private func drawCharts(chartsViewModel: ChartsViewModel, aabb: Chart.AABB, rect: CGRect, context: CGContext) {
-        context.saveGState()
-        defer { context.restoreGState() }
-
-        context.setLineCap(.butt)
-        context.setLineWidth(1.0)
-
-        for chart in chartsViewModel.visibleCharts {
-            let points = chart.calculateUIPoints(for: rect, aabb: aabb)
-
-            context.setStrokeColor(chart.color.cgColor)
-            context.beginPath()
-            context.addLines(between: points)
-            context.strokePath()
+    
+    private func updateCharts()
+    {
+        guard let aabb = chartsVisibleAABB else {
+            return
+        }
+        
+        for chartLayer in chartLayers {
+            chartLayer.layer.frame = self.bounds
+            chartLayer.update(aabb: aabb, animated: true)
         }
     }
 
@@ -121,9 +123,33 @@ public class IntervalView: UIView
         context.addLine(to: CGPoint(x: rightX - Consts.sliderWidth * 0.5, y: rect.maxY - 1))
         context.strokePath()
     }
+    
+    override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        assert(touches.count <= 1)
+        for touch in touches {
+            touchProcessor(tapPosition: touch.location(in: self), state: .began)
+        }
+    }
+    override public func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        assert(touches.count <= 1)
+        for touch in touches {
+            touchProcessor(tapPosition: touch.location(in: self), state: .changed)
+        }
+    }
+    override public func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        assert(touches.count <= 1)
+        for touch in touches {
+            touchProcessor(tapPosition: touch.location(in: self), state: .cancelled)
+        }
+    }
+    override public func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        assert(touches.count <= 1)
+        for touch in touches {
+            touchProcessor(tapPosition: touch.location(in: self), state: .ended)
+        }
+    }
 
-    @objc
-    private func gesture(_ recognizer: UIGestureRecognizer) {
+    private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
         guard let chartsViewModel = chartsViewModel, let aabb = chartsVisibleAABB else {
             return
         }
@@ -133,13 +159,6 @@ public class IntervalView: UIView
 
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
-
-        let leftSlider = CGRect(x: leftX - Consts.sliderTouchWidth * 0.5, y: rect.minY,
-                                width: Consts.sliderTouchWidth, height: rect.height)
-        let rightSlider = CGRect(x: rightX - Consts.sliderTouchWidth * 0.5, y: rect.minY,
-                                 width: Consts.sliderTouchWidth, height: rect.height)
-
-        let tapPosition = recognizer.location(in: self)
 
         func updateInterval() {
             if isBeganMovedLeftSlider {
@@ -154,12 +173,25 @@ public class IntervalView: UIView
             }
         }
 
-        switch recognizer.state {
+        switch state {
         case .began:
-            if leftSlider.contains(tapPosition) {
+            let leftDistance = abs(tapPosition.x - leftX)
+            let rightDistance = abs(tapPosition.x - rightX)
+            var isLeft: Bool = false
+            var isRight: Bool = false
+            // only if leftX == rightX
+            if leftDistance == rightDistance && leftDistance < Consts.sliderTouchWidth * 0.5 {
+                isLeft = tapPosition.x <= leftX
+                isRight = tapPosition.x > rightX
+            } else {
+                isLeft = leftDistance < rightDistance && leftDistance < Consts.sliderTouchWidth * 0.5
+                isRight = rightDistance < leftDistance && rightDistance < Consts.sliderTouchWidth * 0.5
+            }
+            
+            if isLeft {
                 isBeganMovedLeftSlider = true
                 tapOffset = tapPosition.x - leftX
-            } else if rightSlider.contains(tapPosition) { // Move both sliders - not good idea
+            } else if isRight {
                 isBeganMovedRightSlider = true
                 tapOffset = tapPosition.x - rightX
             }
@@ -168,7 +200,7 @@ public class IntervalView: UIView
         case .ended:
             updateInterval()
             fallthrough
-        case .cancelled, .failed, .possible:
+        default:
             isBeganMovedLeftSlider = false
             isBeganMovedRightSlider = false
         }
@@ -183,6 +215,7 @@ extension IntervalView: ChartsUpdateListener
 {
     public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
     {
+        updateCharts()
         setNeedsDisplay()
     }
 
