@@ -63,15 +63,13 @@ internal class MainViewController: UITableViewController, Stylizing
         }
     }
 
-    private func configureChartsViewModel(use charts2D: [[Chart]])
-    {
+    private func configureChartsViewModel(use charts2D: [[Chart]]) {
         // TODO: need other screen, for select?
         chartsViewModel = ChartsViewModel(charts: charts2D[4])
         tableView.reloadData()
     }
 
-    private func showError()
-    {
+    private func showError() {
         let alert = UIAlertController(title: "Error", message: "It's error - can't parse json?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 

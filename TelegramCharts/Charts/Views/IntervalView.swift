@@ -21,10 +21,11 @@ public class IntervalView: UIView
     public var borderColor: UIColor = UIColor.gray
 
     private var chartsViewModel: ChartsViewModel? = nil
-    private var chartsVisibleAABB: Chart.AABB? {
+    private var chartsLayerWrapper: ChartsLayerWrapper = ChartsLayerWrapper()
+    
+    private var visibleAABB: Chart.AABB? {
         return chartsViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1)
     }
-    private var chartLayers: [ChartLayerWrapper] = []
 
     private var isBeganMovedLeftSlider: Bool = false
     private var isBeganMovedRightSlider: Bool = false
@@ -44,22 +45,16 @@ public class IntervalView: UIView
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
         gestureRecognizer.minimumPressDuration = 0.0
         self.addGestureRecognizer(gestureRecognizer)
+        
+        chartsLayerWrapper.setParentLayer(layer)
     }
 
-    public func setCharts(_ charts: ChartsViewModel)
-    {
+    public func setCharts(_ charts: ChartsViewModel) {
         chartsViewModel = charts
         charts.registerUpdateListener(self)
-
-        chartLayers.forEach { $0.layer.removeFromSuperlayer() }
-        chartLayers.removeAll()
-        for chart in charts.charts {
-            let chartLayer = ChartLayerWrapper(chartViewModel: chart)
-            chartLayers.append(chartLayer)
-            layer.addSublayer(chartLayer.layer)
-        }
-
-        updateCharts()
+        
+        chartsLayerWrapper.setCharts(charts)
+        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: false)
         setNeedsDisplay()
     }
 
@@ -70,21 +65,9 @@ public class IntervalView: UIView
             return
         }
 
-        if let chartsViewModel = chartsViewModel, let aabb = chartsVisibleAABB
+        if let chartsViewModel = chartsViewModel, let aabb = visibleAABB
         {
             drawInterval(chartsViewModel: chartsViewModel, aabb: aabb, rect: rect, context: context)
-        }
-    }
-    
-    private func updateCharts()
-    {
-        guard let aabb = chartsVisibleAABB else {
-            return
-        }
-        
-        for chartLayer in chartLayers {
-            chartLayer.layer.frame = self.bounds
-            chartLayer.update(aabb: aabb, animated: true)
         }
     }
 
@@ -138,7 +121,7 @@ public class IntervalView: UIView
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
-        guard let chartsViewModel = chartsViewModel, let aabb = chartsVisibleAABB else {
+        guard let chartsViewModel = chartsViewModel, let aabb = visibleAABB else {
             return
         }
 
@@ -210,14 +193,12 @@ public class IntervalView: UIView
 
 extension IntervalView: ChartsUpdateListener
 {
-    public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
-    {
-        updateCharts()
+    public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel) {
+        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: true)
         setNeedsDisplay()
     }
 
-    public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel)
-    {
+    public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel) {
         setNeedsDisplay()
     }
 }

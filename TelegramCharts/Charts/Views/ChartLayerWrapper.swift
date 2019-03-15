@@ -52,8 +52,7 @@ internal final class ChartLayerWrapper
         }
     }
     
-    private func makePath(aabb: Chart.AABB) -> UIBezierPath
-    {
+    private func makePath(aabb: Chart.AABB) -> UIBezierPath {
         var uiPoints = chartViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
         let path = UIBezierPath()
         

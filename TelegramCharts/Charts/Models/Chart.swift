@@ -25,6 +25,7 @@ public struct Chart
 
     internal struct AABB
     {
+        internal static let empty: AABB = AABB(minDate: 0, maxDate: 0, minValue: 0, maxValue: 0)
         internal let minDate: Chart.Date
         internal let maxDate: Chart.Date
         internal let minValue: Chart.Value

@@ -23,8 +23,7 @@ internal class ChartsTableViewCell: UITableViewCell, Stylizing
         chartsView.setStyle(style.chartsStyle)
     }
 
-    internal func setCharts(_ charts: ChartsViewModel)
-    {
+    internal func setCharts(_ charts: ChartsViewModel) {
         loadingIndicator.stopAnimating()
         chartsView.setCharts(charts)
     }

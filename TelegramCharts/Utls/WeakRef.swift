@@ -8,7 +8,6 @@
 
 public final class WeakRef<Value>
 {
-
     public var value: Value? {
         return self.weakValue as? Value
     }
@@ -19,6 +18,5 @@ public final class WeakRef<Value>
     {
         self.weakValue = value as AnyObject
     }
-
 }
 

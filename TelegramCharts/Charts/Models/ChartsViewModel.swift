@@ -53,8 +53,7 @@ public class ChartsViewModel
         }
     }
 
-    public func registerUpdateListener(_ listener: ChartsUpdateListener)
-    {
+    public func registerUpdateListener(_ listener: ChartsUpdateListener) {
         if !updateListeners.contains(where: { $0.value === listener }) {
             updateListeners.append(WeakRef(listener))
         }
@@ -62,8 +61,7 @@ public class ChartsViewModel
         updateListeners.removeAll(where: { $0.value == nil })
     }
 
-    public func unregisterUpdateListener(_ listener: ChartsUpdateListener)
-    {
+    public func unregisterUpdateListener(_ listener: ChartsUpdateListener) {
         updateListeners.removeAll(where: { $0.value === listener })
         updateListeners.removeAll(where: { $0.value == nil })
     }

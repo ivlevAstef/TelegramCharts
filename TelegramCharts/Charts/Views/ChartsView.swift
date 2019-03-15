@@ -10,63 +10,42 @@ import UIKit
 
 public class ChartsView: UIView
 {
-
     private var chartsViewModel: ChartsViewModel? = nil
-    private var chartsVisibleAABB: Chart.AABB? {
+    private var chartsLayerWrapper: ChartsLayerWrapper = ChartsLayerWrapper()
+    
+    private var visibleAABB: Chart.AABB? {
         return chartsViewModel?.visibleInIntervalAABB?.copyWithPadding(date: 0, value: 0.1)
     }
-    private var chartLayers: [ChartLayerWrapper] = []
 
     public init() {
         super.init(frame: .zero)
 
-        self.backgroundColor = .clear
-        self.clipsToBounds = true
+        backgroundColor = .clear
+        clipsToBounds = true
+        
+        chartsLayerWrapper.setParentLayer(layer)
     }
 
-    public func setCharts(_ charts: ChartsViewModel)
-    {
+    public func setCharts(_ charts: ChartsViewModel) {
         chartsViewModel = charts
         charts.registerUpdateListener(self)
-
-        chartLayers.forEach { $0.layer.removeFromSuperlayer() }
-        chartLayers.removeAll()
-        for chart in charts.charts {
-            let chartLayer = ChartLayerWrapper(chartViewModel: chart)
-            chartLayers.append(chartLayer)
-            layer.addSublayer(chartLayer.layer)
-        }
-
-        updateCharts(animated: false)
-    }
-
-    private func updateCharts(animated: Bool)
-    {
-        guard let aabb = chartsVisibleAABB else {
-            return
-        }
         
-        for chartLayer in chartLayers {
-            chartLayer.layer.frame = self.bounds
-            chartLayer.update(aabb: aabb, animated: animated)
-        }
+        chartsLayerWrapper.setCharts(charts)
+        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: false)
     }
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-
 }
 
 extension ChartsView: ChartsUpdateListener
 {
-    public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel)
-    {
-        updateCharts(animated: true)
+    public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel) {
+        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: true)
     }
 
-    public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel)
-    {
-        updateCharts(animated: false)
+    public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel) {
+        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: false)
     }
 }

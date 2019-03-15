@@ -11,7 +11,6 @@ import UIKit
 
 extension Chart.AABB
 {
-
     internal func copyWithPadding(date datePadding: Double, value valuePadding: Double) -> Chart.AABB {
         let minDate = self.minDate - Chart.Date(Double(self.dateInterval) * datePadding)
         let maxDate = self.maxDate + Chart.Date(Double(self.dateInterval) * datePadding)

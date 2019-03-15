@@ -44,8 +44,7 @@ public class ChartsProvider
         return try? JSONDecoder().decode([RawCharts].self, from: data)
     }
 
-    private func convertToModel(_ rawCharts: RawCharts) -> [Chart]
-    {
+    private func convertToModel(_ rawCharts: RawCharts) -> [Chart] {
         guard let timestampId = rawCharts.types.first(where: { $0.value == "x" })?.key else {
             return []
         }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB06A1C1223B4F2C002DC444 /* ChartsLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB06A1C0223B4F2C002DC444 /* ChartsLayerWrapper.swift */; };
 		ABB87D3B223A393B00E31808 /* ChartLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */; };
 		ABB87D3C223A393B00E31808 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D3A223A393B00E31808 /* ChartsView.swift */; };
 		BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE712E2235FBEA00068579 /* AppDelegate.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB06A1C0223B4F2C002DC444 /* ChartsLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsLayerWrapper.swift; sourceTree = "<group>"; };
 		ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartLayerWrapper.swift; sourceTree = "<group>"; };
 		ABB87D3A223A393B00E31808 /* ChartsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		BACE712B2235FBEA00068579 /* TelegramCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +82,7 @@
 		AB003D7C223A34120098C75E /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AB06A1C0223B4F2C002DC444 /* ChartsLayerWrapper.swift */,
 				ABB87D39223A393B00E31808 /* ChartLayerWrapper.swift */,
 				ABB87D3A223A393B00E31808 /* ChartsView.swift */,
 				BACE714E223612DC00068579 /* ChartsWithIntervalView.swift */,
@@ -265,6 +268,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BACE71482236010E00068579 /* ChartsProvider.swift in Sources */,
+				AB06A1C1223B4F2C002DC444 /* ChartsLayerWrapper.swift in Sources */,
 				BACE717B2238DFCC00068579 /* ChartsStyle.swift in Sources */,
 				BACE714B2236020C00068579 /* Style.swift in Sources */,
 				BACE71792238DB6C00068579 /* Charts+AABB.swift in Sources */,
