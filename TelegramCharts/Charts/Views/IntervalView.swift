@@ -40,6 +40,10 @@ public class IntervalView: UIView
 
         self.isUserInteractionEnabled = true
         self.isMultipleTouchEnabled = false
+        
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
+        gestureRecognizer.minimumPressDuration = 0.0
+        self.addGestureRecognizer(gestureRecognizer)
     }
 
     public func setCharts(_ charts: ChartsViewModel)
@@ -128,29 +132,9 @@ public class IntervalView: UIView
         context.strokePath()
     }
     
-    override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        assert(touches.count <= 1)
-        for touch in touches {
-            touchProcessor(tapPosition: touch.location(in: self), state: .began)
-        }
-    }
-    override public func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        assert(touches.count <= 1)
-        for touch in touches {
-            touchProcessor(tapPosition: touch.location(in: self), state: .changed)
-        }
-    }
-    override public func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        assert(touches.count <= 1)
-        for touch in touches {
-            touchProcessor(tapPosition: touch.location(in: self), state: .cancelled)
-        }
-    }
-    override public func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        assert(touches.count <= 1)
-        for touch in touches {
-            touchProcessor(tapPosition: touch.location(in: self), state: .ended)
-        }
+    @objc
+    private func tapGesture(_ recognizer: UIGestureRecognizer) {
+        touchProcessor(tapPosition: recognizer.location(in: self), state: recognizer.state)
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
