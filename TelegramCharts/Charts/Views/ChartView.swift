@@ -8,6 +8,12 @@
 
 import UIKit
 
+private enum Consts
+{
+    internal static let horizontalAxisHeight: CGFloat = 20.0
+    internal static let spacing: CGFloat = 10.0
+}
+
 public class ChartView: UIView
 {
     private var chartViewModel: ChartViewModel? = nil
@@ -16,15 +22,14 @@ public class ChartView: UIView
     }
     
     private var polygonLinesView: PolygonLinesView = PolygonLinesView()
+    private var horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
 
     public init() {
         super.init(frame: .zero)
 
         backgroundColor = .clear
-        clipsToBounds = true
         
-        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(polygonLinesView)
+        configureSubviews()
         makeConstaints()
     }
 
@@ -34,13 +39,31 @@ public class ChartView: UIView
         
         polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
         polygonLinesView.update(aabb: visibleAABB, animated: false)
+        
+        horizontalAxisView.setFullInterval(chartViewModel.interval)
+        horizontalAxisView.update(aabb: visibleAABB, animated: false)
+    }
+    
+    private func configureSubviews()
+    {
+        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(polygonLinesView)
+        
+        horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(horizontalAxisView)
     }
     
     private func makeConstaints() {
-        self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor, constant: Consts.spacing).isActive = true
         self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        self.polygonLinesView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        
+        self.polygonLinesView.bottomAnchor.constraint(equalTo: self.horizontalAxisView.topAnchor).isActive = true
+        
+        self.horizontalAxisView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+        self.horizontalAxisView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+        self.horizontalAxisView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -Consts.spacing).isActive = true
+        self.horizontalAxisView.heightAnchor.constraint(equalToConstant: Consts.horizontalAxisHeight).isActive = true
     }
 
     internal required init?(coder aDecoder: NSCoder) {
@@ -56,5 +79,6 @@ extension ChartView: ChartUpdateListener
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         polygonLinesView.update(aabb: visibleAABB, animated: false)
+        horizontalAxisView.update(aabb: visibleAABB, animated: true)
     }
 }

@@ -90,8 +90,8 @@ public class IntervalView: UIView
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
 
         let leftRect = CGRect(x: rect.minX, y: rect.minY,
-                              width: leftX - rect.minX - Consts.sliderWidth * 0.5, height: rect.height)
-        let rightRect = CGRect(x: rightX + Consts.sliderWidth * 0.5, y: rect.minY,
+                              width: leftX - rect.minX - Consts.sliderWidth, height: rect.height)
+        let rightRect = CGRect(x: rightX, y: rect.minY,
                                width: rect.width - rightX, height: rect.height)
 
         context.setStrokeColor(UIColor.clear.cgColor)
@@ -102,9 +102,9 @@ public class IntervalView: UIView
         context.addRects([leftRect, rightRect])
         context.fillPath()
 
-        let leftSlider = CGRect(x: leftX - Consts.sliderWidth * 0.5, y: rect.minY,
+        let leftSlider = CGRect(x: leftX - Consts.sliderWidth, y: rect.minY,
                                 width: Consts.sliderWidth, height: rect.height)
-        let rightSlider = CGRect(x: rightX - Consts.sliderWidth * 0.5, y: rect.minY,
+        let rightSlider = CGRect(x: rightX, y: rect.minY,
                                  width: Consts.sliderWidth, height: rect.height)
 
         context.setFillColor(borderColor.cgColor)
@@ -117,10 +117,10 @@ public class IntervalView: UIView
         context.setLineWidth(2.0)
 
         context.beginPath()
-        context.move(to: CGPoint(x: leftX + Consts.sliderWidth * 0.5, y: rect.minY + 1))
-        context.addLine(to: CGPoint(x: rightX - Consts.sliderWidth * 0.5, y: rect.minY + 1))
-        context.move(to: CGPoint(x: leftX + Consts.sliderWidth * 0.5, y: rect.maxY - 1))
-        context.addLine(to: CGPoint(x: rightX - Consts.sliderWidth * 0.5, y: rect.maxY - 1))
+        context.move(to: CGPoint(x: leftX, y: rect.minY + 1))
+        context.addLine(to: CGPoint(x: rightX, y: rect.minY + 1))
+        context.move(to: CGPoint(x: leftX, y: rect.maxY - 1))
+        context.addLine(to: CGPoint(x: rightX, y: rect.maxY - 1))
         context.strokePath()
     }
     
@@ -137,12 +137,12 @@ public class IntervalView: UIView
         let interval = chartViewModel.interval
         let rect = self.bounds
 
-        let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x
-        let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
+        let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x - Consts.sliderWidth * 0.5
+        let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x + Consts.sliderWidth * 0.5
 
         func updateInterval() {
-            let newLeftX = min(tapPosition.x - tapLeftOffset, rightX)
-            let newRightX = max(tapPosition.x - tapRightOffset, leftX)
+            let newLeftX = min(tapPosition.x - tapLeftOffset, rightX - Consts.sliderWidth)
+            let newRightX = max(tapPosition.x - tapRightOffset, leftX + Consts.sliderWidth)
             if isBeganMovedLeftSlider {
                 let newFrom = max(aabb.minDate, aabb.calculateDate(x: newLeftX, rect: rect))
                 chartViewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: interval.to))

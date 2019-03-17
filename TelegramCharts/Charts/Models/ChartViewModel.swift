@@ -19,8 +19,9 @@ public class ChartViewModel
 {
     public struct Interval
     {
-        let from: PolygonLine.Date
-        let to: PolygonLine.Date
+        public static let empty: Interval = Interval(from: 0, to: 0)
+        public let from: PolygonLine.Date
+        public let to: PolygonLine.Date
     }
 
     public private(set) var polygonLines: [PolygonLineViewModel]
@@ -28,7 +29,8 @@ public class ChartViewModel
         return polygonLines.filter { $0.isVisible }
     }
 
-    public private(set) var interval: Interval = Interval(from: 0, to: 0)
+    public private(set) var interval: Interval = Interval.empty
+    public private(set) var fullInterval: Interval = Interval.empty
 
     internal private(set) lazy var aabb: AABB? = {
         return calculateAABB(for: polygonLines)
@@ -50,6 +52,9 @@ public class ChartViewModel
 
         if let aabb = self.aabb {
             self.interval = Interval(from: aabb.minDate, to: aabb.maxDate)
+            self.fullInterval = Interval(from: aabb.minDate, to: aabb.maxDate)
+        } else {
+            assertionFailure("Can't make AABB for polygon lines...")
         }
     }
 
