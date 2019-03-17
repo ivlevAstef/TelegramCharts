@@ -1,5 +1,5 @@
 //
-//  ChartLayerWrapper.swift
+//  PolygonLinesLayerWrapper.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 15/03/2019.
@@ -9,13 +9,8 @@
 import Foundation
 import UIKit
 
-internal final class ChartLayerWrapper
-{
-    internal var visibleAABB: AABB {
-        return chartViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1) ?? AABB.empty
-    }
-    
-    private var chartViewModel: ChartViewModel? = nil
+internal final class PolygonLinesLayerWrapper
+{   
     private var polygonLineLayers: [PolygonLineLayerWrapper] = []
     private weak var parentLayer: CALayer?
     
@@ -32,12 +27,10 @@ internal final class ChartLayerWrapper
         }
     }
     
-    internal func setChart(_ chartViewModel: ChartViewModel) {
-        self.chartViewModel = chartViewModel
-        
+    internal func setPolygonLines(_ polygonLineViewModels: [PolygonLineViewModel]) {
         polygonLineLayers.forEach { $0.layer.removeFromSuperlayer() }
         polygonLineLayers.removeAll()
-        for polygonLine in chartViewModel.polygonLines {
+        for polygonLine in polygonLineViewModels {
             let polygonLineLayer = PolygonLineLayerWrapper(polygonLineViewModel: polygonLine)
             polygonLineLayers.append(polygonLineLayer)
         }

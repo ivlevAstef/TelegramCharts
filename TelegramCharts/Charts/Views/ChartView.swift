@@ -11,11 +11,11 @@ import UIKit
 public class ChartView: UIView
 {
     private var chartViewModel: ChartViewModel? = nil
-    private var chartLayerWrapper: ChartLayerWrapper = ChartLayerWrapper()
-    
     private var visibleAABB: AABB? {
         return chartViewModel?.visibleInIntervalAABB?.copyWithPadding(date: 0, value: 0.1)
     }
+    
+    private var polygonLinesView: PolygonLinesView = PolygonLinesView()
 
     public init() {
         super.init(frame: .zero)
@@ -23,15 +23,24 @@ public class ChartView: UIView
         backgroundColor = .clear
         clipsToBounds = true
         
-        chartLayerWrapper.setParentLayer(layer)
+        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(polygonLinesView)
+        makeConstaints()
     }
 
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
         
-        chartLayerWrapper.setChart(chartViewModel)
-        chartLayerWrapper.update(aabb: visibleAABB, animated: false)
+        polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
+        polygonLinesView.update(aabb: visibleAABB, animated: false)
+    }
+    
+    private func makeConstaints() {
+        self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+        self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+        self.polygonLinesView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
     }
 
     internal required init?(coder aDecoder: NSCoder) {
@@ -42,10 +51,10 @@ public class ChartView: UIView
 extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        chartLayerWrapper.update(aabb: visibleAABB, animated: true)
+        polygonLinesView.update(aabb: visibleAABB, animated: true)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        chartLayerWrapper.update(aabb: visibleAABB, animated: false)
+        polygonLinesView.update(aabb: visibleAABB, animated: false)
     }
 }
