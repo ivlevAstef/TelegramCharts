@@ -1,5 +1,5 @@
 //
-//  ChartsTableViewCell.swift
+//  ChartTableViewCell.swift
 //  TelegramCharts
 //
 //  Created by Ивлев Александр on 11/03/2019.
@@ -8,27 +8,27 @@
 
 import UIKit
 
-internal class ChartsTableViewCell: UITableViewCell, Stylizing
+internal class ChartTableViewCell: UITableViewCell, Stylizing
 {
-    internal let identifier: String = "ChartsTableViewCell"
+    internal let identifier: String = "ChartTableViewCell"
 
-    @IBOutlet private var chartsView: ChartsWithIntervalView!
+    @IBOutlet private var chartView: ChartWithIntervalView!
     @IBOutlet private var loadingIndicator: UIActivityIndicatorView!
 
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
-        chartsView.backgroundColor = style.mainColor
+        chartView.backgroundColor = style.mainColor
         loadingIndicator.color = style.indicatorColor
 
-        chartsView.setStyle(style.chartsStyle)
+        chartView.setStyle(style.chartsStyle)
     }
 
-    internal func setCharts(_ charts: ChartsViewModel) {
+    internal func setChart(_ chartViewModel: ChartViewModel) {
         loadingIndicator.stopAnimating()
-        chartsView.setCharts(charts)
+        chartView.setChart(chartViewModel)
     }
 
     internal static func calculateHeight() -> CGFloat {
-        return ChartsWithIntervalView.calculateHeight()
+        return ChartWithIntervalView.calculateHeight()
     }
 }

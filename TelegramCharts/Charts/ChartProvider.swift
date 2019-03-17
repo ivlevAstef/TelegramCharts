@@ -1,5 +1,5 @@
 //
-//  ChartsProvider.swift
+//  ChartProvider.swift
 //  TelegramCharts
 //
 //  Created by Ивлев Александр on 11/03/2019.
@@ -8,11 +8,11 @@
 
 import Foundation
 
-public class ChartsProvider
+public class ChartProvider
 {
     public enum Result
     {
-        case success(_ charts2D: [[Chart]])
+        case success(_ charts: [[PolygonLine]])
         case failed
     }
 
@@ -22,17 +22,17 @@ public class ChartsProvider
                 completion(.failed)
                 return
             }
-            guard let rawCharts2D = self.loadChartsFromFile() else {
+            guard let rawCharts = self.loadChartsFromFile() else {
                 completion(.failed)
                 return
             }
 
-            let charts2D = rawCharts2D.map{ self.convertToModel($0) }
-            completion(.success(charts2D))
+            let charts = rawCharts.map{ self.convertToModel($0) }
+            completion(.success(charts))
         }
     }
 
-    private func loadChartsFromFile() -> [RawCharts]? {
+    private func loadChartsFromFile() -> [RawChart]? {
         guard let path = Bundle.main.path(forResource: "chart_data", ofType: "json") else {
             return nil
         }
@@ -41,10 +41,10 @@ public class ChartsProvider
             return nil
         }
 
-        return try? JSONDecoder().decode([RawCharts].self, from: data)
+        return try? JSONDecoder().decode([RawChart].self, from: data)
     }
 
-    private func convertToModel(_ rawCharts: RawCharts) -> [Chart] {
+    private func convertToModel(_ rawCharts: RawChart) -> [PolygonLine] {
         guard let timestampId = rawCharts.types.first(where: { $0.value == "x" })?.key else {
             return []
         }
@@ -58,7 +58,7 @@ public class ChartsProvider
         let timestamps = timestampColumn.dropFirst().compactMap{ $0.value }
         assert(timestamps == timestamps.sorted(), "Invalid data. Timestamps doen't sort.")
 
-        var result: [Chart] = []
+        var result: [PolygonLine] = []
 
         for column in rawCharts.columns {
             guard let id = column[safe: 0]?.name else {
@@ -76,19 +76,19 @@ public class ChartsProvider
             let values = column.dropFirst().compactMap{ $0.value }
             assert(values.count == timestamps.count, "incorrect json - timestamp length not equals \(id) length")
 
-            let points = zip(timestamps, values).map { pair -> Chart.Point in
+            let points = zip(timestamps, values).map { pair -> PolygonLine.Point in
                 let (timestamp, value) = pair
-                return Chart.Point(date: timestamp, value: Int(value))
+                return PolygonLine.Point(date: timestamp, value: Int(value))
             }
 
-            result.append(Chart(name: name, points: points, color: color))
+            result.append(PolygonLine(name: name, points: points, color: color))
         }
 
         return result
     }
 }
 
-private struct RawColumn: Decodable
+private struct RawCell: Decodable
 {
     internal let name: String?
     internal let value: Int64?
@@ -107,12 +107,12 @@ private struct RawColumn: Decodable
     }
 }
 
-private struct RawCharts: Decodable
+private struct RawChart: Decodable
 {
     internal typealias ChartName = String
     internal typealias ChartType = String
 
-    internal let columns: [[RawColumn]]
+    internal let columns: [[RawCell]]
     internal let types: [ChartName: ChartType]
     internal let names: [ChartName: String]
     internal let colors: [ChartName: String]

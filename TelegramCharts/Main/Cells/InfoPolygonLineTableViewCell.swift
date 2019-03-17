@@ -1,5 +1,5 @@
 //
-//  InfoChartTableViewCell.swift
+//  InfoPolygonLineTableViewCell.swift
 //  TelegramCharts
 //
 //  Created by Ивлев Александр on 11/03/2019.
@@ -8,12 +8,12 @@
 
 import UIKit
 
-internal class InfoChartTableViewCell: UITableViewCell, Stylizing
+internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
 {
-    internal let identifier: String = "InfoChartTableViewCell"
+    internal let identifier: String = "InfoPolygonLineTableViewCell"
 
     @IBOutlet private var colorView: UIView!
-    @IBOutlet private var chartNameLabel: UILabel!
+    @IBOutlet private var nameLabel: UILabel!
 
     private var colorViewColor: UIColor?
     private var selectedColorViewColor: UIColor?
@@ -21,7 +21,7 @@ internal class InfoChartTableViewCell: UITableViewCell, Stylizing
     internal func applyStyle(_ style: Style) {
         colorView.layer.cornerRadius = 4.0
         backgroundColor = style.mainColor
-        chartNameLabel.textColor = style.textColor
+        nameLabel.textColor = style.textColor
         tintColor = style.activeElementColor
 
         selectedColorViewColor = style.selectedColor
@@ -34,8 +34,8 @@ internal class InfoChartTableViewCell: UITableViewCell, Stylizing
         colorView.backgroundColor = color
     }
 
-    internal func setChartName(_ name: String) {
-        chartNameLabel.text = name
+    internal func setName(_ name: String) {
+        nameLabel.text = name
     }
 
     internal func setCheckmark(_ enabled: Bool) {

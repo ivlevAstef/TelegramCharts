@@ -1,5 +1,5 @@
 //
-//  ChartsStyle.swift
+//  ChartStyle.swift
 //  TelegramCharts
 //
 //  Created by Ивлев Александр on 13/03/2019.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-public struct ChartsStyle {
+public struct ChartStyle {
     public let accentTextColor: UIColor
     public let textColor: UIColor
     public let popupBackgroundColor: UIColor

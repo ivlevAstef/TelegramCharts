@@ -1,5 +1,5 @@
 //
-//  ChartsWithIntervalView.swift
+//  ChartWithIntervalView.swift
 //  TelegramCharts
 //
 //  Created by Ивлев Александр on 11/03/2019.
@@ -8,28 +8,28 @@
 
 import UIKit
 
-public class ChartsWithIntervalView: UIView
+public class ChartWithIntervalView: UIView
 {
     private static let defaultIntervalViewHeight: CGFloat = 40.0
 
-    private let chartsView: ChartsView = ChartsView()
+    private let chartView: ChartView = ChartView()
     private let intervalView: IntervalView = IntervalView()
 
     public init(intervalViewHeight: CGFloat? = nil) {
         super.init(frame: .zero)
 
         configureSubviews()
-        makeConstaints(intervalViewHeight: intervalViewHeight ?? ChartsWithIntervalView.defaultIntervalViewHeight)
+        makeConstaints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
     }
 
-    public func setStyle(_ style: ChartsStyle) {
+    public func setStyle(_ style: ChartStyle) {
         self.intervalView.unvisibleColor = style.intervalUnvisibleColor
         self.intervalView.borderColor = style.intervalBorderColor
     }
 
-    public func setCharts(_ charts: ChartsViewModel) {
-        chartsView.setCharts(charts)
-        intervalView.setCharts(charts)
+    public func setChart(_ chart: ChartViewModel) {
+        chartView.setChart(chart)
+        intervalView.setChart(chart)
     }
 
     public static func calculateHeight() -> CGFloat {
@@ -37,18 +37,18 @@ public class ChartsWithIntervalView: UIView
     }
 
     private func configureSubviews() {
-        chartsView.translatesAutoresizingMaskIntoConstraints = false
+        chartView.translatesAutoresizingMaskIntoConstraints = false
         intervalView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(chartsView)
+        addSubview(chartView)
         addSubview(intervalView)
     }
 
     private func makeConstaints(intervalViewHeight: CGFloat) {
-        self.chartsView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        self.chartsView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.chartsView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+        self.chartView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.chartView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+        self.chartView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
 
-        self.chartsView.bottomAnchor.constraint(equalTo: self.intervalView.topAnchor).isActive = true
+        self.chartView.bottomAnchor.constraint(equalTo: self.intervalView.topAnchor).isActive = true
 
         self.intervalView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         self.intervalView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
@@ -60,6 +60,6 @@ public class ChartsWithIntervalView: UIView
         super.init(coder: aDecoder)
 
         configureSubviews()
-        makeConstaints(intervalViewHeight: ChartsWithIntervalView.defaultIntervalViewHeight)
+        makeConstaints(intervalViewHeight: ChartWithIntervalView.defaultIntervalViewHeight)
     }
 }

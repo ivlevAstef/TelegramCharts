@@ -11,7 +11,7 @@ import UIKit
 internal class MainViewController: UITableViewController, Stylizing
 {
     // ideally need DI, ServiceLocator or other
-    private let chartsProvider: ChartsProvider = ChartsProvider()
+    private let chartProvider: ChartProvider = ChartProvider()
     private var currentStyle: Style = Style.dayStyle
 
     // it's laziness
@@ -29,13 +29,13 @@ internal class MainViewController: UITableViewController, Stylizing
         return view
     }()
 
-    private var chartsViewModel: ChartsViewModel? = nil
+    private var chartViewModel: ChartViewModel? = nil
 
     internal override func viewDidLoad() {
         super.viewDidLoad()
 
         applyStyle(currentStyle)
-        chartsProvider.getCharts { [weak self] result in
+        chartProvider.getCharts { [weak self] result in
             DispatchQueue.main.async {
                 self?.processChartsResult(result)
             }
@@ -54,18 +54,18 @@ internal class MainViewController: UITableViewController, Stylizing
         followersHeaderLabel.textColor = style.subTitleColor
     }
 
-    private func processChartsResult(_ result: ChartsProvider.Result) {
+    private func processChartsResult(_ result: ChartProvider.Result) {
         switch result {
-        case .success(let charts2D):
-            configureChartsViewModel(use: charts2D)
+        case .success(let charts):
+            configureChartViewModel(use: charts)
         case .failed:
             showError()
         }
     }
 
-    private func configureChartsViewModel(use charts2D: [[Chart]]) {
+    private func configureChartViewModel(use charts: [[PolygonLine]]) {
         // TODO: need other screen, for select?
-        chartsViewModel = ChartsViewModel(charts: charts2D[4])
+        chartViewModel = ChartViewModel(polygonLines: charts[4])
         tableView.reloadData()
     }
 
@@ -93,7 +93,7 @@ internal class MainViewController: UITableViewController, Stylizing
         switch indexPath.section {
         case 0:
             if 0 == indexPath.row {
-                return ChartsTableViewCell.calculateHeight()
+                return ChartTableViewCell.calculateHeight()
             }
             return 44
         case 1:
@@ -106,7 +106,7 @@ internal class MainViewController: UITableViewController, Stylizing
     internal override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return 1 + (chartsViewModel?.charts.count ?? 0)
+            return 1 + (chartViewModel?.polygonLines.count ?? 0)
         case 1:
             return 1
         default:
@@ -121,20 +121,20 @@ internal class MainViewController: UITableViewController, Stylizing
         switch indexPath.section {
         case 0:
             if 0 == indexPath.row {
-                let chartsCell: ChartsTableViewCell = dequeueReusableCell(for: indexPath)
-                if let chartsViewModel = self.chartsViewModel {
-                    chartsCell.setCharts(chartsViewModel)
+                let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
+                if let chartViewModel = self.chartViewModel {
+                    chartCell.setChart(chartViewModel)
                 }
-                cell = chartsCell
+                cell = chartCell
             } else {
                 let index = indexPath.row - 1
-                guard let chart = self.chartsViewModel?.charts[safe: index] else {
+                guard let polygonLine = self.chartViewModel?.polygonLines[safe: index] else {
                     fatalError("Charts view models mismatch chart for index: \(index)")
                 }
-                let infoChartCell: InfoChartTableViewCell = dequeueReusableCell(for: indexPath)
-                infoChartCell.setColor(chart.color)
-                infoChartCell.setChartName(chart.name)
-                infoChartCell.setCheckmark(chart.isVisible)
+                let infoChartCell: InfoPolygonLineTableViewCell = dequeueReusableCell(for: indexPath)
+                infoChartCell.setColor(polygonLine.color)
+                infoChartCell.setName(polygonLine.name)
+                infoChartCell.setCheckmark(polygonLine.isVisible)
                 cell = infoChartCell
             }
         case 1:
@@ -156,11 +156,11 @@ internal class MainViewController: UITableViewController, Stylizing
     internal override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if 0 == indexPath.section && indexPath.row > 0 {
             let index = indexPath.row - 1
-            guard let chart = self.chartsViewModel?.charts[safe: index] else {
+            guard let polygonLine = self.chartViewModel?.polygonLines[safe: index] else {
                 fatalError("Charts view models mismatch chart for index: \(index)")
             }
 
-            self.chartsViewModel?.toogleChart(chart)
+            self.chartViewModel?.toogleVisiblePolygonLine(polygonLine)
             tableView.reloadRows(at: [indexPath], with: .none)
         }
     }

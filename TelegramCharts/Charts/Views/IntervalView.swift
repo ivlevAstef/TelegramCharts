@@ -20,11 +20,11 @@ public class IntervalView: UIView
     public var unvisibleColor: UIColor = UIColor.lightGray.withAlphaComponent(0.3)
     public var borderColor: UIColor = UIColor.gray
 
-    private var chartsViewModel: ChartsViewModel? = nil
-    private var chartsLayerWrapper: ChartsLayerWrapper = ChartsLayerWrapper()
+    private var chartViewModel: ChartViewModel? = nil
+    private var chartLayerWrapper: ChartLayerWrapper = ChartLayerWrapper()
     
-    private var visibleAABB: Chart.AABB? {
-        return chartsViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1)
+    private var visibleAABB: AABB? {
+        return chartViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1)
     }
 
     private var isBeganMovedLeftSlider: Bool = false
@@ -46,15 +46,15 @@ public class IntervalView: UIView
         gestureRecognizer.minimumPressDuration = 0.0
         self.addGestureRecognizer(gestureRecognizer)
         
-        chartsLayerWrapper.setParentLayer(layer)
+        chartLayerWrapper.setParentLayer(layer)
     }
 
-    public func setCharts(_ charts: ChartsViewModel) {
-        chartsViewModel = charts
-        charts.registerUpdateListener(self)
+    public func setChart(_ chartViewModel: ChartViewModel) {
+        self.chartViewModel = chartViewModel
+        chartViewModel.registerUpdateListener(self)
         
-        chartsLayerWrapper.setCharts(charts)
-        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: false)
+        chartLayerWrapper.setChart(chartViewModel)
+        chartLayerWrapper.update(aabb: visibleAABB, animated: false)
         setNeedsDisplay()
     }
 
@@ -65,17 +65,17 @@ public class IntervalView: UIView
             return
         }
 
-        if let chartsViewModel = chartsViewModel, let aabb = visibleAABB
+        if let chartViewModel = chartViewModel, let aabb = visibleAABB
         {
-            drawInterval(chartsViewModel: chartsViewModel, aabb: aabb, rect: rect, context: context)
+            drawInterval(chartViewModel: chartViewModel, aabb: aabb, rect: rect, context: context)
         }
     }
 
-    private func drawInterval(chartsViewModel: ChartsViewModel, aabb: Chart.AABB, rect: CGRect, context: CGContext) {
+    private func drawInterval(chartViewModel: ChartViewModel, aabb: AABB, rect: CGRect, context: CGContext) {
         context.saveGState()
         defer { context.restoreGState() }
 
-        let interval = chartsViewModel.interval
+        let interval = chartViewModel.interval
 
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
@@ -121,11 +121,11 @@ public class IntervalView: UIView
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
-        guard let chartsViewModel = chartsViewModel, let aabb = visibleAABB else {
+        guard let chartViewModel = chartViewModel, let aabb = visibleAABB else {
             return
         }
 
-        let interval = chartsViewModel.interval
+        let interval = chartViewModel.interval
         let rect = self.bounds
 
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x
@@ -136,11 +136,11 @@ public class IntervalView: UIView
             let newRightX = max(tapPosition.x - tapRightOffset, leftX)
             if isBeganMovedLeftSlider {
                 let newFrom = max(aabb.minDate, aabb.calculateDate(x: newLeftX, rect: rect))
-                chartsViewModel.updateInterval(ChartsViewModel.Interval(from: newFrom, to: interval.to))
+                chartViewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: interval.to))
             }
             if isBeganMovedRightSlider {
                 let newTo = min(aabb.maxDate, aabb.calculateDate(x: newRightX, rect: rect))
-                chartsViewModel.updateInterval(ChartsViewModel.Interval(from: interval.from, to: newTo))
+                chartViewModel.updateInterval(ChartViewModel.Interval(from: interval.from, to: newTo))
             }
             if isBeganMovedCenterSlider {
                 var newFrom = aabb.calculateDate(x: newLeftX, rect: rect)
@@ -153,7 +153,7 @@ public class IntervalView: UIView
                     newFrom -= (newTo - aabb.maxDate)
                     newTo = aabb.maxDate
                 }
-                chartsViewModel.updateInterval(ChartsViewModel.Interval(from: newFrom, to: newTo))
+                chartViewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: newTo))
             }
         }
 
@@ -191,14 +191,14 @@ public class IntervalView: UIView
     }
 }
 
-extension IntervalView: ChartsUpdateListener
+extension IntervalView: ChartUpdateListener
 {
-    public func chartsVisibleIsChanged(_ viewModel: ChartsViewModel) {
-        chartsLayerWrapper.updateCharts(aabb: visibleAABB, animated: true)
+    public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
+        chartLayerWrapper.update(aabb: visibleAABB, animated: true)
         setNeedsDisplay()
     }
 
-    public func chartsIntervalIsChanged(_ viewModel: ChartsViewModel) {
+    public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         setNeedsDisplay()
     }
 }

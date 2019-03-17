@@ -2,7 +2,7 @@
 //  ChartLayerWrapper.swift
 //  TelegramCharts
 //
-//  Created by Alexander Ivlev on 14/03/2019.
+//  Created by Alexander Ivlev on 15/03/2019.
 //  Copyright © 2019 CFT. All rights reserved.
 //
 
@@ -11,87 +11,46 @@ import UIKit
 
 internal final class ChartLayerWrapper
 {
-    internal let layer: CAShapeLayer = CAShapeLayer()
-    private let chartViewModel: ChartViewModel
-
-    internal init(chartViewModel: ChartViewModel) {
+    internal var visibleAABB: AABB {
+        return chartViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1) ?? AABB.empty
+    }
+    
+    private var chartViewModel: ChartViewModel? = nil
+    private var polygonLineLayers: [PolygonLineLayerWrapper] = []
+    private weak var parentLayer: CALayer?
+    
+    internal init() {
+    }
+    
+    internal func setParentLayer(_ layer: CALayer) {
+        parentLayer = layer
+        
+        polygonLineLayers.forEach { $0.layer.removeFromSuperlayer() }
+        for polygonLineLayer in polygonLineLayers {
+            polygonLineLayer.layer.frame = layer.bounds
+            layer.addSublayer(polygonLineLayer.layer)
+        }
+    }
+    
+    internal func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         
-        layer.lineWidth = 1.0
-        layer.lineCap = .butt
-        layer.strokeColor = chartViewModel.color.cgColor
-        layer.fillColor = nil
-    }
-    
-    internal func update(aabb: Chart.AABB, animated: Bool) {
-        let newPath = makePath(aabb: aabb)
-
-        layer.removeAllAnimations()
-        
-        if animated && nil != layer.path {
-            let animation = CASaveStateAnimation(keyPath: "path")
-            animation.duration = 0.25
-            animation.toValue = newPath.cgPath
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-            animation.fillMode = .both
-            animation.startAnimation(on: layer)
-        } else {
-            layer.path = newPath.cgPath
+        polygonLineLayers.forEach { $0.layer.removeFromSuperlayer() }
+        polygonLineLayers.removeAll()
+        for polygonLine in chartViewModel.polygonLines {
+            let polygonLineLayer = PolygonLineLayerWrapper(polygonLineViewModel: polygonLine)
+            polygonLineLayers.append(polygonLineLayer)
         }
         
-        let newOpacity: Float = chartViewModel.isVisible ? 1.0 : 0.0
-        if animated {
-            let animation = CASaveStateAnimation(keyPath: "opacity")
-            animation.duration = 0.25
-            animation.toValue = newOpacity
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-            animation.fillMode = .both
-            animation.startAnimation(on: layer)
-        } else {
-            layer.opacity = newOpacity
+        if let layer = parentLayer {
+            setParentLayer(layer)
         }
     }
     
-    private func makePath(aabb: Chart.AABB) -> UIBezierPath {
-        var uiPoints = chartViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
-        let path = UIBezierPath()
-        
-        if uiPoints.isEmpty {
-            return path
+    internal func update(aabb: AABB?, animated: Bool) {
+        let aabb = aabb ?? AABB.empty
+        for polygonLineLayer in polygonLineLayers {
+            polygonLineLayer.update(aabb: aabb, animated: animated)
         }
-        
-        path.move(to: uiPoints.removeFirst())
-        for point in uiPoints {
-            path.addLine(to: point)
-        }
-        
-        return path
-    }
-}
-
-private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
-{
-    private let uniqueKey: String = UUID().uuidString
-    
-    private weak var parentLayer: CALayer?
-    private var selfRetain: CASaveStateAnimation?
-    
-    internal func startAnimation(on layer: CALayer) {
-        parentLayer = layer
-        isRemovedOnCompletion = false
-        delegate = self
-        layer.add(self, forKey: uniqueKey)
-    }
-    
-    @objc
-    func animationDidStart(_ anim: CAAnimation) {
-        selfRetain = self
-    }
-    
-    @objc
-    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        parentLayer?.setValue(toValue, forKey: keyPath!)
-        selfRetain = nil
-        parentLayer?.removeAnimation(forKey: uniqueKey)
     }
 }
