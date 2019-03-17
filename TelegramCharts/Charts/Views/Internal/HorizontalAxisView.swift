@@ -18,8 +18,10 @@ internal class HorizontalAxisView: UIView
 {
     private var fullInterval: ChartViewModel.Interval = ChartViewModel.Interval.empty
     private var dates: [PolygonLine.Date] = []
-    private var font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var aabb: AABB?
+    
+    private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
+    private var color: UIColor = .black
     
     private var dateLabels: [DateLabel] = []
     
@@ -27,6 +29,10 @@ internal class HorizontalAxisView: UIView
         super.init(frame: .zero)
         
         backgroundColor = .clear
+    }
+    
+    public func setStyle(_ style: ChartStyle) {
+        color = style.textColor
     }
     
     internal func setFullInterval(_ interval: ChartViewModel.Interval) {
@@ -65,7 +71,7 @@ internal class HorizontalAxisView: UIView
                 label = prevLabels[index]
                 prevLabels.remove(at: index)
             } else {
-                label = DateLabel(date: date, font: font, color: .black)
+                label = DateLabel(date: date, font: font, color: color)
                 addSubview(label)
                 newLabels.append(label)
             }

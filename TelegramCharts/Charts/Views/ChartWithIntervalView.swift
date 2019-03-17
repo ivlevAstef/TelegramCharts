@@ -23,8 +23,8 @@ public class ChartWithIntervalView: UIView
     }
 
     public func setStyle(_ style: ChartStyle) {
-        self.intervalView.unvisibleColor = style.intervalUnvisibleColor
-        self.intervalView.borderColor = style.intervalBorderColor
+        intervalView.setStyle(style)
+        chartView.setStyle(style)
     }
 
     public func setChart(_ chart: ChartViewModel) {

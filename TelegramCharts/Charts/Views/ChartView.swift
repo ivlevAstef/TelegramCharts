@@ -33,6 +33,10 @@ public class ChartView: UIView
         makeConstaints()
     }
 
+    public func setStyle(_ style: ChartStyle) {
+        horizontalAxisView.setStyle(style)
+    }
+    
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)

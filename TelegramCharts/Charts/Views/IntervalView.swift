@@ -50,6 +50,11 @@ public class IntervalView: UIView
         addSubview(polygonLinesView)
         makeConstaints()
     }
+    
+    public func setStyle(_ style: ChartStyle) {
+        unvisibleColor = style.intervalUnvisibleColor
+        borderColor = style.intervalBorderColor
+    }
 
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
