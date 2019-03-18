@@ -15,6 +15,7 @@
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
 		ABB87D3B223A393B00E31808 /* PolygonLineLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */; };
 		ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D3A223A393B00E31808 /* ChartView.swift */; };
+		BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */; };
 		BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE712E2235FBEA00068579 /* AppDelegate.swift */; };
 		BACE71312235FBEA00068579 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71302235FBEA00068579 /* MainViewController.swift */; };
 		BACE71432235FC3A00068579 /* PolygonLineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71422235FC3A00068579 /* PolygonLineViewModel.swift */; };
@@ -47,6 +48,7 @@
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
 		ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonLineLayerWrapper.swift; sourceTree = "<group>"; };
 		ABB87D3A223A393B00E31808 /* ChartView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
+		BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalAxisView.swift; sourceTree = "<group>"; };
 		BACE712B2235FBEA00068579 /* TelegramCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BACE712E2235FBEA00068579 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BACE71302235FBEA00068579 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */,
 				AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */,
 				ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */,
+				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 			);
 			path = Internal;
 			sourceTree = "<group>";
@@ -282,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BACE71482236010E00068579 /* ChartProvider.swift in Sources */,
+				BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */,
 				AB06A1C1223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift in Sources */,
 				ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */,
 				BACE717B2238DFCC00068579 /* ChartStyle.swift in Sources */,

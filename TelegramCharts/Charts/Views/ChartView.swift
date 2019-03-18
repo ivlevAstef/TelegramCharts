@@ -22,6 +22,7 @@ public class ChartView: UIView
     }
     
     private var polygonLinesView: PolygonLinesView = PolygonLinesView()
+    private var verticalAxisView: VerticalAxisView = VerticalAxisView()
     private var horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
 
     public init() {
@@ -35,6 +36,7 @@ public class ChartView: UIView
 
     public func setStyle(_ style: ChartStyle) {
         horizontalAxisView.setStyle(style)
+        verticalAxisView.setStyle(style)
     }
     
     public func setChart(_ chartViewModel: ChartViewModel) {
@@ -43,7 +45,9 @@ public class ChartView: UIView
         
         polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
         polygonLinesView.update(aabb: visibleAABB, animated: false)
-        
+
+        verticalAxisView.update(aabb: visibleAABB, animated: false)
+
         horizontalAxisView.setFullInterval(chartViewModel.interval)
         horizontalAxisView.update(aabb: visibleAABB, animated: false)
     }
@@ -55,6 +59,9 @@ public class ChartView: UIView
         
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
+
+        verticalAxisView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(verticalAxisView)
     }
     
     private func makeConstaints() {
@@ -68,6 +75,11 @@ public class ChartView: UIView
         self.horizontalAxisView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         self.horizontalAxisView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -Consts.spacing).isActive = true
         self.horizontalAxisView.heightAnchor.constraint(equalToConstant: Consts.horizontalAxisHeight).isActive = true
+
+        self.verticalAxisView.topAnchor.constraint(equalTo: self.polygonLinesView.topAnchor).isActive = true
+        self.verticalAxisView.leftAnchor.constraint(equalTo: self.polygonLinesView.leftAnchor).isActive = true
+        self.verticalAxisView.rightAnchor.constraint(equalTo: self.polygonLinesView.rightAnchor).isActive = true
+        self.verticalAxisView.bottomAnchor.constraint(equalTo: self.polygonLinesView.bottomAnchor).isActive = true
     }
 
     internal required init?(coder aDecoder: NSCoder) {
@@ -79,10 +91,12 @@ extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         polygonLinesView.update(aabb: visibleAABB, animated: true)
+        verticalAxisView.update(aabb: visibleAABB, animated: true)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         polygonLinesView.update(aabb: visibleAABB, animated: false)
+        verticalAxisView.update(aabb: visibleAABB, animated: false)
         horizontalAxisView.update(aabb: visibleAABB, animated: true)
     }
 }
