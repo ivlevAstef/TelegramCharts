@@ -116,41 +116,38 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     internal override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell & Stylizing
-
         switch indexPath.section {
         case 0:
             if 0 == indexPath.row {
                 let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
+                chartCell.applyStyle(currentStyle)
                 if let chartViewModel = self.chartViewModel {
                     chartCell.setChart(chartViewModel)
                 }
-                cell = chartCell
+                return chartCell
             } else {
                 let index = indexPath.row - 1
                 guard let polygonLine = self.chartViewModel?.polygonLines[safe: index] else {
                     fatalError("Charts view models mismatch chart for index: \(index)")
                 }
                 let infoChartCell: InfoPolygonLineTableViewCell = dequeueReusableCell(for: indexPath)
+                infoChartCell.applyStyle(currentStyle)
                 infoChartCell.setColor(polygonLine.color)
                 infoChartCell.setName(polygonLine.name)
                 infoChartCell.setCheckmark(polygonLine.isVisible)
-                cell = infoChartCell
+                return infoChartCell
             }
         case 1:
             let switchStyleCell: SwitchStyleModeTableViewCell = dequeueReusableCell(for: indexPath)
+            switchStyleCell.applyStyle(currentStyle)
             switchStyleCell.setText("Switch to \(currentStyle.next().name) Mode")
             switchStyleCell.tapCallback = { [weak self] in
                 self?.switchStyle()
             }
-            cell = switchStyleCell
+            return switchStyleCell
         default:
             fatalError("It's not ideally code, but it doesn't matter")
         }
-
-        cell.applyStyle(currentStyle)
-
-        return cell
     }
 
     internal override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

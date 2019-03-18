@@ -100,10 +100,10 @@
 			isa = PBXGroup;
 			children = (
 				ABAE7943223E17560063B223 /* HorizontalAxisView.swift */,
+				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 				ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */,
 				AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */,
 				ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */,
-				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 			);
 			path = Internal;
 			sourceTree = "<group>";

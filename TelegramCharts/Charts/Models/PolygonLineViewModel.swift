@@ -95,15 +95,8 @@ public class PolygonLineViewModel
     }
     
     internal static func calculateUIPoints(for points: [Point], rect: CGRect, aabb: AABB) -> [CGPoint] {
-        let xScale = Double(rect.width) / Double(aabb.dateInterval)
-        let yScale = Double(rect.height) / Double(aabb.valueInterval)
-        
-        let xOffset = Double(rect.minX)
-        let yOffset = Double(rect.maxY)
-        
         return points.map { point in
-            CGPoint(x: xOffset + Double(point.date - aabb.minDate) * xScale,
-                    y: yOffset - Double(point.value - aabb.minValue) * yScale)
+            aabb.calculateUIPoint(date: point.date, value: point.value, rect: rect)
         }
     }
 }

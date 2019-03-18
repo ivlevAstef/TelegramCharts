@@ -24,7 +24,7 @@ public class IntervalView: UIView
     private var polygonLinesView: PolygonLinesView = PolygonLinesView()
     
     private var visibleAABB: AABB? {
-        return chartViewModel?.visibleaabb?.copyWithPadding(date: 0, value: 0.1)
+        return chartViewModel?.visibleaabb?.copyWithIntellectualPadding(date: 0, value: 0.1)
     }
 
     private var isBeganMovedLeftSlider: Bool = false
@@ -61,7 +61,8 @@ public class IntervalView: UIView
         chartViewModel.registerUpdateListener(self)
         
         polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
-        polygonLinesView.update(aabb: visibleAABB, animated: false)
+        polygonLinesView.setLineWidth(1.0)
+        polygonLinesView.update(aabb: visibleAABB, animated: false, duration: 0.0)
         setNeedsDisplay()
     }
 
@@ -209,7 +210,7 @@ public class IntervalView: UIView
 extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: true)
+        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: 0.3)
         setNeedsDisplay()
     }
 

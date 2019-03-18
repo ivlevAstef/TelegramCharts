@@ -16,6 +16,12 @@ internal final class PolygonLinesLayerWrapper
     
     internal init() {
     }
+
+    internal func setLineWidth(_ lineWidth: CGFloat) {
+        for polygonLineLayer in polygonLineLayers {
+            polygonLineLayer.layer.lineWidth = lineWidth
+        }
+    }
     
     internal func setParentLayer(_ layer: CALayer) {
         parentLayer = layer
@@ -40,10 +46,10 @@ internal final class PolygonLinesLayerWrapper
         }
     }
     
-    internal func update(aabb: AABB?, animated: Bool) {
+    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         let aabb = aabb ?? AABB.empty
         for polygonLineLayer in polygonLineLayers {
-            polygonLineLayer.update(aabb: aabb, animated: animated)
+            polygonLineLayer.update(aabb: aabb, animated: animated, duration: duration)
         }
     }
 }

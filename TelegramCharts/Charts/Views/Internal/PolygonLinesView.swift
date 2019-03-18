@@ -20,13 +20,17 @@ internal class PolygonLinesView: UIView
         
         polygonLinesLayerWrapper.setParentLayer(layer)
     }
+
+    internal func setLineWidth(_ lineWidth: CGFloat) {
+        polygonLinesLayerWrapper.setLineWidth(lineWidth)
+    }
     
     internal func setPolygonLines(_ polygonLineViewModels: [PolygonLineViewModel]) {
         polygonLinesLayerWrapper.setPolygonLines(polygonLineViewModels)
     }
     
-    internal func update(aabb: AABB?, animated: Bool) {
-        polygonLinesLayerWrapper.update(aabb: aabb, animated: animated)
+    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
+        polygonLinesLayerWrapper.update(aabb: aabb, animated: animated, duration: duration)
     }
     
     internal required init?(coder aDecoder: NSCoder) {

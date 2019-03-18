@@ -18,7 +18,7 @@ public class ChartView: UIView
 {
     private var chartViewModel: ChartViewModel? = nil
     private var visibleAABB: AABB? {
-        return chartViewModel?.visibleInIntervalAABB?.copyWithPadding(date: 0, value: 0.1)
+        return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: 0.1)
     }
     
     private var polygonLinesView: PolygonLinesView = PolygonLinesView()
@@ -44,12 +44,13 @@ public class ChartView: UIView
         chartViewModel.registerUpdateListener(self)
         
         polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
-        polygonLinesView.update(aabb: visibleAABB, animated: false)
+        polygonLinesView.setLineWidth(2.0)
+        polygonLinesView.update(aabb: visibleAABB, animated: false, duration: 0.0)
 
-        verticalAxisView.update(aabb: visibleAABB, animated: false)
+        verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
 
-        horizontalAxisView.setFullInterval(chartViewModel.interval)
-        horizontalAxisView.update(aabb: visibleAABB, animated: false)
+        horizontalAxisView.setFullInterval(chartViewModel.fullInterval)
+        horizontalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
     }
     
     private func configureSubviews()
@@ -90,13 +91,13 @@ public class ChartView: UIView
 extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: true)
-        verticalAxisView.update(aabb: visibleAABB, animated: true)
+        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: 0.3)
+        verticalAxisView.update(aabb: visibleAABB, animated: true, duration: 0.3)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: false)
-        verticalAxisView.update(aabb: visibleAABB, animated: false)
-        horizontalAxisView.update(aabb: visibleAABB, animated: true)
+        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: 0.1)
+        verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.1)
+        horizontalAxisView.update(aabb: visibleAABB, animated: true, duration: 0.2)
     }
 }

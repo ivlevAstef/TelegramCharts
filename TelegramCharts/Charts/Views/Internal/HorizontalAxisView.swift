@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-private enum Consts {
+private enum Consts
+{
     internal static let topPadding: CGFloat = 5.0
     internal static let minDateSpacing: CGFloat = 16.0
 }
@@ -32,40 +33,34 @@ internal class HorizontalAxisView: UIView
     
     internal func setStyle(_ style: ChartStyle) {
         color = style.textColor
+
+        for subview in subviews.compactMap({ $0 as? DateLabel }) {
+            subview.setStyle(color: color)
+        }
     }
     
     internal func setFullInterval(_ interval: ChartViewModel.Interval) {
         fullInterval = interval
     }
     
-    internal func update(aabb: AABB?, animated: Bool) {
-        defer { setNeedsDisplay() }
-        
+    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         guard let aabb = aabb else {
             subviews.forEach { $0.removeFromSuperview() }
             return
         }
 
-        updateLabels(aabb: aabb, animated: animated)
+        updateLabels(aabb: aabb, animated: animated, duration: duration)
     }
     
-    private func updateLabels(aabb: AABB, animated: Bool) {
+    private func updateLabels(aabb: AABB, animated: Bool, duration: TimeInterval) {
         var prevLabels = dateLabels
-        var newLabels: [UILabel] = []
+        var newLabels: [DateLabel] = []
         
         dateLabels.removeAll()
-        // TODO: тут все переписываем (почти)
-        // порядок такой:
-        // 1. находим сколько всего максиум влазиет дат = (maxCount), на весь интервал (эта функция зависит от скейлинга)
-        // 2. находим сколько максиум влазиет дат на экран = (maxScreenCount) (обычно 5-7, не зависит от масштаба)
-        // 3. Полный интервал делеим на maxScreenCount равных частей (см. пункт 2)
-        // 4. Делим maxCount на maxScreenCount и потом смотрим ближайшую наименьшую степень двойки. (55/6 = 9 -> 8 = 2^3)
-        // 5. начинаем наши интервалы делить пополам пока не поделим их N раз, где N степерь двойки
-        // 5 этап проще. - делим весь интервал на maxScreenCount и потом делим еще на значение степени двойки (8)
-        // получаем расстояние между датами. После чего можно легко посчитать даты которые лежат в заданном интервале, ну или циклом пройтись и заполнить весь массив дат.
 
         // stride not works... WTF?
         let step: PolygonLine.Date = calculateStep(aabb: aabb)
+        // can optimization - calculate correct interval
         var iter = fullInterval.from
         while iter <= fullInterval.to {
             let date = iter
@@ -100,7 +95,7 @@ internal class HorizontalAxisView: UIView
         if animated {
             newLabels.forEach { $0.alpha = 0.0 }
             
-            UIView.animate(withDuration: 0.25, delay: 0.0, options: .curveEaseIn, animations: {
+            UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: {
                 prevLabels.forEach { $0.alpha = 0.0 }
                 newLabels.forEach { $0.alpha = 1.0 }
             }, completion: { _ in
@@ -109,8 +104,6 @@ internal class HorizontalAxisView: UIView
         } else {
             prevLabels.forEach { $0.removeFromSuperview() }
         }
-        
-       
     }
 
     private func calculateStep(aabb: AABB) -> PolygonLine.Date {
@@ -173,6 +166,10 @@ private class DateLabel: UILabel
         self.font = font
         self.textColor = color
         self.sizeToFit()
+    }
+
+    internal func setStyle(color: UIColor) {
+        self.textColor = color
     }
 
     internal func setPosition(_ position: CGFloat, t: Double) {

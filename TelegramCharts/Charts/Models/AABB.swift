@@ -29,6 +29,13 @@ internal struct AABB
         self.dateInterval = maxDate - minDate
         self.valueInterval = maxValue - minValue
     }
+
+    internal func copyWithIntellectualPadding(date datePadding: Double, value valuePadding: Double) -> AABB {
+        let aabb = copyWithPadding(date: datePadding, value: valuePadding)
+        let minValue = aabb.calculateValueBegin()
+        let maxValue = aabb.calculateValueEnd()
+        return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
+    }
     
     internal func copyWithPadding(date datePadding: Double, value valuePadding: Double) -> AABB {
         let minDate = self.minDate - PolygonLine.Date(Double(self.dateInterval) * datePadding)
@@ -49,5 +56,31 @@ internal struct AABB
     internal func calculateDate(x: CGFloat, rect: CGRect) -> PolygonLine.Date {
         let xScale = Double(dateInterval) / Double(rect.width)
         return minDate + PolygonLine.Date(Double(x - rect.minX) * xScale)
+    }
+
+
+    private func calculateValueBegin() -> PolygonLine.Value {
+        let roundScale = calculateValueRoundScale()
+        return minValue - minValue % roundScale
+    }
+
+    private func calculateValueEnd() -> PolygonLine.Value {
+        let roundScale = calculateValueRoundScale()
+        return maxValue + (roundScale - maxValue % roundScale)
+    }
+
+    private func calculateValueRoundScale() -> PolygonLine.Value {
+        var interval = Double(maxValue - minValue)
+        if interval <= 50 {
+            return 1
+        }
+
+        var scale = 10
+        while interval >= 500 {
+            interval /= 10
+            scale *= 10
+        }
+
+        return scale
     }
 }
