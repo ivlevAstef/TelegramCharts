@@ -51,7 +51,7 @@ public class ChartViewModel
         }
 
         if let aabb = self.aabb {
-            self.interval = Interval(from: aabb.minDate, to: aabb.maxDate)
+            self.interval = Interval(from: aabb.maxDate - (aabb.maxDate - aabb.minDate) / 3, to: aabb.maxDate)
             self.fullInterval = Interval(from: aabb.minDate, to: aabb.maxDate)
         } else {
             assertionFailure("Can't make AABB for polygon lines...")
