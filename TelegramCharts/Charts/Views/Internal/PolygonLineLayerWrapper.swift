@@ -14,6 +14,9 @@ internal final class PolygonLineLayerWrapper
     internal let layer: CAShapeLayer = CAShapeLayer()
     private let polygonLineViewModel: PolygonLineViewModel
 
+    private let pathIndexCounter: IndexCounter = IndexCounter()
+    private let opacityIndexCounter: IndexCounter = IndexCounter()
+
     internal init(polygonLineViewModel: PolygonLineViewModel) {
         self.polygonLineViewModel = polygonLineViewModel
         
@@ -28,6 +31,7 @@ internal final class PolygonLineLayerWrapper
 
         if animated && nil != layer.path {
             let animation = CASaveStateAnimation(keyPath: "path")
+            animation.setIndexCounter(pathIndexCounter)
             animation.duration = duration
             animation.toValue = newPath.cgPath
             animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
@@ -40,6 +44,7 @@ internal final class PolygonLineLayerWrapper
         let newOpacity: Float = polygonLineViewModel.isVisible ? 1.0 : 0.0
         if animated {
             let animation = CASaveStateAnimation(keyPath: "opacity")
+            animation.setIndexCounter(opacityIndexCounter)
             animation.duration = duration
             animation.toValue = newOpacity
             animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
@@ -67,13 +72,34 @@ internal final class PolygonLineLayerWrapper
     }
 }
 
+private class IndexCounter
+{
+    private var counter: Int64 = 0
+
+    var current: Int64 {
+        return counter
+    }
+
+    func next() -> Int64 {
+        counter += 1
+        return counter
+    }
+}
+
 private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
 {
-    private let uniqueKey: String = UUID().uuidString
+    private var uniqueIndex: Int64!
+    private var indexCounter: IndexCounter!
+    private var uniqueKey: String { return "\(uniqueIndex!)"}
     
     private weak var parentLayer: CALayer?
     private var selfRetain: CASaveStateAnimation?
-    
+
+    internal func setIndexCounter(_ indexCounter: IndexCounter) {
+        self.indexCounter = indexCounter
+        self.uniqueIndex = indexCounter.next()
+    }
+
     internal func startAnimation(on layer: CALayer) {
         parentLayer = layer
         isRemovedOnCompletion = false
@@ -88,7 +114,9 @@ private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
     
     @objc
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        parentLayer?.setValue(toValue, forKey: keyPath!)
+        if uniqueIndex == indexCounter.current {
+            parentLayer?.setValue(toValue, forKey: keyPath!)
+        }
         selfRetain = nil
         parentLayer?.removeAnimation(forKey: uniqueKey)
     }

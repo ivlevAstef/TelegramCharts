@@ -104,15 +104,18 @@ public class ChartView: UIView
 extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        verticalAxisView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        hintView.setAABB(aabb: visibleAABB)
+        let aabb = visibleAABB
+        polygonLinesView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        hintView.setAABB(aabb: aabb)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: Configs.intervalChangeForLinesDuration)
-        verticalAxisView.update(aabb: visibleAABB, animated: true, duration: Configs.intervalChangeForValuesDuration)
-        horizontalAxisView.update(aabb: visibleAABB, animated: true, duration: Configs.intervalChangeForDatesDuration)
-        hintView.setAABB(aabb: visibleAABB)
+        let aabb = visibleAABB
+        polygonLinesView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
+        verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForValuesDuration)
+        horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForDatesDuration)
+        hintView.setAABB(aabb: aabb)
     }
 }

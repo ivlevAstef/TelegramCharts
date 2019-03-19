@@ -101,7 +101,9 @@ internal class HintAndOtherView: UIView
             return
         }
 
-        let dates = polygonLinesViewModels.map { $0.pointByDate(date: aroundDate).date }
+        let polylineViewModels = polygonLinesViewModels.filter { $0.isVisible }
+
+        let dates = polylineViewModels.map { $0.pointByDate(date: aroundDate).date }
         guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
             hide(animated: true)
             return
@@ -110,7 +112,7 @@ internal class HintAndOtherView: UIView
 
         show(animated: true)
 
-        let lines = polygonLinesViewModels.map { ($0.color, $0.pointByDate(date: nearDate).value) }
+        let lines = polylineViewModels.map { ($0.color, $0.pointByDate(date: nearDate).value) }
         hintView.setData(date: nearDate, lines: lines)
         hintView.setPosition(position, limit: bounds)
 

@@ -45,8 +45,17 @@ internal class HorizontalAxisView: UIView
     
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         guard let aabb = aabb else {
-            subviews.forEach { $0.removeFromSuperview() }
+            if animated {
+                UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: { [weak self] in
+                    self?.subviews.forEach { $0.alpha = 0.0 }
+                }, completion: { [weak self] _ in
+                    self?.subviews.forEach { $0.removeFromSuperview() }
+                })
+            } else {
+                subviews.forEach { $0.removeFromSuperview() }
+            }
             dateLabels.removeAll()
+
             return
         }
 
