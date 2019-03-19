@@ -31,12 +31,11 @@ internal final class PolygonLineLayerWrapper
 
         if animated && nil != layer.path {
             let animation = CASaveStateAnimation(keyPath: "path")
-            animation.setIndexCounter(pathIndexCounter)
             animation.duration = duration
             animation.toValue = newPath.cgPath
             animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
             animation.fillMode = .both
-            animation.startAnimation(on: layer)
+            animation.startAnimation(on: layer, indexCounter: pathIndexCounter)
         } else {
             layer.path = newPath.cgPath
         }
@@ -44,12 +43,11 @@ internal final class PolygonLineLayerWrapper
         let newOpacity: Float = polygonLineViewModel.isVisible ? 1.0 : 0.0
         if animated {
             let animation = CASaveStateAnimation(keyPath: "opacity")
-            animation.setIndexCounter(opacityIndexCounter)
             animation.duration = duration
             animation.toValue = newOpacity
             animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
             animation.fillMode = .both
-            animation.startAnimation(on: layer)
+            animation.startAnimation(on: layer, indexCounter: opacityIndexCounter)
         } else {
             layer.opacity = newOpacity
         }
@@ -90,17 +88,15 @@ private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
 {
     private var uniqueIndex: Int64!
     private var indexCounter: IndexCounter!
-    private var uniqueKey: String { return "\(uniqueIndex!)"}
+    private var uniqueKey: String { return "\(keyPath!)\(uniqueIndex!)"}
     
     private weak var parentLayer: CALayer?
     private var selfRetain: CASaveStateAnimation?
 
-    internal func setIndexCounter(_ indexCounter: IndexCounter) {
+    internal func startAnimation(on layer: CALayer, indexCounter: IndexCounter) {
         self.indexCounter = indexCounter
         self.uniqueIndex = indexCounter.next()
-    }
 
-    internal func startAnimation(on layer: CALayer) {
         parentLayer = layer
         isRemovedOnCompletion = false
         delegate = self
