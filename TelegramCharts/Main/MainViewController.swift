@@ -28,13 +28,17 @@ internal class MainViewController: UITableViewController, Stylizing
 
         return view
     }()
-
+    
+    @IBOutlet private var chartSegmentControl: UISegmentedControl!
+    private var loadedCharts: [[PolygonLine]] = []
     private var chartViewModel: ChartViewModel? = nil
 
     internal override func viewDidLoad() {
         super.viewDidLoad()
 
+        chartSegmentControl.removeAllSegments()
         applyStyle(currentStyle)
+
         chartProvider.getCharts { [weak self] result in
             DispatchQueue.main.async {
                 self?.processChartsResult(result)
@@ -52,20 +56,40 @@ internal class MainViewController: UITableViewController, Stylizing
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: style.titleColor]
         navigationController?.navigationBar.barTintColor = style.mainColor
         followersHeaderLabel.textColor = style.subTitleColor
+        chartSegmentControl.tintColor = style.activeElementColor
     }
 
     private func processChartsResult(_ result: ChartProvider.Result) {
         switch result {
         case .success(let charts):
-            configureChartViewModel(use: charts)
+            loadedCharts = charts
+            configureSegmentControl(use: charts)
+            selectChart(at: chartSegmentControl.selectedSegmentIndex)
         case .failed:
             showError()
         }
     }
 
-    private func configureChartViewModel(use charts: [[PolygonLine]]) {
-        // TODO: need other screen, for select?
-        chartViewModel = ChartViewModel(polygonLines: charts[4])
+    private func configureSegmentControl(use charts: [[PolygonLine]]) {
+        chartSegmentControl.removeAllSegments()
+
+        for i in 0..<charts.count {
+            chartSegmentControl.insertSegment(withTitle: "\(i + 1)", at: i, animated: false)
+        }
+        chartSegmentControl.selectedSegmentIndex = 0
+    }
+
+    @IBAction private func selectChart(_ sender: UISegmentedControl) {
+        selectChart(at: sender.selectedSegmentIndex)
+    }
+
+    private func selectChart(at index: Int) {
+        guard let polygonLines = loadedCharts[safe: index] else {
+            assertionFailure("Can't find chart at index: \(index)")
+            return
+        }
+
+        chartViewModel = ChartViewModel(polygonLines: polygonLines)
         tableView.reloadData()
     }
 
