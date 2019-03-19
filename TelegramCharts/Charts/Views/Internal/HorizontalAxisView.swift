@@ -46,6 +46,7 @@ internal class HorizontalAxisView: UIView
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         guard let aabb = aabb else {
             subviews.forEach { $0.removeFromSuperview() }
+            dateLabels.removeAll()
             return
         }
 
@@ -138,8 +139,10 @@ internal class HorizontalAxisView: UIView
         let attributes = [
             NSAttributedString.Key.font: font
         ]
-        
-        return ("Www 11" as NSString).size(withAttributes: attributes).width
+
+        // 22 march
+        let date = DateLabel.dateFormatter.string(from: Date(timeIntervalSince1970: 1553212800))
+        return (date as NSString).size(withAttributes: attributes).width
     }()
     
     internal required init?(coder aDecoder: NSCoder) {
@@ -150,7 +153,7 @@ internal class HorizontalAxisView: UIView
 
 private class DateLabel: UILabel
 {
-    private static let dateFormatter: DateFormatter = {
+    internal static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
         return dateFormatter

@@ -11,6 +11,7 @@ import UIKit
 public struct ChartStyle {
     public let accentTextColor: UIColor
     public let textColor: UIColor
+    public let backgroundColor: UIColor
     public let popupBackgroundColor: UIColor
 
     public let linesColor: UIColor

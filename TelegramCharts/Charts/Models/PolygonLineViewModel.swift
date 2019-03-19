@@ -51,6 +51,21 @@ public class PolygonLineViewModel
         self.color = color
     }
 
+    internal func pointByDate(date: PolygonLine.Date) -> Point {
+        var lastPoint = Point(date: PolygonLine.Date.min, value: 0)
+        // Or interpolation?
+        for point in points {
+            if lastPoint.date < date && date <= point.date {
+                if (date - lastPoint.date) < (point.date - date) {
+                    return lastPoint
+                }
+                return point
+            }
+            lastPoint = point
+        }
+        return points.last ?? Point(date: 0, value: 0)
+    }
+
     internal func calculateAABBInInterval(from: PolygonLine.Date, to: PolygonLine.Date) -> AABB? {
         var minValue: PolygonLine.Value = PolygonLine.Value.max
         var maxValue: PolygonLine.Value = PolygonLine.Value.min
