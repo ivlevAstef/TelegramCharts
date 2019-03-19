@@ -210,7 +210,7 @@ public class IntervalView: UIView
 extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: 0.3)
+        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
         setNeedsDisplay()
     }
 

@@ -17,7 +17,7 @@ private enum Consts
 
 internal class VerticalAxisView: UIView
 {
-    private var aabb: AABB?
+    private var lastAABB: AABB?
 
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
@@ -43,42 +43,16 @@ internal class VerticalAxisView: UIView
 
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         guard let aabb = aabb else {
+            lastAABB = nil
             subviews.forEach { $0.removeFromSuperview() }
             return
         }
 
         updateValues(aabb: aabb, animated: animated, duration: duration)
+        lastAABB = aabb
     }
 
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
-        var prevViews = valueViews
-        var newViews: [ValueView] = []
-
-        valueViews.removeAll()
-
-        let begin = aabb.minValue
-        let step = calculateValueStep(aabb: aabb)
-
-        var value = begin
-        for _ in 0..<valuesCount {
-            let view: ValueView
-
-            if let prevView = prevViews.first, prevView.value == value {
-                view = prevView
-                prevViews.removeFirst()
-            } else {
-                view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
-                let position = aabb.calculateUIPoint(date: 0, value: value, rect: bounds).y
-                view.setPosition(position)
-
-                addSubview(view)
-                newViews.append(view)
-            }
-            valueViews.append(view)
-
-            value += step
-        }
-
         func updatePositionOnSubviews() {
             for view in subviews.compactMap({ $0 as? ValueView }) {
                 let position = aabb.calculateUIPoint(date: 0, value: view.value, rect: bounds).y
@@ -86,10 +60,46 @@ internal class VerticalAxisView: UIView
             }
         }
 
+        let oldValues = valueViews.map { $0.value }
+        let newValues = calculateNewValues(aabb: aabb)
+
+        if !checkIsMoreDiff(oldValues, newValues) {
+            if animated {
+                UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: {
+                    updatePositionOnSubviews()
+                })
+            } else {
+                updatePositionOnSubviews()
+            }
+            return
+        }
+
+        var prevViews = valueViews
+        var newViews: [ValueView] = []
+
+        valueViews.removeAll()
+
+        for value in newValues {
+            let view: ValueView
+
+            if let prevView = prevViews.first, prevView.value == value {
+                view = prevView
+                prevViews.removeFirst()
+            } else {
+                view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
+                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: value, rect: bounds).y
+                view.setPosition(position)
+
+                addSubview(view)
+                newViews.append(view)
+            }
+            valueViews.append(view)
+        }
+
         if animated {
             newViews.forEach { $0.alpha = 0.0 }
 
-            UIView.animate(withDuration: duration, delay: 0.0, options: .curveLinear, animations: {
+            UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: {
                 prevViews.forEach { $0.alpha = 0.0 }
                 newViews.forEach { $0.alpha = 1.0 }
                 updatePositionOnSubviews()
@@ -100,6 +110,39 @@ internal class VerticalAxisView: UIView
             prevViews.forEach { $0.removeFromSuperview() }
             updatePositionOnSubviews()
         }
+    }
+
+    private func calculateNewValues(aabb: AABB) -> [PolygonLine.Value] {
+        let begin = aabb.minValue
+        let step = calculateValueStep(aabb: aabb)
+
+        var result: [PolygonLine.Value] = []
+
+        var value = begin
+        for _ in 0..<valuesCount {
+            result.append(value)
+            value += step
+        }
+
+        return result
+    }
+
+    private func checkIsMoreDiff(_ oldValues: [PolygonLine.Value], _ newValues: [PolygonLine.Value]) -> Bool {
+        var maxDiff = 0
+        var minValue = PolygonLine.Value.max
+        var maxValue = PolygonLine.Value.min
+        for (old, new) in zip(oldValues, newValues) {
+            maxDiff = max(maxDiff, abs(old - new))
+            minValue = min(minValue, min(old, new))
+            maxValue = max(maxValue, max(old, new))
+        }
+
+        if maxValue < minValue {
+            return true
+        }
+
+        let interval = maxValue - minValue
+        return Double(maxDiff) / Double(interval) > Configs.thresholdValueDiff
     }
 
     private func calculateValueStep(aabb: AABB) -> PolygonLine.Value {

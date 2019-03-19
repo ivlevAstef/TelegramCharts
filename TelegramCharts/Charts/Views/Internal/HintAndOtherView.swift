@@ -122,7 +122,7 @@ internal class HintAndOtherView: UIView
 
     private func hide(animated: Bool) {
         if animated {
-            UIView.animate(withDuration: 0.25, animations: { [hintView, lineView] in
+            UIView.animate(withDuration: Configs.hintDuration, animations: { [hintView, lineView] in
                 hintView.alpha = 0.0
                 lineView.alpha = 0.0
             }, completion: { [hintView, lineView] _ in
@@ -139,7 +139,7 @@ internal class HintAndOtherView: UIView
         hintView.isHidden = false
         lineView.isHidden = false
         if animated {
-            UIView.animate(withDuration: 0.25, animations: { [hintView, lineView] in
+            UIView.animate(withDuration: Configs.hintDuration, animations: { [hintView, lineView] in
                 hintView.alpha = 1.0
                 lineView.alpha = 1.0
             })

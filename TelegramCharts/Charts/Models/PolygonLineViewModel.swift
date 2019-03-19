@@ -75,10 +75,10 @@ public class PolygonLineViewModel
             let point = points[i]
             if from <= point.date && point.date <= to {
                 hasPoints = true
-                
-                minValue = min(minValue, point.value)
-                maxValue = max(maxValue, point.value)
-                
+
+                minValue = min(minValue, points[i].value)
+                maxValue = max(maxValue, points[i].value)
+
                 if let prevPoint = points[safe: i - 1], prevPoint.date < from {
                     let t = Double(from - prevPoint.date) / Double(point.date - prevPoint.date)
                     let value = prevPoint.value + PolygonLine.Value(t * Double(point.value - prevPoint.value))
@@ -91,6 +91,7 @@ public class PolygonLineViewModel
                     minValue = min(minValue, value)
                     maxValue = max(maxValue, value)
                 }
+
             }
         }
 

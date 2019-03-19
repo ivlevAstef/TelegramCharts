@@ -26,13 +26,11 @@ internal final class PolygonLineLayerWrapper
     internal func update(aabb: AABB, animated: Bool, duration: TimeInterval) {
         let newPath = makePath(aabb: aabb)
 
-        layer.removeAllAnimations()
-        
         if animated && nil != layer.path {
             let animation = CASaveStateAnimation(keyPath: "path")
             animation.duration = duration
             animation.toValue = newPath.cgPath
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
             animation.fillMode = .both
             animation.startAnimation(on: layer)
         } else {
@@ -44,7 +42,7 @@ internal final class PolygonLineLayerWrapper
             let animation = CASaveStateAnimation(keyPath: "opacity")
             animation.duration = duration
             animation.toValue = newOpacity
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
             animation.fillMode = .both
             animation.startAnimation(on: layer)
         } else {
