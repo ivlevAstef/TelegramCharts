@@ -261,13 +261,16 @@ private class HintView: UIView
         addSubview(yearLabel)
 
         // Values
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+
         let minLeftX = max(dateLabel.frame.maxX, yearLabel.frame.maxX)
         var rightX = minLeftX
         var valueLabels: [UILabel] = []
         for (color, value) in lines {
             let valueLabel = UILabel(frame: .zero)
             valueLabel.font = accentFont
-            valueLabel.text = "\(value)"
+            valueLabel.text = numberFormatter.string(from: NSNumber(value: value))
             valueLabel.textColor = color
             valueLabel.sizeToFit()
 

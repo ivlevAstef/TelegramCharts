@@ -19,7 +19,7 @@ internal class VerticalAxisView: UIView
 {
     private var lastAABB: AABB?
 
-    private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
+    private let font: UIFont = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
@@ -181,7 +181,7 @@ private class ValueView: UIView
         addSubview(label)
         addSubview(line)
 
-        label.text = "\(value)"
+        label.text = abbreviationNumber(Int64(value))
         label.font = font
         label.textColor = color
         label.sizeToFit()
@@ -199,6 +199,22 @@ private class ValueView: UIView
 
     internal func setPosition(_ position: CGFloat) {
         frame.origin = CGPoint(x: 0, y: position - frame.height)
+    }
+
+    private func abbreviationNumber(_ number: Int64) -> String {
+        if abs(number) < 1000 {
+            return "\(number)"
+        }
+
+        let sign = number < 0 ? "-" : ""
+        let number = abs(number)
+
+        let exp = Int(log10(Double(number)) / 3.0)
+        let units: [String] = ["K","M","B","T","q","Q","s","S"]
+
+        let roundedNum: Double = round(10 * Double(number) / pow(1000.0, Double(exp))) / 10.0
+
+        return "\(sign)\(roundedNum)\(units[exp - 1])"
     }
 
     internal required init?(coder aDecoder: NSCoder) {
