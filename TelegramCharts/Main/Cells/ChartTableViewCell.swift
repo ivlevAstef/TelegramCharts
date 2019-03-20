@@ -20,7 +20,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
         chartView.backgroundColor = style.mainColor
         loadingIndicator.color = style.indicatorColor
 
-        chartView.setStyle(style.chartsStyle)
+        chartView.setStyle(style.chartStyle)
     }
 
     internal func setChart(_ chartViewModel: ChartViewModel) {

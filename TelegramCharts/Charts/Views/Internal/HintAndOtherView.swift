@@ -53,9 +53,9 @@ internal class HintAndOtherView: UIView
 
     internal func setStyle(_ style: ChartStyle) {
         lineView.lineColor = style.focusLineColor
-        lineView.centerPointColor = style.backgroundColor
-        hintView.backgroundColor = style.popupBackgroundColor
-        hintView.textColor = style.accentTextColor
+        lineView.centerPointColor = style.dotColor
+        hintView.backgroundColor = style.hintBackgroundColor
+        hintView.textColor = style.hintTextColor
     }
 
     internal func setPolygonLines(_ polygonLinesViewModels: [PolygonLineViewModel]) {
