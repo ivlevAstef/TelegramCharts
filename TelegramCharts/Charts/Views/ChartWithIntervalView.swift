@@ -12,6 +12,7 @@ public class ChartWithIntervalView: UIView
 {
     private static let defaultIntervalViewHeight: CGFloat = 40.0
 
+    private let noData: UILabel = UILabel(frame: .zero)
     private let chartView: ChartView = ChartView()
     private let intervalView: IntervalView = IntervalView()
 
@@ -22,11 +23,16 @@ public class ChartWithIntervalView: UIView
     }
 
     public func setStyle(_ style: ChartStyle) {
+        noData.font = UIFont.systemFont(ofSize: 16.0, weight: .medium)
+        noData.textColor = style.textColor
+
         intervalView.setStyle(style)
         chartView.setStyle(style)
     }
 
     public func setChart(_ chart: ChartViewModel) {
+        chart.registerUpdateListener(self)
+
         chartView.setChart(chart)
         intervalView.setChart(chart)
     }
@@ -44,8 +50,13 @@ public class ChartWithIntervalView: UIView
     private func configureSubviews() {
         chartView.translatesAutoresizingMaskIntoConstraints = false
         intervalView.translatesAutoresizingMaskIntoConstraints = false
+        noData.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chartView)
         addSubview(intervalView)
+        addSubview(noData)
+
+        noData.text = "Select at least one column"
+        noData.alpha = 0.0
     }
 
     private func makeConstraints(intervalViewHeight: CGFloat) {
@@ -59,11 +70,28 @@ public class ChartWithIntervalView: UIView
         self.intervalView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         self.intervalView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         self.intervalView.heightAnchor.constraint(equalToConstant: intervalViewHeight).isActive = true
+
+        self.noData.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        self.noData.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
     }
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
         initialize(intervalViewHeight: nil)
+    }
+}
+
+extension ChartWithIntervalView: ChartUpdateListener
+{
+    public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
+        let hasVisiblePolyline = viewModel.polygonLines.contains(where: { $0.isVisible })
+
+        UIView.animate(withDuration: Configs.visibleChangeDuration) { [weak self] in
+            self?.noData.alpha = hasVisiblePolyline ? 0.0 : 1.0
+        }
+    }
+
+    public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
     }
 }

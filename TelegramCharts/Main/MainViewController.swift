@@ -56,9 +56,7 @@ internal class MainViewController: UITableViewController, Stylizing
         navigationController?.navigationBar.barTintColor = style.mainColor
         navigationController?.navigationBar.layoutIfNeeded()
 
-        for stylizing in tableView.subviews.compactMap({ $0 as? Stylizing }) {
-            stylizing.applyStyle(style)
-        }
+        StyleController.recursiveApplyStyle(on: tableView, style: style)
     }
 
     // MARK: Table View

@@ -73,14 +73,19 @@ internal final class PolygonLineLayerWrapper
 private class IndexCounter
 {
     private var counter: Int64 = 0
-
-    var current: Int64 {
-        return counter
-    }
+    private var lastExecuted: Int64 = 0
 
     func next() -> Int64 {
         counter += 1
         return counter
+    }
+
+    func finished(_ number: Int64) -> Bool {
+        if lastExecuted < number {
+            lastExecuted = number
+            return true
+        }
+        return false
     }
 }
 
@@ -110,7 +115,7 @@ private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
     
     @objc
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        if uniqueIndex == indexCounter.current {
+        if indexCounter.finished(uniqueIndex) {
             parentLayer?.setValue(toValue, forKey: keyPath!)
         }
         selfRetain = nil

@@ -53,9 +53,7 @@ internal class ChartSelectorViewController: UITableViewController, Stylizing
         navigationController?.navigationBar.barTintColor = style.mainColor
         navigationController?.navigationBar.layoutIfNeeded()
 
-        for stylizing in tableView.subviews.compactMap({ $0 as? Stylizing }) {
-            stylizing.applyStyle(style)
-        }
+        StyleController.recursiveApplyStyle(on: tableView, style: style)
     }
 
     private func processChartsResult(_ result: ChartProvider.Result) {
