@@ -28,7 +28,6 @@ public class ChartView: UIView
 
     public init() {
         super.init(frame: .zero)
-        backgroundColor = .clear
         
         initialize()
     }

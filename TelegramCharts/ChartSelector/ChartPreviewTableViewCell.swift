@@ -24,14 +24,12 @@ internal class ChartPreviewTableViewCell: UITableViewCell, Stylizing
 
         chartName.textColor = style.textColor
 
-        chartView.backgroundColor = UIColor.clear
         chartView.layer.borderColor = style.backgroundColor.cgColor
         chartView.layer.borderWidth = 1.0
 
         selectedColorViewColor = style.selectedColor
 
         selectedBackgroundView = UIView(frame: .zero)
-        selectedBackgroundView?.backgroundColor = .clear
     }
 
     internal func setName(_ name: String) {

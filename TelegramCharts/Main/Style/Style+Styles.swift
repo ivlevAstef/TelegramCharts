@@ -38,18 +38,6 @@ extension Style
         chartStyle: darkChartStyle
     )
 
-    internal func next() -> Style {
-        switch self.name {
-        case "Day":
-            return Style.darkStyle
-        case "Night":
-            return Style.dayStyle
-        default:
-            assertionFailure("Incorrect style name. Check code")
-            return Style.dayStyle
-        }
-    }
-
     internal static let dayChartStyle: ChartStyle = ChartStyle(
         hintTextColor: UIColor(r: 109, g: 109, b: 114),
         hintBackgroundColor: UIColor(r: 244, g: 244, b: 250),

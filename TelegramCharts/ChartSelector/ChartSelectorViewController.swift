@@ -19,9 +19,7 @@ internal class ChartSelectorViewController: UITableViewController, Stylizing
         super.viewDidLoad()
 
         chartProvider.getCharts { [weak self] result in
-            DispatchQueue.main.async {
-                self?.processChartsResult(result)
-            }
+            self?.processChartsResult(result)
         }
 
         title = "Charts"

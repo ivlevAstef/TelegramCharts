@@ -6,7 +6,6 @@
 //  Copyright © 2019 CFT. All rights reserved.
 //
 
-import Foundation
 import UIKit
 
 public protocol ChartUpdateListener: class

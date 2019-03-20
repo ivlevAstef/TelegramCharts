@@ -33,8 +33,6 @@ internal class MainViewController: UITableViewController, Stylizing
 
         title = "Statistics"
         tableView.tableHeaderView = header
-
-        //tableView.reloadData()
     }
 
     internal func setName(_ name: String) {
@@ -123,7 +121,7 @@ internal class MainViewController: UITableViewController, Stylizing
         case 1:
             let switchStyleCell: SwitchStyleModeTableViewCell = dequeueReusableCell(for: indexPath)
             switchStyleCell.applyStyle(StyleController.currentStyle)
-            switchStyleCell.setText("Switch to \(StyleController.currentStyle.next().name) Mode")
+            switchStyleCell.setText("Switch to \(StyleController.nextStyle.name) Mode")
             switchStyleCell.tapCallback = { [weak self] in
                 self?.switchStyle()
             }
@@ -146,7 +144,7 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     internal func switchStyle() {
-        StyleController.currentStyle = StyleController.currentStyle.next()
+        StyleController.next()
         UIView.animate(withDuration: 0.1) { [weak self, style = StyleController.currentStyle] in
             self?.applyStyle(style)
         }

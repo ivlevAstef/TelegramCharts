@@ -27,7 +27,6 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
         selectedColorViewColor = style.selectedColor
 
         selectedBackgroundView = UIView(frame: .zero)
-        selectedBackgroundView?.backgroundColor = .clear
     }
 
     internal func setColor(_ color: UIColor) {

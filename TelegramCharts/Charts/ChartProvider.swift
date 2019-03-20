@@ -17,19 +17,13 @@ public class ChartProvider
     }
 
     public func getCharts(_ completion: @escaping (Result) -> Void) {
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            guard let `self` = self else {
-                completion(.failed)
-                return
-            }
-            guard let rawCharts = self.loadChartsFromFile() else {
-                completion(.failed)
-                return
-            }
-
-            let charts = rawCharts.map{ self.convertToModel($0) }
-            completion(.success(charts))
+        guard let rawCharts = self.loadChartsFromFile() else {
+            completion(.failed)
+            return
         }
+
+        let charts = rawCharts.map{ self.convertToModel($0) }
+        completion(.success(charts))
     }
 
     private func loadChartsFromFile() -> [RawChart]? {

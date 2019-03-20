@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB057E632242A1FD007A76E6 /* UIView+animate.swift */; };
 		AB06A1C1223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
@@ -46,6 +47,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AB057E632242A1FD007A76E6 /* UIView+animate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+animate.swift"; sourceTree = "<group>"; };
 		AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonLinesLayerWrapper.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 				BACE715D22362E4B00068579 /* Array+SafeGet.swift */,
 				BACE715F223633D700068579 /* UIColor+Init.swift */,
 				BACE71762238D18300068579 /* WeakRef.swift */,
+				AB057E632242A1FD007A76E6 /* UIView+animate.swift */,
 			);
 			path = Utls;
 			sourceTree = "<group>";
@@ -324,6 +327,7 @@
 				ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */,
 				BACE71712238BB5E00068579 /* IntervalView.swift in Sources */,
 				BA41DFC7224269DA0021DC82 /* StyleController.swift in Sources */,
+				AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */,
 				BACE715922362CAF00068579 /* Stylizing.swift in Sources */,
 				BA41DFC2224126DB0021DC82 /* Configs.swift in Sources */,
 				BACE7156223613DF00068579 /* ChartTableViewCell.swift in Sources */,
@@ -487,9 +491,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_OPTIMIZATION = space;
+				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W7V8BMGJZ4;
+				ENABLE_BITCODE = YES;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				INFOPLIST_FILE = TelegramCharts/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -508,9 +518,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_OPTIMIZATION = space;
+				CLANG_ENABLE_CODE_COVERAGE = NO;
+				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = W7V8BMGJZ4;
+				ENABLE_BITCODE = YES;
+				GCC_ENABLE_CPP_EXCEPTIONS = NO;
+				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				INFOPLIST_FILE = TelegramCharts/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -520,6 +540,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = sia.testwork.TelegramCharts;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_DISABLE_SAFETY_CHECKS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Osize";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

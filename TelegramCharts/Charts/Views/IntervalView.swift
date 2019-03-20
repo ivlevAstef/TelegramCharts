@@ -36,7 +36,6 @@ public class IntervalView: UIView
 
     public init() {
         super.init(frame: .zero)
-        self.backgroundColor = .clear
 
         initialize()
     }
@@ -201,8 +200,6 @@ private class IntervalDrawableView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        self.backgroundColor = .clear
-
         addSubview(unvisibleLeftView)
         addSubview(unvisibleRightView)
         addSubview(leftSliderView)
@@ -227,8 +224,7 @@ private class IntervalDrawableView: UIView
     internal func update(chartViewModel: ChartViewModel?, aabb: AABB?, polyRect: CGRect,
                          animated: Bool, duration: TimeInterval)
     {
-        guard let chartViewModel = chartViewModel, let aabb = aabb else
-        {
+        guard let chartViewModel = chartViewModel, let aabb = aabb else {
             hide(animated: animated, duration: duration)
             return
         }
@@ -263,23 +259,15 @@ private class IntervalDrawableView: UIView
     }
 
     private func show(animated: Bool, duration: TimeInterval) {
-        if animated {
-            UIView.animate(withDuration: duration) { [weak self] in
-                self?.alpha = 1.0
-            }
-        } else {
-            alpha = 1.0
-        }
+        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+            self?.alpha = 1.0
+        })
     }
 
     private func hide(animated: Bool, duration: TimeInterval) {
-        if animated {
-            UIView.animate(withDuration: duration) { [weak self] in
-                self?.alpha = 0.0
-            }
-        } else {
-            alpha = 0.0
-        }
+        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+            self?.alpha = 0.0
+        })
     }
 
     private static func makeArrow(reverse: Bool) -> UIImage? {
