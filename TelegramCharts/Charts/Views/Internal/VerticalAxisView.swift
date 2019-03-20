@@ -52,6 +52,7 @@ internal class VerticalAxisView: UIView
         guard let aabb = aabb else {
             lastAABB = nil
             subviews.forEach { $0.removeFromSuperview() }
+            valueViews.removeAll()
             return
         }
 
@@ -142,6 +143,10 @@ internal class VerticalAxisView: UIView
     }
 
     private func checkIsMoreDiff(_ oldValues: [PolygonLine.Value], _ newValues: [PolygonLine.Value]) -> Bool {
+        if (oldValues.isEmpty || newValues.isEmpty) && oldValues.count != newValues.count {
+            return true
+        }
+
         var maxDiff = 0
         var minValue = PolygonLine.Value.max
         var maxValue = PolygonLine.Value.min

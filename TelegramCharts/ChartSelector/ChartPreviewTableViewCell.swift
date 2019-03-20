@@ -1,28 +1,32 @@
 //
-//  InfoPolygonLineTableViewCell.swift
+//  ChartPreviewTableViewCell.swift
 //  TelegramCharts
 //
-//  Created by Ивлев Александр on 11/03/2019.
+//  Created by Ивлев Александр on 20/03/2019.
 //  Copyright © 2019 CFT. All rights reserved.
 //
 
+
 import UIKit
 
-internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
+internal class ChartPreviewTableViewCell: UITableViewCell, Stylizing
 {
-    internal let identifier: String = "InfoPolygonLineTableViewCell"
+    internal let identifier: String = "ChartPreviewTableViewCell"
 
-    @IBOutlet private var colorView: UIView!
-    @IBOutlet private var nameLabel: UILabel!
+    @IBOutlet private var chartView: SimpleChartView!
+    @IBOutlet private var chartName: UILabel!
 
     private var colorViewColor: UIColor?
     private var selectedColorViewColor: UIColor?
 
     internal func applyStyle(_ style: Style) {
-        colorView.layer.cornerRadius = 4.0
         backgroundColor = style.mainColor
-        nameLabel.textColor = style.textColor
-        tintColor = style.activeElementColor
+
+        chartName.textColor = style.textColor
+
+        chartView.backgroundColor = UIColor.clear
+        chartView.layer.borderColor = style.backgroundColor.cgColor
+        chartView.layer.borderWidth = 1.0
 
         selectedColorViewColor = style.selectedColor
 
@@ -30,26 +34,17 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
         selectedBackgroundView?.backgroundColor = .clear
     }
 
-    internal func setColor(_ color: UIColor) {
-        self.colorViewColor = color
-        colorView.backgroundColor = color
-    }
-
     internal func setName(_ name: String) {
-        nameLabel.text = name
+        chartName.text = name
     }
 
-    internal func setCheckmark(_ enabled: Bool) {
-        if enabled {
-            self.accessoryType = .checkmark
-        } else {
-            self.accessoryType = .none
-        }
+    internal func setChart(_ chartViewModel: ChartViewModel) {
+        chartView.layoutIfNeeded()
+        chartView.setChart(chartViewModel)
     }
 
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
-        colorView.backgroundColor = self.colorViewColor
 
         UIView.animate(withDuration: 0.1, delay: 0.2, animations: { [weak self, selectedColorViewColor] in
             if highlighted {
@@ -60,3 +55,4 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
         })
     }
 }
+

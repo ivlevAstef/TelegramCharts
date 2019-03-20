@@ -26,10 +26,6 @@
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="199.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="KVG-Mq-jFO">
-                                            <rect key="frame" x="169" y="81.5" width="37" height="37"/>
-                                            <color key="color" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        </activityIndicatorView>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="97T-PH-use" customClass="ChartWithIntervalView" customModule="TelegramCharts" customModuleProvider="target">
                                             <rect key="frame" x="16" y="11" width="343" height="178"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -39,16 +35,11 @@
                                         <constraint firstItem="97T-PH-use" firstAttribute="top" secondItem="aLd-dH-og4" secondAttribute="topMargin" id="5pI-Ys-HtX"/>
                                         <constraint firstItem="97T-PH-use" firstAttribute="leading" secondItem="aLd-dH-og4" secondAttribute="leadingMargin" id="NQ3-FZ-17q"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="97T-PH-use" secondAttribute="bottom" id="NwF-KD-mau"/>
-                                        <constraint firstItem="KVG-Mq-jFO" firstAttribute="top" relation="greaterThanOrEqual" secondItem="aLd-dH-og4" secondAttribute="topMargin" id="WC0-iW-ejn"/>
-                                        <constraint firstItem="KVG-Mq-jFO" firstAttribute="centerX" secondItem="aLd-dH-og4" secondAttribute="centerX" id="XD6-k4-CZl"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="97T-PH-use" secondAttribute="trailing" id="qKv-H9-Fc7"/>
-                                        <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="KVG-Mq-jFO" secondAttribute="bottom" id="xsq-xv-yjT"/>
-                                        <constraint firstItem="KVG-Mq-jFO" firstAttribute="centerY" secondItem="aLd-dH-og4" secondAttribute="centerY" id="yWE-Tg-N5P"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="chartView" destination="97T-PH-use" id="azN-1y-9YP"/>
-                                    <outlet property="loadingIndicator" destination="KVG-Mq-jFO" id="lIe-Ll-7I0"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="InfoPolygonLineTableViewCell" rowHeight="44" id="zBx-Ys-Mdd" customClass="InfoPolygonLineTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
@@ -121,28 +112,11 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="Ca0-gE-TE6">
                         <nil key="title"/>
-                        <segmentedControl key="titleView" opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="L6k-Rs-8nX">
-                            <rect key="frame" x="35.5" y="7" width="304" height="30"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <segments>
-                                <segment title="First"/>
-                                <segment title="Second"/>
-                                <segment title=""/>
-                                <segment title=""/>
-                                <segment title=""/>
-                            </segments>
-                            <connections>
-                                <action selector="selectChart:" destination="MI2-34-3T1" eventType="valueChanged" id="ZmA-6t-rIB"/>
-                            </connections>
-                        </segmentedControl>
                     </navigationItem>
-                    <connections>
-                        <outlet property="chartSegmentControl" destination="L6k-Rs-8nX" id="tUE-Yx-4BJ"/>
-                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2ja-GA-duU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="268" y="9.4452773613193415"/>
+            <point key="canvasLocation" x="602" y="-99"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="XaX-gR-Eod">
@@ -154,12 +128,69 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="MI2-34-3T1" kind="relationship" relationship="rootViewController" id="kjj-RZ-R9V"/>
+                        <segue destination="xzR-Ug-E78" kind="relationship" relationship="rootViewController" id="3Fu-2N-MDW"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Lqk-Aj-L8e" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-442" y="10"/>
+            <point key="canvasLocation" x="-817" y="-99"/>
+        </scene>
+        <!--Chart Selector View Controller-->
+        <scene sceneID="ZoB-fk-xss">
+            <objects>
+                <tableViewController id="xzR-Ug-E78" customClass="ChartSelectorViewController" customModule="TelegramCharts" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="CU1-Wc-006">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ChartPreviewTableViewCell" rowHeight="80" id="wSf-IG-yfh" customClass="ChartPreviewTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="55.5" width="375" height="80"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wSf-IG-yfh" id="cWO-JE-k55">
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="79.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gxC-1h-NPD">
+                                            <rect key="frame" x="16" y="30" width="205" height="19.5"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vrY-Hi-pB2" customClass="SimpleChartView" customModule="TelegramCharts" customModuleProvider="target">
+                                            <rect key="frame" x="233" y="10" width="100" height="60"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="60" id="Kcp-NP-W6S"/>
+                                                <constraint firstAttribute="width" constant="100" id="nz2-17-FOZ"/>
+                                            </constraints>
+                                        </view>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="vrY-Hi-pB2" firstAttribute="centerY" secondItem="cWO-JE-k55" secondAttribute="centerY" id="6H2-86-WYr"/>
+                                        <constraint firstItem="gxC-1h-NPD" firstAttribute="leading" secondItem="cWO-JE-k55" secondAttribute="leadingMargin" id="F8R-jJ-JGI"/>
+                                        <constraint firstItem="gxC-1h-NPD" firstAttribute="centerY" secondItem="cWO-JE-k55" secondAttribute="centerY" id="NH8-p3-4qN"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="vrY-Hi-pB2" secondAttribute="trailing" id="qy4-HR-qhN"/>
+                                        <constraint firstItem="vrY-Hi-pB2" firstAttribute="leading" secondItem="gxC-1h-NPD" secondAttribute="trailing" constant="12" id="yDk-ir-R75"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="chartName" destination="gxC-1h-NPD" id="Kdb-kK-Q3n"/>
+                                    <outlet property="chartView" destination="vrY-Hi-pB2" id="cCE-Tc-5eM"/>
+                                    <segue destination="MI2-34-3T1" kind="show" identifier="ToChart" trigger="accessoryAction" id="Kat-lk-a6k"/>
+                                </connections>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="xzR-Ug-E78" id="ATN-4U-ykb"/>
+                            <outlet property="delegate" destination="xzR-Ug-E78" id="qFl-Un-Ni4"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="3XX-Wz-5Bp"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="aMt-WE-SNo" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-98" y="-99"/>
         </scene>
     </scenes>
 </document>

@@ -13,18 +13,16 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     internal let identifier: String = "ChartTableViewCell"
 
     @IBOutlet private var chartView: ChartWithIntervalView!
-    @IBOutlet private var loadingIndicator: UIActivityIndicatorView!
 
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
         chartView.backgroundColor = style.mainColor
-        loadingIndicator.color = style.indicatorColor
 
         chartView.setStyle(style.chartStyle)
     }
 
     internal func setChart(_ chartViewModel: ChartViewModel) {
-        loadingIndicator.stopAnimating()
+        chartView.layoutIfNeeded()
         chartView.setChart(chartViewModel)
     }
 

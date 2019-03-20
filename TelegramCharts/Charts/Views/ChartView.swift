@@ -28,11 +28,9 @@ public class ChartView: UIView
 
     public init() {
         super.init(frame: .zero)
-
         backgroundColor = .clear
         
-        configureSubviews()
-        makeConstraints()
+        initialize()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -57,9 +55,13 @@ public class ChartView: UIView
         hintView.setPolygonLines(chartViewModel.polygonLines)
         hintView.setAABB(aabb: visibleAABB)
     }
-    
-    private func configureSubviews()
-    {
+
+    private func initialize() {
+        configureSubviews()
+        makeConstraints()
+    }
+
+    private func configureSubviews() {
         polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(polygonLinesView)
         
@@ -98,6 +100,8 @@ public class ChartView: UIView
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+
+        initialize()
     }
 }
 

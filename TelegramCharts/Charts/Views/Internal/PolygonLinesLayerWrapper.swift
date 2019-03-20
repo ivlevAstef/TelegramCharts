@@ -13,6 +13,8 @@ internal final class PolygonLinesLayerWrapper
 {   
     private var polygonLineLayers: [PolygonLineLayerWrapper] = []
     private weak var parentLayer: CALayer?
+
+    private var lastAABB: AABB?
     
     internal init() {
     }
@@ -47,9 +49,18 @@ internal final class PolygonLinesLayerWrapper
     }
     
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
-        let aabb = aabb ?? AABB.empty
+
+        let animatedPath = animated && (nil != lastAABB)
+        let animatedOpacity = animated
+
+        let usedAABB = aabb ?? lastAABB ?? AABB.empty
+        lastAABB = aabb
+
         for polygonLineLayer in polygonLineLayers {
-            polygonLineLayer.update(aabb: aabb, animated: animated, duration: duration)
+            polygonLineLayer.update(aabb: usedAABB,
+                                    animatedPath: animatedPath,
+                                    animatedOpacity: animatedOpacity,
+                                    duration: duration)
         }
     }
 }

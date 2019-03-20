@@ -44,14 +44,17 @@ public class ChartViewModel
 
     private var updateListeners: [WeakRef<ChartUpdateListener>] = []
 
-    public init(polygonLines: [PolygonLine]) {
+    public init(polygonLines: [PolygonLine], from: Double = 0.0, to: Double = 1.0) {
         self.polygonLines = polygonLines.map { polygonLine in
             let points = polygonLine.points.map { PolygonLineViewModel.Point(date: $0.date, value: $0.value) }
             return PolygonLineViewModel(name: polygonLine.name, points: points, color: UIColor(hex: polygonLine.color))
         }
 
         if let aabb = self.aabb {
-            self.interval = Interval(from: aabb.maxDate - (aabb.maxDate - aabb.minDate) / 3, to: aabb.maxDate)
+            let length = Double(aabb.maxDate - aabb.minDate)
+            self.interval = Interval(from: aabb.minDate + PolygonLine.Date(length * from),
+                                     to: aabb.minDate + PolygonLine.Date(length * to))
+                
             self.fullInterval = Interval(from: aabb.minDate, to: aabb.maxDate)
         } else {
             assertionFailure("Can't make AABB for polygon lines...")

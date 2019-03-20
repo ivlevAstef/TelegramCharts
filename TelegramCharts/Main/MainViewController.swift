@@ -10,94 +10,55 @@ import UIKit
 
 internal class MainViewController: UITableViewController, Stylizing
 {
-    // ideally need DI, ServiceLocator or other
-    private let chartProvider: ChartProvider = ChartProvider()
-    private var currentStyle: Style = Style.dayStyle
-
     // it's laziness
-    private lazy var followersHeaderLabel: UILabel = {
+    private lazy var headerLabel: UILabel = {
         let label = UILabel(frame: CGRect(x: 14, y: 30, width: 260, height: 16))
         label.font = UIFont.systemFont(ofSize: 14.0)
-        label.text = "FOLLOWERS"
 
         return label
     }()
-    private lazy var followersHeader: UIView = {
+    private lazy var header: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 50))
-        view.addSubview(followersHeaderLabel)
+        view.addSubview(headerLabel)
 
         return view
     }()
-    
-    @IBOutlet private var chartSegmentControl: UISegmentedControl!
-    private var loadedCharts: [[PolygonLine]] = []
+
     private var chartViewModel: ChartViewModel? = nil
 
     internal override func viewDidLoad() {
         super.viewDidLoad()
 
-        chartSegmentControl.removeAllSegments()
-        applyStyle(currentStyle)
-
-        chartProvider.getCharts { [weak self] result in
-            DispatchQueue.main.async {
-                self?.processChartsResult(result)
-            }
-        }
+        applyStyle(StyleController.currentStyle)
 
         title = "Statistics"
-        tableView.tableHeaderView = followersHeader
+        tableView.tableHeaderView = header
+
+        //tableView.reloadData()
+    }
+
+    internal func setName(_ name: String) {
+        headerLabel.text = name
+    }
+
+    internal func setChart(_ chartViewModel: ChartViewModel) {
+        self.chartViewModel = chartViewModel
     }
 
     internal func applyStyle(_ style: Style) {
         tableView.backgroundColor = style.backgroundColor
         tableView.separatorColor = style.separatorColor
         tableView.separatorStyle = .singleLine
+
+        headerLabel.textColor = style.subTitleColor
+
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: style.titleColor]
         navigationController?.navigationBar.barTintColor = style.mainColor
-        followersHeaderLabel.textColor = style.subTitleColor
-        chartSegmentControl.tintColor = style.activeElementColor
-    }
+        navigationController?.navigationBar.layoutIfNeeded()
 
-    private func processChartsResult(_ result: ChartProvider.Result) {
-        switch result {
-        case .success(let charts):
-            loadedCharts = charts
-            configureSegmentControl(use: charts)
-            selectChart(at: chartSegmentControl.selectedSegmentIndex)
-        case .failed:
-            showError()
+        for stylizing in tableView.subviews.compactMap({ $0 as? Stylizing }) {
+            stylizing.applyStyle(style)
         }
-    }
-
-    private func configureSegmentControl(use charts: [[PolygonLine]]) {
-        chartSegmentControl.removeAllSegments()
-
-        for i in 0..<charts.count {
-            chartSegmentControl.insertSegment(withTitle: "\(i + 1)", at: i, animated: false)
-        }
-        chartSegmentControl.selectedSegmentIndex = 0
-    }
-
-    @IBAction private func selectChart(_ sender: UISegmentedControl) {
-        selectChart(at: sender.selectedSegmentIndex)
-    }
-
-    private func selectChart(at index: Int) {
-        guard let polygonLines = loadedCharts[safe: index] else {
-            assertionFailure("Can't find chart at index: \(index)")
-            return
-        }
-
-        chartViewModel = ChartViewModel(polygonLines: polygonLines)
-        tableView.reloadData()
-    }
-
-    private func showError() {
-        let alert = UIAlertController(title: "Error", message: "It's error - can't parse json?", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-
-        present(alert, animated: true, completion: nil)
     }
 
     // MARK: Table View
@@ -144,7 +105,7 @@ internal class MainViewController: UITableViewController, Stylizing
         case 0:
             if 0 == indexPath.row {
                 let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
-                chartCell.applyStyle(currentStyle)
+                chartCell.applyStyle(StyleController.currentStyle)
                 if let chartViewModel = self.chartViewModel {
                     chartCell.setChart(chartViewModel)
                 }
@@ -155,7 +116,7 @@ internal class MainViewController: UITableViewController, Stylizing
                     fatalError("Charts view models mismatch chart for index: \(index)")
                 }
                 let infoChartCell: InfoPolygonLineTableViewCell = dequeueReusableCell(for: indexPath)
-                infoChartCell.applyStyle(currentStyle)
+                infoChartCell.applyStyle(StyleController.currentStyle)
                 infoChartCell.setColor(polygonLine.color)
                 infoChartCell.setName(polygonLine.name)
                 infoChartCell.setCheckmark(polygonLine.isVisible)
@@ -163,8 +124,8 @@ internal class MainViewController: UITableViewController, Stylizing
             }
         case 1:
             let switchStyleCell: SwitchStyleModeTableViewCell = dequeueReusableCell(for: indexPath)
-            switchStyleCell.applyStyle(currentStyle)
-            switchStyleCell.setText("Switch to \(currentStyle.next().name) Mode")
+            switchStyleCell.applyStyle(StyleController.currentStyle)
+            switchStyleCell.setText("Switch to \(StyleController.currentStyle.next().name) Mode")
             switchStyleCell.tapCallback = { [weak self] in
                 self?.switchStyle()
             }
@@ -187,8 +148,9 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     internal func switchStyle() {
-        currentStyle = currentStyle.next()
-        applyStyle(currentStyle)
-        tableView.reloadData()
+        StyleController.currentStyle = StyleController.currentStyle.next()
+        UIView.animate(withDuration: 0.1) { [weak self, style = StyleController.currentStyle] in
+            self?.applyStyle(style)
+        }
     }
 }

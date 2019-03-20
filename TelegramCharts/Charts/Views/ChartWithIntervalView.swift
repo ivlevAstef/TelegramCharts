@@ -18,8 +18,7 @@ public class ChartWithIntervalView: UIView
     public init(intervalViewHeight: CGFloat? = nil) {
         super.init(frame: .zero)
 
-        configureSubviews()
-        makeConstraints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
+        initialize(intervalViewHeight: intervalViewHeight)
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -34,6 +33,12 @@ public class ChartWithIntervalView: UIView
 
     public static func calculateHeight() -> CGFloat {
         return UIScreen.main.bounds.width
+    }
+
+    private func initialize(intervalViewHeight: CGFloat?)
+    {
+        configureSubviews()
+        makeConstraints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
     }
 
     private func configureSubviews() {
@@ -59,7 +64,6 @@ public class ChartWithIntervalView: UIView
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        configureSubviews()
-        makeConstraints(intervalViewHeight: ChartWithIntervalView.defaultIntervalViewHeight)
+        initialize(intervalViewHeight: nil)
     }
 }

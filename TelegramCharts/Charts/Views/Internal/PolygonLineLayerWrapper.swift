@@ -26,10 +26,10 @@ internal final class PolygonLineLayerWrapper
         layer.fillColor = nil
     }
     
-    internal func update(aabb: AABB, animated: Bool, duration: TimeInterval) {
+    internal func update(aabb: AABB, animatedPath: Bool, animatedOpacity: Bool, duration: TimeInterval) {
         let newPath = makePath(aabb: aabb)
 
-        if animated && nil != layer.path {
+        if animatedPath && nil != layer.path {
             let animation = CASaveStateAnimation(keyPath: "path")
             animation.duration = duration
             animation.toValue = newPath.cgPath
@@ -41,7 +41,7 @@ internal final class PolygonLineLayerWrapper
         }
         
         let newOpacity: Float = polygonLineViewModel.isVisible ? 1.0 : 0.0
-        if animated {
+        if animatedOpacity {
             let animation = CASaveStateAnimation(keyPath: "opacity")
             animation.duration = duration
             animation.toValue = newOpacity

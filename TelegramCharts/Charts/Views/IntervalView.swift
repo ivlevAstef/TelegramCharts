@@ -36,24 +36,9 @@ public class IntervalView: UIView
 
     public init() {
         super.init(frame: .zero)
-        
         self.backgroundColor = .clear
-        self.clipsToBounds = true
 
-        self.isUserInteractionEnabled = true
-        self.isMultipleTouchEnabled = false
-        
-        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
-        gestureRecognizer.minimumPressDuration = 0.0
-        self.addGestureRecognizer(gestureRecognizer)
-        
-        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(polygonLinesView)
-
-        intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(intervalDrawableView)
-
-        makeConstraints()
+        initialize()
     }
     
     public func setStyle(_ style: ChartStyle) {
@@ -70,7 +55,27 @@ public class IntervalView: UIView
         polygonLinesView.setLineWidth(1.0)
         polygonLinesView.update(aabb: aabb, animated: false, duration: 0.0)
 
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame)
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+                                    animated: false, duration: 0.0)
+    }
+
+    private func initialize() {
+        self.clipsToBounds = true
+
+        self.isUserInteractionEnabled = true
+        self.isMultipleTouchEnabled = false
+
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
+        gestureRecognizer.minimumPressDuration = 0.0
+        self.addGestureRecognizer(gestureRecognizer)
+
+        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(polygonLinesView)
+
+        intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(intervalDrawableView)
+
+        makeConstraints()
     }
     
     private func makeConstraints() {
@@ -159,6 +164,8 @@ public class IntervalView: UIView
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+
+        initialize()
     }
 }
 
@@ -167,129 +174,152 @@ extension IntervalView: ChartUpdateListener
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
         polygonLinesView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame)
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+                                    animated: true, duration: Configs.visibleChangeDuration)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame)
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+                                    animated: false, duration: 0)
     }
 }
 
 private class IntervalDrawableView: UIView
 {
-    private var unvisibleColor: UIColor = UIColor.lightGray.withAlphaComponent(0.3)
-    private var borderColor: UIColor = UIColor.gray
     private var arrowColor: UIColor = UIColor.white
 
-    private var chartViewModel: ChartViewModel? = nil
-    private var aabb: AABB? = nil
-    private var polyRect: CGRect = .zero
+    private let unvisibleLeftView: UIView = UIView(frame: .zero)
+    private let unvisibleRightView: UIView = UIView(frame: .zero)
+    private let leftSliderView: UIView = UIView(frame: .zero)
+    private let rightSliderView: UIView = UIView(frame: .zero)
+    private let topBorderView: UIView = UIView(frame: .zero)
+    private let bottomBorderView: UIView = UIView(frame: .zero)
+    private let leftArrow: UIImageView = UIImageView(image: makeArrow(reverse: false))
+    private let rightArrow: UIImageView = UIImageView(image: makeArrow(reverse: true))
 
     internal init() {
         super.init(frame: .zero)
 
         self.backgroundColor = .clear
-        self.clipsToBounds = true
+
+        addSubview(unvisibleLeftView)
+        addSubview(unvisibleRightView)
+        addSubview(leftSliderView)
+        addSubview(rightSliderView)
+        addSubview(topBorderView)
+        addSubview(bottomBorderView)
+        addSubview(leftArrow)
+        addSubview(rightArrow)
     }
 
     internal func setStyle(_ style: ChartStyle) {
-        unvisibleColor = style.intervalUnvisibleColor
-        borderColor = style.intervalBorderColor
-        // TODO: arrowColor
+        unvisibleLeftView.backgroundColor = style.intervalUnvisibleColor
+        unvisibleRightView.backgroundColor = style.intervalUnvisibleColor
+        leftSliderView.backgroundColor = style.intervalBorderColor
+        rightSliderView.backgroundColor = style.intervalBorderColor
+        topBorderView.backgroundColor = style.intervalBorderColor
+        bottomBorderView.backgroundColor = style.intervalBorderColor
+        leftArrow.tintColor = style.intervalArrowColor
+        rightArrow.tintColor = style.intervalArrowColor
     }
 
-    internal func update(chartViewModel: ChartViewModel?, aabb: AABB?, polyRect: CGRect) {
-        self.chartViewModel = chartViewModel
-        self.aabb = aabb
-        self.polyRect = polyRect
-
-        setNeedsDisplay()
-    }
-
-    override public func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return
-        }
-
-        drawInterval(rect: rect, context: context)
-    }
-
-    private func drawInterval(rect: CGRect, context: CGContext) {
+    internal func update(chartViewModel: ChartViewModel?, aabb: AABB?, polyRect: CGRect,
+                         animated: Bool, duration: TimeInterval)
+    {
         guard let chartViewModel = chartViewModel, let aabb = aabb else
         {
+            hide(animated: animated, duration: duration)
             return
         }
 
-        context.saveGState()
-        defer { context.restoreGState() }
+        show(animated: animated, duration: duration)
 
         let interval = chartViewModel.interval
-
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: polyRect).x
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: polyRect).x
 
-        // unvisible zone
-        let unvisibleRect = CGRect(x: rect.origin.x, y: rect.origin.y + Consts.verticalPadding,
-                                   width: rect.width, height: rect.height - 2 * Consts.verticalPadding)
-        let leftRect = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
-                              width: leftX - unvisibleRect.minX - Consts.sliderWidth, height: unvisibleRect.height)
-        let rightRect = CGRect(x: rightX, y: unvisibleRect.minY,
-                               width: unvisibleRect.width - rightX, height: unvisibleRect.height)
+        let unvisibleRect = CGRect(x: bounds.origin.x, y: bounds.origin.y + Consts.verticalPadding,
+                                   width: bounds.width, height: bounds.height - 2 * Consts.verticalPadding)
 
-        context.setStrokeColor(UIColor.clear.cgColor)
-        context.setLineWidth(0.0)
-        context.setFillColor(unvisibleColor.cgColor)
+        unvisibleLeftView.frame = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
+                                         width: leftX - unvisibleRect.minX - Consts.sliderWidth, height: unvisibleRect.height)
+        unvisibleRightView.frame = CGRect(x: rightX, y: unvisibleRect.minY,
+                                          width: unvisibleRect.width - rightX, height: unvisibleRect.height)
 
-        context.beginPath()
-        context.addRects([leftRect, rightRect])
-        context.fillPath()
+        leftSliderView.frame = CGRect(x: leftX - Consts.sliderWidth, y: bounds.minY,
+                                      width: Consts.sliderWidth, height: bounds.height)
+        rightSliderView.frame = CGRect(x: rightX, y: bounds.minY,
+                                       width: Consts.sliderWidth, height: bounds.height)
 
-        // Sliders
-        let leftSlider = CGRect(x: leftX - Consts.sliderWidth, y: rect.minY,
-                                width: Consts.sliderWidth, height: rect.height)
-        let rightSlider = CGRect(x: rightX, y: rect.minY,
-                                 width: Consts.sliderWidth, height: rect.height)
+        topBorderView.frame = CGRect(x: leftX, y: bounds.minY,
+                                     width: rightX - leftX, height: 2)
 
-        context.setFillColor(borderColor.cgColor)
+        bottomBorderView.frame = CGRect(x: leftX, y: bounds.maxY - 2,
+                                        width: rightX - leftX, height: 2)
 
-        context.beginPath()
-        context.addRects([leftSlider, rightSlider])
-        context.fillPath()
+        leftArrow.center = leftSliderView.center
+        rightArrow.center = rightSliderView.center
+    }
 
-        context.setStrokeColor(borderColor.cgColor)
-        context.setLineWidth(2.0)
+    private func show(animated: Bool, duration: TimeInterval) {
+        if animated {
+            UIView.animate(withDuration: duration) { [weak self] in
+                self?.alpha = 1.0
+            }
+        } else {
+            alpha = 1.0
+        }
+    }
 
-        context.beginPath()
-        context.move(to: CGPoint(x: leftX, y: rect.minY + 1))
-        context.addLine(to: CGPoint(x: rightX, y: rect.minY + 1))
-        context.move(to: CGPoint(x: leftX, y: rect.maxY - 1))
-        context.addLine(to: CGPoint(x: rightX, y: rect.maxY - 1))
-        context.strokePath()
+    private func hide(animated: Bool, duration: TimeInterval) {
+        if animated {
+            UIView.animate(withDuration: duration) { [weak self] in
+                self?.alpha = 0.0
+            }
+        } else {
+            alpha = 0.0
+        }
+    }
 
-        // Arrow
-        context.setStrokeColor(arrowColor.cgColor)
+    private static func makeArrow(reverse: Bool) -> UIImage? {
+        guard let image = drawArrow() else {
+            return nil
+        }
+
+        if let cgImage = image.cgImage, reverse {
+            let reverseImage = UIImage(cgImage: cgImage, scale: 1.0, orientation: UIImage.Orientation.upMirrored)
+            return reverseImage.withRenderingMode(.alwaysTemplate)
+        }
+
+        return image.withRenderingMode(.alwaysTemplate)
+    }
+
+    private static func drawArrow() -> UIImage? {
+        let centerArrowX: CGFloat = 3
+        let edgeArrowX: CGFloat = 6
+        let arrowHeight: CGFloat = 10
+
+        UIGraphicsBeginImageContext(CGSize(width: Consts.sliderWidth, height: arrowHeight))
+
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+
+        context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(2.0)
         context.setLineCap(.round)
 
-        let centerArrowX: CGFloat = 3
-        let edgeArrowX: CGFloat = 6
-        let centerArrowY: CGFloat = rect.minY + (rect.maxY - rect.minY) * 0.5
-        let arrowHeight: CGFloat = 5
-
         context.beginPath()
-        context.move(to: CGPoint(x: leftX - Consts.sliderWidth + edgeArrowX, y: centerArrowY - arrowHeight))
-        context.addLine(to: CGPoint(x: leftX - Consts.sliderWidth + centerArrowX, y: centerArrowY))
-        context.addLine(to: CGPoint(x: leftX - Consts.sliderWidth + edgeArrowX, y: centerArrowY + arrowHeight))
+        context.move(to: CGPoint(x: edgeArrowX, y: 0))
+        context.addLine(to: CGPoint(x: centerArrowX, y: arrowHeight * 0.5))
+        context.addLine(to: CGPoint(x: edgeArrowX, y: arrowHeight))
         context.strokePath()
 
-        context.beginPath()
-        context.move(to: CGPoint(x: rightX + Consts.sliderWidth - edgeArrowX, y: centerArrowY - arrowHeight))
-        context.addLine(to: CGPoint(x: rightX + Consts.sliderWidth - centerArrowX, y: centerArrowY))
-        context.addLine(to: CGPoint(x: rightX + Consts.sliderWidth - edgeArrowX, y: centerArrowY + arrowHeight))
-        context.strokePath()
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return image
     }
 
     required init?(coder aDecoder: NSCoder) {
