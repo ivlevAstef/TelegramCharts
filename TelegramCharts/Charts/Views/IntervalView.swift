@@ -53,7 +53,7 @@ public class IntervalView: UIView
         intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(intervalDrawableView)
 
-        makeConstaints()
+        makeConstraints()
     }
     
     public func setStyle(_ style: ChartStyle) {
@@ -73,7 +73,7 @@ public class IntervalView: UIView
         intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame)
     }
     
-    private func makeConstaints() {
+    private func makeConstraints() {
         self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: Consts.padding).isActive = true
         self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -Consts.padding).isActive = true

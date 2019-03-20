@@ -32,7 +32,7 @@ public class ChartView: UIView
         backgroundColor = .clear
         
         configureSubviews()
-        makeConstaints()
+        makeConstraints()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -73,7 +73,7 @@ public class ChartView: UIView
         addSubview(hintView)
     }
     
-    private func makeConstaints() {
+    private func makeConstraints() {
         self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor, constant: Consts.spacing).isActive = true
         self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true

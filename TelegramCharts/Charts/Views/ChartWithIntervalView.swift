@@ -19,7 +19,7 @@ public class ChartWithIntervalView: UIView
         super.init(frame: .zero)
 
         configureSubviews()
-        makeConstaints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
+        makeConstraints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -43,7 +43,7 @@ public class ChartWithIntervalView: UIView
         addSubview(intervalView)
     }
 
-    private func makeConstaints(intervalViewHeight: CGFloat) {
+    private func makeConstraints(intervalViewHeight: CGFloat) {
         self.chartView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         self.chartView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         self.chartView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
@@ -60,6 +60,6 @@ public class ChartWithIntervalView: UIView
         super.init(coder: aDecoder)
 
         configureSubviews()
-        makeConstaints(intervalViewHeight: ChartWithIntervalView.defaultIntervalViewHeight)
+        makeConstraints(intervalViewHeight: ChartWithIntervalView.defaultIntervalViewHeight)
     }
 }

@@ -23,6 +23,8 @@ internal class VerticalAxisView: UIView
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
+    private let bottomLine: UIView = UIView(frame: .zero)
+
     private var valueViews: [ValueView] = []
 
     internal init() {
@@ -30,11 +32,16 @@ internal class VerticalAxisView: UIView
 
         backgroundColor = .clear
         clipsToBounds = true
+
+        bottomLine.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(bottomLine)
+        makeConstraints()
     }
 
     internal func setStyle(_ style: ChartStyle) {
         color = style.textColor
         lineColor = style.linesColor
+        bottomLine.backgroundColor = style.focusLineColor
 
         for subview in subviews.compactMap({ $0 as? ValueView }) {
             subview.setStyle(color: color, lineColor: lineColor)
@@ -52,11 +59,18 @@ internal class VerticalAxisView: UIView
         lastAABB = aabb
     }
 
+    private func makeConstraints() {
+        self.bottomLine.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
+        self.bottomLine.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+        self.bottomLine.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+        self.bottomLine.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+    }
+
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
         func updatePositionOnSubviews() {
             for view in subviews.compactMap({ $0 as? ValueView }) {
                 let position = aabb.calculateUIPoint(date: 0, value: view.value, rect: bounds).y
-                view.setPosition(position)
+                view.setPosition(position, limits: bounds)
             }
         }
 
@@ -88,7 +102,7 @@ internal class VerticalAxisView: UIView
             } else {
                 view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
                 let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: value, rect: bounds).y
-                view.setPosition(position)
+                view.setPosition(position, limits: bounds)
 
                 addSubview(view)
                 newViews.append(view)
@@ -197,8 +211,17 @@ private class ValueView: UIView
         line.backgroundColor = lineColor
     }
 
-    internal func setPosition(_ position: CGFloat) {
+    internal func setPosition(_ position: CGFloat, limits: CGRect) {
         frame.origin = CGPoint(x: 0, y: position - frame.height)
+
+        let topLimitOpacity = max(0, (limits.minY - frame.minY) / frame.height)
+        let bottomLimitOpacity = max(0, (frame.maxY - limits.maxY) / frame.height)
+
+        // pow for more opacity
+        let limitOpacity = pow(1.0 - min(max(topLimitOpacity, bottomLimitOpacity), 1.0), 2.0)
+
+        label.alpha = limitOpacity
+        line.alpha = limitOpacity
     }
 
     private func abbreviationNumber(_ number: Int64) -> String {
