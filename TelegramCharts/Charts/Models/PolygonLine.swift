@@ -2,8 +2,8 @@
 //  Chart.swift
 //  TelegramCharts
 //
-//  Created by Ивлев Александр on 11/03/2019.
-//  Copyright © 2019 CFT. All rights reserved.
+//  Created by Alexander Ivlev on 11/03/2019.
+//  Copyright © 2019 SIA. All rights reserved.
 //
 
 public struct PolygonLine

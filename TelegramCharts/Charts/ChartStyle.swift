@@ -2,8 +2,8 @@
 //  ChartStyle.swift
 //  TelegramCharts
 //
-//  Created by Ивлев Александр on 13/03/2019.
-//  Copyright © 2019 CFT. All rights reserved.
+//  Created by Alexander Ivlev on 13/03/2019.
+//  Copyright © 2019 SIA. All rights reserved.
 //
 
 import UIKit
