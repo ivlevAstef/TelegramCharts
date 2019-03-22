@@ -290,7 +290,7 @@ private class IntervalDrawableView: UIView
         }
 
         if let cgImage = image.cgImage, reverse {
-            let reverseImage = UIImage(cgImage: cgImage, scale: 1.0, orientation: UIImage.Orientation.upMirrored)
+            let reverseImage = UIImage(cgImage: cgImage, scale: UIScreen.main.scale, orientation: UIImage.Orientation.upMirrored)
             return reverseImage.withRenderingMode(.alwaysTemplate)
         }
 
@@ -302,7 +302,7 @@ private class IntervalDrawableView: UIView
         let edgeArrowX: CGFloat = 6
         let arrowHeight: CGFloat = 10
 
-        UIGraphicsBeginImageContext(CGSize(width: Consts.sliderWidth, height: arrowHeight))
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: Consts.sliderWidth, height: arrowHeight), false, UIScreen.main.scale)
 
         guard let context = UIGraphicsGetCurrentContext() else {
             return nil
