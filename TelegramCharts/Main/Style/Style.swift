@@ -24,5 +24,7 @@ internal struct Style
     internal let separatorColor: UIColor
     internal let selectedColor: UIColor
 
+    internal let statusBarStyle: UIStatusBarStyle
+
     internal let chartStyle: ChartStyle
 }

@@ -21,6 +21,7 @@ extension Style
         activeElementColor: UIColor(r: 0, g: 126, b: 229),
         separatorColor: UIColor(r: 200, g: 199, b: 204),
         selectedColor: UIColor(r: 0, g: 0, b: 0, alpha: 0.1),
+        statusBarStyle: UIStatusBarStyle.default,
         chartStyle: dayChartStyle
     )
 
@@ -35,6 +36,7 @@ extension Style
         activeElementColor: UIColor(r: 24, g: 145, b: 255),
         separatorColor: UIColor(r: 18, g: 26, b: 36),
         selectedColor: UIColor(r: 255, g: 255, b: 255, alpha: 0.1),
+        statusBarStyle: UIStatusBarStyle.lightContent,
         chartStyle: darkChartStyle
     )
 

@@ -125,10 +125,10 @@
             </objects>
             <point key="canvasLocation" x="-119" y="-99"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Main Navigation Controller-->
         <scene sceneID="XaX-gR-Eod">
             <objects>
-                <navigationController id="tsu-BP-aNn" sceneMemberID="viewController">
+                <navigationController id="tsu-BP-aNn" customClass="MainNavigationController" customModule="TelegramCharts" customModuleProvider="target" sceneMemberID="viewController">
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translucent="NO" id="asK-g6-pll">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>

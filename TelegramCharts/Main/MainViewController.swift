@@ -14,7 +14,12 @@ internal class MainViewController: UITableViewController, Stylizing
     private let chartProvider: ChartProvider = ChartProvider()
     
     private var subTitleColor: UIColor = .white
+    private var statusBarStyle: UIStatusBarStyle = .default
     private var chartViewModels: [ChartViewModel] = []
+
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return statusBarStyle
+    }
 
     internal override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +43,9 @@ internal class MainViewController: UITableViewController, Stylizing
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: style.titleColor]
         navigationController?.navigationBar.barTintColor = style.mainColor
         navigationController?.navigationBar.layoutIfNeeded()
+
+        statusBarStyle = style.statusBarStyle
+        setNeedsStatusBarAppearanceUpdate()
 
         StyleController.recursiveApplyStyle(on: tableView, style: style)
     }
