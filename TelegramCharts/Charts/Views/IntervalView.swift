@@ -285,19 +285,6 @@ private class IntervalDrawableView: UIView
     }
 
     private static func makeArrow(reverse: Bool) -> UIImage? {
-        guard let image = drawArrow() else {
-            return nil
-        }
-
-        if let cgImage = image.cgImage, reverse {
-            let reverseImage = UIImage(cgImage: cgImage, scale: UIScreen.main.scale, orientation: UIImage.Orientation.upMirrored)
-            return reverseImage.withRenderingMode(.alwaysTemplate)
-        }
-
-        return image.withRenderingMode(.alwaysTemplate)
-    }
-
-    private static func drawArrow() -> UIImage? {
         let centerArrowX: CGFloat = 3
         let edgeArrowX: CGFloat = 6
         let arrowHeight: CGFloat = 10
@@ -313,15 +300,21 @@ private class IntervalDrawableView: UIView
         context.setLineCap(.round)
 
         context.beginPath()
-        context.move(to: CGPoint(x: edgeArrowX, y: 0))
-        context.addLine(to: CGPoint(x: centerArrowX, y: arrowHeight * 0.5))
-        context.addLine(to: CGPoint(x: edgeArrowX, y: arrowHeight))
+        if reverse {
+            context.move(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 0))
+            context.addLine(to: CGPoint(x: Consts.sliderWidth - centerArrowX, y: arrowHeight * 0.5))
+            context.addLine(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: arrowHeight))
+        } else {
+            context.move(to: CGPoint(x: edgeArrowX, y: 0))
+            context.addLine(to: CGPoint(x: centerArrowX, y: arrowHeight * 0.5))
+            context.addLine(to: CGPoint(x: edgeArrowX, y: arrowHeight))
+        }
         context.strokePath()
 
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
 
-        return image
+        return image?.withRenderingMode(.alwaysTemplate)
     }
 
     required init?(coder aDecoder: NSCoder) {
