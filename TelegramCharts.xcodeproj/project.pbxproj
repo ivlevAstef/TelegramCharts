@@ -139,7 +139,7 @@
 		BACE712D2235FBEA00068579 /* TelegramCharts */ = {
 			isa = PBXGroup;
 			children = (
-				BACE715A22362DDB00068579 /* Utls */,
+				BACE715A22362DDB00068579 /* Utils */,
 				BACE715722361B0A00068579 /* Main */,
 				BACE71402235FC0000068579 /* Charts */,
 				BACE712E2235FBEA00068579 /* AppDelegate.swift */,
@@ -202,7 +202,7 @@
 			path = Main;
 			sourceTree = "<group>";
 		};
-		BACE715A22362DDB00068579 /* Utls */ = {
+		BACE715A22362DDB00068579 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
 				BACE715B22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift */,
@@ -211,7 +211,7 @@
 				BACE71762238D18300068579 /* WeakRef.swift */,
 				AB057E632242A1FD007A76E6 /* UIView+animate.swift */,
 			);
-			path = Utls;
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		BACE716122363AD500068579 /* Resources */ = {
