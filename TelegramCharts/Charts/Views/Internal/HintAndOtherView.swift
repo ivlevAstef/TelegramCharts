@@ -44,7 +44,7 @@ internal class HintAndOtherView: UIView
         hide(animated: false)
 
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
-        gestureRecognizer.minimumPressDuration = 0.0
+        gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
     }
 

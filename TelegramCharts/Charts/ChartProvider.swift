@@ -10,20 +10,14 @@ import Foundation
 
 public class ChartProvider
 {
-    public enum Result
-    {
-        case success(_ charts: [[PolygonLine]])
-        case failed
-    }
-
-    public func getCharts(_ completion: @escaping (Result) -> Void) {
+    public func getCharts(_ completion: @escaping ([[PolygonLine]]) -> Void) {
         guard let rawCharts = self.loadChartsFromFile() else {
-            completion(.failed)
+            completion([])
             return
         }
 
         let charts = rawCharts.map{ self.convertToModel($0) }
-        completion(.success(charts))
+        completion(charts)
     }
 
     private func loadChartsFromFile() -> [RawChart]? {

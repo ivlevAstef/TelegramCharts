@@ -18,7 +18,7 @@ public class ChartView: UIView
 {
     private var chartViewModel: ChartViewModel? = nil
     private var visibleAABB: AABB? {
-        return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: 0.1)
+        return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
     
     private let polygonLinesView: PolygonLinesView = PolygonLinesView()

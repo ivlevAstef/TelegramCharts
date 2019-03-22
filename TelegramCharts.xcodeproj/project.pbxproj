@@ -19,10 +19,7 @@
 		BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */; };
 		BA41DFC02240DF0B0021DC82 /* HintAndOtherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */; };
 		BA41DFC2224126DB0021DC82 /* Configs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFC1224126DB0021DC82 /* Configs.swift */; };
-		BA41DFC52242694E0021DC82 /* ChartSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFC42242694E0021DC82 /* ChartSelectorViewController.swift */; };
 		BA41DFC7224269DA0021DC82 /* StyleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFC6224269DA0021DC82 /* StyleController.swift */; };
-		BA41DFC922426AA40021DC82 /* ChartPreviewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFC822426AA40021DC82 /* ChartPreviewTableViewCell.swift */; };
-		BA41DFCB224270830021DC82 /* SimpleChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFCA224270830021DC82 /* SimpleChartView.swift */; };
 		BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE712E2235FBEA00068579 /* AppDelegate.swift */; };
 		BACE71312235FBEA00068579 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71302235FBEA00068579 /* MainViewController.swift */; };
 		BACE71432235FC3A00068579 /* PolygonLineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71422235FC3A00068579 /* PolygonLineViewModel.swift */; };
@@ -59,10 +56,7 @@
 		BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalAxisView.swift; sourceTree = "<group>"; };
 		BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HintAndOtherView.swift; sourceTree = "<group>"; };
 		BA41DFC1224126DB0021DC82 /* Configs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configs.swift; sourceTree = "<group>"; };
-		BA41DFC42242694E0021DC82 /* ChartSelectorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSelectorViewController.swift; sourceTree = "<group>"; };
 		BA41DFC6224269DA0021DC82 /* StyleController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleController.swift; sourceTree = "<group>"; };
-		BA41DFC822426AA40021DC82 /* ChartPreviewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPreviewTableViewCell.swift; sourceTree = "<group>"; };
-		BA41DFCA224270830021DC82 /* SimpleChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleChartView.swift; sourceTree = "<group>"; };
 		BACE712B2235FBEA00068579 /* TelegramCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BACE712E2235FBEA00068579 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BACE71302235FBEA00068579 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -106,7 +100,6 @@
 				ABB87D3A223A393B00E31808 /* ChartView.swift */,
 				BACE714E223612DC00068579 /* ChartWithIntervalView.swift */,
 				BACE71702238BB5E00068579 /* IntervalView.swift */,
-				BA41DFCA224270830021DC82 /* SimpleChartView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -122,15 +115,6 @@
 				BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */,
 			);
 			path = Internal;
-			sourceTree = "<group>";
-		};
-		BA41DFC3224269360021DC82 /* ChartSelector */ = {
-			isa = PBXGroup;
-			children = (
-				BA41DFC42242694E0021DC82 /* ChartSelectorViewController.swift */,
-				BA41DFC822426AA40021DC82 /* ChartPreviewTableViewCell.swift */,
-			);
-			path = ChartSelector;
 			sourceTree = "<group>";
 		};
 		BACE71222235FBEA00068579 = {
@@ -153,7 +137,6 @@
 		BACE712D2235FBEA00068579 /* TelegramCharts */ = {
 			isa = PBXGroup;
 			children = (
-				BA41DFC3224269360021DC82 /* ChartSelector */,
 				BACE715A22362DDB00068579 /* Utls */,
 				BACE715722361B0A00068579 /* Main */,
 				BACE71402235FC0000068579 /* Charts */,
@@ -322,7 +305,6 @@
 				BACE714B2236020C00068579 /* Style.swift in Sources */,
 				BACE71772238D18300068579 /* WeakRef.swift in Sources */,
 				BACE7160223633D700068579 /* UIColor+Init.swift in Sources */,
-				BA41DFC52242694E0021DC82 /* ChartSelectorViewController.swift in Sources */,
 				ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */,
 				ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */,
 				BACE71712238BB5E00068579 /* IntervalView.swift in Sources */,
@@ -341,9 +323,7 @@
 				BACE714D223602E400068579 /* Style+Styles.swift in Sources */,
 				BACE71432235FC3A00068579 /* PolygonLineViewModel.swift in Sources */,
 				ABAE793C223DE8230063B223 /* AABB.swift in Sources */,
-				BA41DFC922426AA40021DC82 /* ChartPreviewTableViewCell.swift in Sources */,
 				BACE7152223613B300068579 /* SwitchStyleModeTableViewCell.swift in Sources */,
-				BA41DFCB224270830021DC82 /* SimpleChartView.swift in Sources */,
 				ABB87D3B223A393B00E31808 /* PolygonLineLayerWrapper.swift in Sources */,
 				ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */,
 			);

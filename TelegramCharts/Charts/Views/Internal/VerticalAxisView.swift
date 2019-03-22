@@ -207,14 +207,18 @@ private class ValueView: UIView
     internal func setPosition(_ position: CGFloat, limits: CGRect) {
         frame.origin = CGPoint(x: 0, y: position - frame.height)
 
-        let topLimitOpacity = max(0, (limits.minY - frame.minY) / frame.height)
-        let bottomLimitOpacity = max(0, (frame.maxY - limits.maxY) / frame.height)
-
-        // pow for more opacity
-        let limitOpacity = pow(1.0 - min(max(topLimitOpacity, bottomLimitOpacity), 1.0), 2.0)
-
-        label.alpha = limitOpacity
-        line.alpha = limitOpacity
+        var limitOpacity: CGFloat = 1.0
+        if frame.minY < limits.minY {
+            limitOpacity = 0.0
+        }
+        if frame.maxY > limits.maxY {
+            limitOpacity = 0.0
+        }
+        
+        UIView.animate(withDuration: 0.1) { [weak self] in
+            self?.label.alpha = limitOpacity
+            self?.line.alpha = limitOpacity
+        }
     }
 
     private func abbreviationNumber(_ number: Int64) -> String {

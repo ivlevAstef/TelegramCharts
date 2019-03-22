@@ -26,6 +26,8 @@ internal class HorizontalAxisView: UIView
     
     internal init() {
         super.init(frame: .zero)
+        
+        self.clipsToBounds = true
     }
     
     internal func setStyle(_ style: ChartStyle) {
