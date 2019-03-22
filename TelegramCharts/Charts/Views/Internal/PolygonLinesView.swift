@@ -15,7 +15,6 @@ internal class PolygonLinesView: UIView
     internal init() {
         super.init(frame: .zero)
         
-        backgroundColor = .clear
         clipsToBounds = true
         
         polygonLinesLayerWrapper.setParentLayer(layer)

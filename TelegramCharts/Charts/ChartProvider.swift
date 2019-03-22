@@ -10,26 +10,14 @@ import Foundation
 
 public class ChartProvider
 {
-    public enum Result
-    {
-        case success(_ charts: [[PolygonLine]])
-        case failed
-    }
-
-    public func getCharts(_ completion: @escaping (Result) -> Void) {
-        DispatchQueue.global(qos: .utility).async { [weak self] in
-            guard let `self` = self else {
-                completion(.failed)
-                return
-            }
-            guard let rawCharts = self.loadChartsFromFile() else {
-                completion(.failed)
-                return
-            }
-
-            let charts = rawCharts.map{ self.convertToModel($0) }
-            completion(.success(charts))
+    public func getCharts(_ completion: @escaping ([[PolygonLine]]) -> Void) {
+        guard let rawCharts = self.loadChartsFromFile() else {
+            completion([])
+            return
         }
+
+        let charts = rawCharts.map{ self.convertToModel($0) }
+        completion(charts)
     }
 
     private func loadChartsFromFile() -> [RawChart]? {

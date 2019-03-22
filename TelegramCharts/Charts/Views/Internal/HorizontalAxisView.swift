@@ -6,7 +6,6 @@
 //  Copyright © 2019 CFT. All rights reserved.
 //
 
-import Foundation
 import UIKit
 
 private enum Consts
@@ -28,7 +27,7 @@ internal class HorizontalAxisView: UIView
     internal init() {
         super.init(frame: .zero)
         
-        backgroundColor = .clear
+        self.clipsToBounds = true
     }
     
     internal func setStyle(_ style: ChartStyle) {
@@ -45,15 +44,11 @@ internal class HorizontalAxisView: UIView
     
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
         guard let aabb = aabb else {
-            if animated {
-                UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: { [weak self] in
-                    self?.subviews.forEach { $0.alpha = 0.0 }
-                }, completion: { [weak self] _ in
-                    self?.subviews.forEach { $0.removeFromSuperview() }
-                })
-            } else {
-                subviews.forEach { $0.removeFromSuperview() }
-            }
+            UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+                self?.subviews.forEach { $0.alpha = 0.0 }
+            }, completion: { [weak self] _ in
+                self?.subviews.forEach { $0.removeFromSuperview() }
+            })
             dateLabels.removeAll()
 
             return
@@ -102,18 +97,13 @@ internal class HorizontalAxisView: UIView
             label.setPosition(position, t: t)
         }
         
-        if animated {
-            newLabels.forEach { $0.alpha = 0.0 }
-            
-            UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseInOut, animations: {
-                prevLabels.forEach { $0.alpha = 0.0 }
-                newLabels.forEach { $0.alpha = 1.0 }
-            }, completion: { _ in
-                prevLabels.forEach { $0.removeFromSuperview() }
-            })
-        } else {
+        newLabels.forEach { $0.alpha = 0.0 }
+        UIView.animateIf(animated, duration: duration, animations: {
+            prevLabels.forEach { $0.alpha = 0.0 }
+            newLabels.forEach { $0.alpha = 1.0 }
+        }, completion: { _ in
             prevLabels.forEach { $0.removeFromSuperview() }
-        }
+        })
     }
 
     private func calculateStep(aabb: AABB) -> PolygonLine.Date {

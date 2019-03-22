@@ -8,7 +8,9 @@
 
 internal enum Configs
 {
-    internal static let thresholdValueDiff: Double = 0.05 // 5%
+    internal static let thresholdValueDiff: Double = 0.08 // 8%
+    
+    internal static let padding: Double = 0.06 // 6%
 
     internal static let visibleChangeDuration: Double = 0.3
 
@@ -17,5 +19,6 @@ internal enum Configs
     internal static let intervalChangeForDatesDuration: Double = 0.25
 
     internal static let hintDuration: Double = 0.25
-
+    
+    internal static let minimumPressDuration = 0.05
 }

@@ -9,8 +9,23 @@
 import UIKit
 
 internal class StyleController {
-    internal static var currentStyle: Style = Style.dayStyle
+    internal private(set) static var currentStyle: Style = Style.dayStyle
 
+    internal static func next() {
+        currentStyle = nextStyle
+    }
+    
+    internal static var nextStyle: Style {
+        switch currentStyle.name {
+        case "Day":
+            return Style.darkStyle
+        case "Night":
+            return Style.dayStyle
+        default:
+            assertionFailure("Incorrect style name. Check code")
+            return Style.dayStyle
+        }
+    }
 
     static func recursiveApplyStyle(on view: UIView, style: Style) {
         (view as? Stylizing)?.applyStyle(style)

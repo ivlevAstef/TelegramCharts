@@ -35,6 +35,8 @@ public class ChartWithIntervalView: UIView
 
         chartView.setChart(chart)
         intervalView.setChart(chart)
+        
+        configureNoDataLabel(viewModel: chart, animated: false)
     }
 
     public static func calculateHeight() -> CGFloat {
@@ -74,6 +76,14 @@ public class ChartWithIntervalView: UIView
         self.noData.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
         self.noData.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
     }
+    
+    private func configureNoDataLabel(viewModel: ChartViewModel, animated: Bool) {
+        let hasVisiblePolyline = viewModel.polygonLines.contains(where: { $0.isVisible })
+        
+        UIView.animateIf(animated, duration: Configs.visibleChangeDuration, animations: { [weak self] in
+            self?.noData.alpha = hasVisiblePolyline ? 0.0 : 1.0
+        })
+    }
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -85,11 +95,7 @@ public class ChartWithIntervalView: UIView
 extension ChartWithIntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        let hasVisiblePolyline = viewModel.polygonLines.contains(where: { $0.isVisible })
-
-        UIView.animate(withDuration: Configs.visibleChangeDuration) { [weak self] in
-            self?.noData.alpha = hasVisiblePolyline ? 0.0 : 1.0
-        }
+        configureNoDataLabel(viewModel: viewModel, animated: true)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {

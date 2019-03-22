@@ -25,7 +25,7 @@ public class IntervalView: UIView
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
     
     private var visibleAABB: AABB? {
-        return chartViewModel?.visibleaabb?.copyWithIntellectualPadding(date: 0, value: 0.1)
+        return chartViewModel?.visibleaabb?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
 
     private var isBeganMovedLeftSlider: Bool = false
@@ -36,7 +36,6 @@ public class IntervalView: UIView
 
     public init() {
         super.init(frame: .zero)
-        self.backgroundColor = .clear
 
         initialize()
     }
@@ -66,7 +65,7 @@ public class IntervalView: UIView
         self.isMultipleTouchEnabled = false
 
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
-        gestureRecognizer.minimumPressDuration = 0.0
+        gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
 
         polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
@@ -201,16 +200,7 @@ private class IntervalDrawableView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        self.backgroundColor = .clear
-
-        addSubview(unvisibleLeftView)
-        addSubview(unvisibleRightView)
-        addSubview(leftSliderView)
-        addSubview(rightSliderView)
-        addSubview(topBorderView)
-        addSubview(bottomBorderView)
-        addSubview(leftArrow)
-        addSubview(rightArrow)
+        configureViews()
     }
 
     internal func setStyle(_ style: ChartStyle) {
@@ -227,8 +217,7 @@ private class IntervalDrawableView: UIView
     internal func update(chartViewModel: ChartViewModel?, aabb: AABB?, polyRect: CGRect,
                          animated: Bool, duration: TimeInterval)
     {
-        guard let chartViewModel = chartViewModel, let aabb = aabb else
-        {
+        guard let chartViewModel = chartViewModel, let aabb = aabb else {
             hide(animated: animated, duration: duration)
             return
         }
@@ -238,6 +227,8 @@ private class IntervalDrawableView: UIView
         let interval = chartViewModel.interval
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: polyRect).x
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: polyRect).x
+        
+        let cornerRadii = CGSize(width: 2, height: 2)
 
         let unvisibleRect = CGRect(x: bounds.origin.x, y: bounds.origin.y + Consts.verticalPadding,
                                    width: bounds.width, height: bounds.height - 2 * Consts.verticalPadding)
@@ -246,11 +237,18 @@ private class IntervalDrawableView: UIView
                                          width: leftX - unvisibleRect.minX - Consts.sliderWidth, height: unvisibleRect.height)
         unvisibleRightView.frame = CGRect(x: rightX, y: unvisibleRect.minY,
                                           width: unvisibleRect.width - rightX, height: unvisibleRect.height)
-
+        
         leftSliderView.frame = CGRect(x: leftX - Consts.sliderWidth, y: bounds.minY,
                                       width: Consts.sliderWidth, height: bounds.height)
+        let leftMask = CAShapeLayer()
+        leftMask.path = UIBezierPath(roundedRect: leftSliderView.bounds, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: cornerRadii).cgPath
+        leftSliderView.layer.mask = leftMask
+        
         rightSliderView.frame = CGRect(x: rightX, y: bounds.minY,
                                        width: Consts.sliderWidth, height: bounds.height)
+        let rightMask = CAShapeLayer()
+        rightMask.path = UIBezierPath(roundedRect: rightSliderView.bounds, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: cornerRadii).cgPath
+        rightSliderView.layer.mask = rightMask
 
         topBorderView.frame = CGRect(x: leftX, y: bounds.minY,
                                      width: rightX - leftX, height: 2)
@@ -262,24 +260,28 @@ private class IntervalDrawableView: UIView
         rightArrow.center = rightSliderView.center
     }
 
+    private func configureViews()
+    {
+        addSubview(unvisibleLeftView)
+        addSubview(unvisibleRightView)
+        addSubview(leftSliderView)
+        addSubview(rightSliderView)
+        addSubview(topBorderView)
+        addSubview(bottomBorderView)
+        addSubview(leftArrow)
+        addSubview(rightArrow)
+    }
+    
     private func show(animated: Bool, duration: TimeInterval) {
-        if animated {
-            UIView.animate(withDuration: duration) { [weak self] in
-                self?.alpha = 1.0
-            }
-        } else {
-            alpha = 1.0
-        }
+        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+            self?.alpha = 1.0
+        })
     }
 
     private func hide(animated: Bool, duration: TimeInterval) {
-        if animated {
-            UIView.animate(withDuration: duration) { [weak self] in
-                self?.alpha = 0.0
-            }
-        } else {
-            alpha = 0.0
-        }
+        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+            self?.alpha = 0.0
+        })
     }
 
     private static func makeArrow(reverse: Bool) -> UIImage? {

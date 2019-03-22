@@ -6,7 +6,6 @@
 //  Copyright © 2019 CFT. All rights reserved.
 //
 
-import Foundation
 import UIKit
 
 private enum Consts
@@ -40,14 +39,12 @@ internal class HintAndOtherView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        backgroundColor = .clear
-
         addSubview(lineView)
         addSubview(hintView)
         hide(animated: false)
 
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
-        gestureRecognizer.minimumPressDuration = 0.0
+        gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
     }
 
@@ -123,32 +120,23 @@ internal class HintAndOtherView: UIView
     }
 
     private func hide(animated: Bool) {
-        if animated {
-            UIView.animate(withDuration: Configs.hintDuration, animations: { [hintView, lineView] in
-                hintView.alpha = 0.0
-                lineView.alpha = 0.0
-            }, completion: { [hintView, lineView] _ in
-                hintView.isHidden = true
-                lineView.isHidden = true
-            })
-        } else {
-            hintView.isHidden = true
-            lineView.isHidden = true
-        }
+        UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
+            self?.hintView.alpha = 0.0
+            self?.lineView.alpha = 0.0
+        }, completion: { [weak self] _ in
+            self?.hintView.isHidden = true
+            self?.lineView.isHidden = true
+        })
     }
 
     private func show(animated: Bool) {
         hintView.isHidden = false
         lineView.isHidden = false
-        if animated {
-            UIView.animate(withDuration: Configs.hintDuration, animations: { [hintView, lineView] in
-                hintView.alpha = 1.0
-                lineView.alpha = 1.0
-            })
-        } else {
-            hintView.alpha = 1.0
-            lineView.alpha = 1.0
-        }
+        
+        UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
+            self?.hintView.alpha = 1.0
+            self?.lineView.alpha = 1.0
+        })
     }
 
     internal required init?(coder aDecoder: NSCoder) {
