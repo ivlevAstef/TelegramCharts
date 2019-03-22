@@ -235,7 +235,7 @@ private class IntervalDrawableView: UIView
 
         unvisibleLeftView.frame = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
                                          width: leftX - unvisibleRect.minX - Consts.sliderWidth, height: unvisibleRect.height)
-        unvisibleRightView.frame = CGRect(x: rightX, y: unvisibleRect.minY,
+        unvisibleRightView.frame = CGRect(x: rightX + Consts.sliderWidth, y: unvisibleRect.minY,
                                           width: unvisibleRect.width - rightX, height: unvisibleRect.height)
         
         leftSliderView.frame = CGRect(x: leftX - Consts.sliderWidth, y: bounds.minY,
