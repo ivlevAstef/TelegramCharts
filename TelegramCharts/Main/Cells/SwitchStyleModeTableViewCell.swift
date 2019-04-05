@@ -25,6 +25,10 @@ internal class SwitchStyleModeTableViewCell: UITableViewCell, Stylizing
         switchButton.setTitle(text, for: .normal)
     }
 
+    internal func setText(by style: Style) {
+        setText("Switch to \(style.name) Mode")
+    }
+
     @IBAction private func switchButtonTapped(_ sender: Any) {
         tapCallback?()
     }

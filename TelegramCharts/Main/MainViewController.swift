@@ -48,6 +48,10 @@ internal class MainViewController: UITableViewController, Stylizing
         setNeedsStatusBarAppearanceUpdate()
 
         StyleController.recursiveApplyStyle(on: tableView, style: style)
+
+        for switchCells in tableView.visibleCells.compactMap({ $0 as? SwitchStyleModeTableViewCell }) {
+            switchCells.setText(by: StyleController.nextStyle)
+        }
     }
     
     private func processChartsResult(_ result: [[PolygonLine]]) {
@@ -131,12 +135,13 @@ internal class MainViewController: UITableViewController, Stylizing
             infoChartCell.setColor(polygonLine.color)
             infoChartCell.setName(polygonLine.name)
             infoChartCell.setCheckmark(polygonLine.isVisible)
+            infoChartCell.setEnabledSeparator(isEnabled: index + 1 < chartViewModel.polygonLines.count)
             return infoChartCell
         }
         
         let switchStyleCell: SwitchStyleModeTableViewCell = dequeueReusableCell(for: indexPath)
         switchStyleCell.applyStyle(StyleController.currentStyle)
-        switchStyleCell.setText("Switch to \(StyleController.nextStyle.name) Mode")
+        switchStyleCell.setText(by: StyleController.nextStyle)
         switchStyleCell.tapCallback = { [weak self] in
             self?.switchStyle()
         }
@@ -151,7 +156,10 @@ internal class MainViewController: UITableViewController, Stylizing
             let chartViewModel = chartViewModels[indexPath.section]
             let polygonLine = chartViewModel.polygonLines[index]
             chartViewModel.toogleVisiblePolygonLine(polygonLine)
-            tableView.reloadRows(at: [indexPath], with: .none)
+
+            if let cell = tableView.cellForRow(at: indexPath) as? InfoPolygonLineTableViewCell {
+                cell.setCheckmark(polygonLine.isVisible)
+            }
         }
     }
 

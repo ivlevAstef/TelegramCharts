@@ -53,6 +53,7 @@ internal struct AABB
     }
     
     internal func calculateDate(x: CGFloat, rect: CGRect) -> PolygonLine.Date {
+        let x = max(rect.minX, min(x, rect.maxX))
         let xScale = Double(dateInterval) / Double(rect.width)
         return minDate + PolygonLine.Date(Double(x - rect.minX) * xScale)
     }

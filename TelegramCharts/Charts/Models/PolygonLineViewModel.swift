@@ -51,10 +51,12 @@ public class PolygonLineViewModel
     }
 
     internal func pointByDate(date: PolygonLine.Date) -> Point {
-        var lastPoint = Point(date: PolygonLine.Date.min, value: 0)
+        guard var lastPoint = points.first else {
+            return Point(date: 0, value: 0)
+        }
         // Or interpolation?
         for point in points {
-            if lastPoint.date < date && date <= point.date {
+            if lastPoint.date <= date && date <= point.date {
                 if (date - lastPoint.date) < (point.date - date) {
                     return lastPoint
                 }

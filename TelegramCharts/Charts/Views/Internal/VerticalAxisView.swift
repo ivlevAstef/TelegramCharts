@@ -90,8 +90,9 @@ internal class VerticalAxisView: UIView
 
         for value in newValues {
             let view: ValueView
+            let unique = ValueView.makeUnique(Int64(value))
 
-            if let prevView = prevViews.first, prevView.value == value {
+            if let prevView = prevViews.first, prevView.unique == unique {
                 view = prevView
                 prevViews.removeFirst()
             } else {
@@ -176,6 +177,7 @@ internal class VerticalAxisView: UIView
 
 private class ValueView: UIView
 {
+    internal let unique: String
     internal let value: PolygonLine.Value
 
     private let label: UILabel = UILabel(frame: .zero)
@@ -183,12 +185,13 @@ private class ValueView: UIView
 
     internal init(value: PolygonLine.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
         self.value = value
+        self.unique = ValueView.makeUnique(Int64(value))
 
         super.init(frame: CGRect(x: 0, y: 0, width: parentWidth, height: 0))
         addSubview(label)
         addSubview(line)
 
-        label.text = abbreviationNumber(Int64(value))
+        label.text = ValueView.abbreviationNumber(Int64(value))
         label.font = font
         label.textColor = color
         label.sizeToFit()
@@ -221,7 +224,11 @@ private class ValueView: UIView
         }
     }
 
-    private func abbreviationNumber(_ number: Int64) -> String {
+    internal static func makeUnique(_ number: Int64) -> String {
+        return abbreviationNumber(number)
+    }
+
+    private static func abbreviationNumber(_ number: Int64) -> String {
         if abs(number) < 1000 {
             return "\(number)"
         }

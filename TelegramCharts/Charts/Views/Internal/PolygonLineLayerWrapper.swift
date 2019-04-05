@@ -20,7 +20,7 @@ internal final class PolygonLineLayerWrapper
         self.polygonLineViewModel = polygonLineViewModel
         
         layer.lineWidth = 1.0
-        layer.lineCap = .butt
+        layer.lineCap = .round
         layer.strokeColor = polygonLineViewModel.color.cgColor
         layer.fillColor = nil
     }
@@ -59,10 +59,13 @@ internal final class PolygonLineLayerWrapper
         if uiPoints.isEmpty {
             return path
         }
-        
-        path.move(to: uiPoints.removeFirst())
+
+        var lastPoint = uiPoints.removeFirst()
+
         for point in uiPoints {
+            path.move(to: lastPoint)
             path.addLine(to: point)
+            lastPoint = point
         }
         
         return path

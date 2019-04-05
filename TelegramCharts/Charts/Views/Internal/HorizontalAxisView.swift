@@ -73,7 +73,8 @@ internal class HorizontalAxisView: UIView
 
             let halfWidth = maxDateWidth * 0.5
             let dateCenter = aabb.calculateUIPoint(date: date, value: 0, rect: bounds).x
-            if dateCenter + halfWidth <= self.bounds.minX || dateCenter - halfWidth >= self.bounds.maxX {
+            if dateCenter + halfWidth <= self.bounds.minX - self.bounds.size.width * 0.5
+            || dateCenter - halfWidth >= self.bounds.maxX + self.bounds.size.width * 0.5 {
                 continue
             }
 
@@ -96,13 +97,23 @@ internal class HorizontalAxisView: UIView
             let position = aabb.calculateUIPoint(date: label.date, value: 0, rect: bounds).x
             label.setPosition(position, t: t)
         }
-        
-        newLabels.forEach { $0.alpha = 0.0 }
-        UIView.animateIf(animated, duration: duration, animations: {
+
+        for label in newLabels {
+            if label.frame.minX <= self.bounds.minX || label.frame.maxX >= self.bounds.maxX {
+                label.alpha = 1.0
+            } else {
+                label.alpha = 0.0
+            }
+        }
+
+        UIView.animateIf(animated, duration: duration * 0.5, animations: {
             prevLabels.forEach { $0.alpha = 0.0 }
-            newLabels.forEach { $0.alpha = 1.0 }
         }, completion: { _ in
             prevLabels.forEach { $0.removeFromSuperview() }
+        })
+
+        UIView.animateIf(animated, duration: duration, animations: {
+            newLabels.forEach { $0.alpha = 1.0 }
         })
     }
 

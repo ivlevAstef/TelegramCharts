@@ -17,7 +17,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
-                        <inset key="separatorInset" minX="40" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        <inset key="separatorInset" minX="7777" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="HWw-lh-whH">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="16"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
@@ -33,7 +33,7 @@
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="97T-PH-use" customClass="ChartWithIntervalView" customModule="TelegramCharts" customModuleProvider="target">
                                             <rect key="frame" x="16" y="11" width="343" height="178"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <color key="backgroundColor" red="1" green="0.06974860209" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                         </view>
                                     </subviews>
                                     <constraints>
@@ -69,18 +69,30 @@
                                                 <constraint firstAttribute="height" constant="14" id="fc0-4s-GVz"/>
                                             </constraints>
                                         </view>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IRt-xp-oAv">
+                                            <rect key="frame" x="42" y="42.5" width="335" height="1"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="1" id="eF6-hm-iXi"/>
+                                            </constraints>
+                                        </view>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="Jsy-Tx-gCb" firstAttribute="leading" secondItem="K5D-zU-muR" secondAttribute="trailing" constant="12" id="9F5-nc-Ttc"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="Jsy-Tx-gCb" secondAttribute="trailing" id="NGs-N7-VCd"/>
+                                        <constraint firstAttribute="bottom" secondItem="IRt-xp-oAv" secondAttribute="bottom" id="ONb-aT-9Yt"/>
                                         <constraint firstItem="Jsy-Tx-gCb" firstAttribute="centerY" secondItem="0fl-Dr-Maq" secondAttribute="centerY" id="Sdf-Ud-KcP"/>
                                         <constraint firstItem="K5D-zU-muR" firstAttribute="leading" secondItem="0fl-Dr-Maq" secondAttribute="leadingMargin" id="lFM-cK-bOu"/>
+                                        <constraint firstItem="Jsy-Tx-gCb" firstAttribute="leading" secondItem="IRt-xp-oAv" secondAttribute="leading" id="mDs-oH-vAB"/>
                                         <constraint firstItem="Jsy-Tx-gCb" firstAttribute="centerY" secondItem="K5D-zU-muR" secondAttribute="centerY" id="o46-hW-hGg"/>
+                                        <constraint firstItem="IRt-xp-oAv" firstAttribute="width" secondItem="0fl-Dr-Maq" secondAttribute="width" id="qh6-uh-8kD"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="colorView" destination="K5D-zU-muR" id="Sml-l7-o7I"/>
                                     <outlet property="nameLabel" destination="Jsy-Tx-gCb" id="Rtn-qa-D7I"/>
+                                    <outlet property="separatorView" destination="IRt-xp-oAv" id="yJK-eP-eNy"/>
+                                    <outlet property="separatorViewHeightConstraint" destination="eF6-hm-iXi" id="9w9-BX-Chb"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="SwitchStyleModeTableViewCell" rowHeight="50" id="DaO-dk-wXN" customClass="SwitchStyleModeTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
@@ -123,7 +135,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2ja-GA-duU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-119" y="-99"/>
+            <point key="canvasLocation" x="120.8" y="-99.400299850074973"/>
         </scene>
         <!--Main Navigation Controller-->
         <scene sceneID="XaX-gR-Eod">

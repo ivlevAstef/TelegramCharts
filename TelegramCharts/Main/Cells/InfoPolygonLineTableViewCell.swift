@@ -15,7 +15,11 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
     @IBOutlet private var colorView: UIView!
     @IBOutlet private var nameLabel: UILabel!
 
+    @IBOutlet private var separatorView: UIView!
+    @IBOutlet private var separatorViewHeightConstraint: NSLayoutConstraint!
+
     private var colorViewColor: UIColor?
+    private var separatorViewColor: UIColor?
     private var selectedColorViewColor: UIColor?
 
     internal func applyStyle(_ style: Style) {
@@ -24,9 +28,18 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
         nameLabel.textColor = style.textColor
         tintColor = style.activeElementColor
 
+        separatorView.backgroundColor = style.separatorColor
+        separatorViewColor = style.separatorColor
+
         selectedColorViewColor = style.selectedColor
 
         selectedBackgroundView = UIView(frame: .zero)
+
+        separatorViewHeightConstraint.constant = 0.5
+    }
+
+    internal func setEnabledSeparator(isEnabled: Bool) {
+        separatorView.isHidden = !isEnabled
     }
 
     internal func setColor(_ color: UIColor) {
@@ -49,13 +62,19 @@ internal class InfoPolygonLineTableViewCell: UITableViewCell, Stylizing
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         super.setHighlighted(highlighted, animated: animated)
         colorView.backgroundColor = self.colorViewColor
+        separatorView.backgroundColor = self.separatorViewColor
 
-        UIView.animate(withDuration: 0.1, delay: 0.2, animations: { [weak self, selectedColorViewColor] in
-            if highlighted {
-                self?.selectedBackgroundView?.backgroundColor = selectedColorViewColor
-            } else {
-                self?.selectedBackgroundView?.backgroundColor = .clear
-            }
+        updateSelectedBackgroundColor(highlighted: !highlighted)
+        UIView.animate(withDuration: 0.1, animations: { [weak self] in
+            self?.updateSelectedBackgroundColor(highlighted: highlighted)
         })
+    }
+
+    private func updateSelectedBackgroundColor(highlighted: Bool) {
+        if highlighted {
+            self.selectedBackgroundView?.backgroundColor = selectedColorViewColor
+        } else {
+            self.selectedBackgroundView?.backgroundColor = .clear
+        }
     }
 }

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB057E632242A1FD007A76E6 /* UIView+animate.swift */; };
-		AB06A1C1223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7940223DF03D0063B223 /* InfoPolygonLineTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793F223DF03D0063B223 /* InfoPolygonLineTableViewCell.swift */; };
@@ -46,7 +45,6 @@
 
 /* Begin PBXFileReference section */
 		AB057E632242A1FD007A76E6 /* UIView+animate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+animate.swift"; sourceTree = "<group>"; };
-		AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonLinesLayerWrapper.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE793F223DF03D0063B223 /* InfoPolygonLineTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoPolygonLineTableViewCell.swift; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 				ABAE7943223E17560063B223 /* HorizontalAxisView.swift */,
 				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 				ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */,
-				AB06A1C0223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift */,
 				ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */,
 				BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */,
 			);
@@ -302,7 +299,6 @@
 				BACE71482236010E00068579 /* ChartProvider.swift in Sources */,
 				BA41DFC02240DF0B0021DC82 /* HintAndOtherView.swift in Sources */,
 				BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */,
-				AB06A1C1223B4F2C002DC444 /* PolygonLinesLayerWrapper.swift in Sources */,
 				ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */,
 				BACE717B2238DFCC00068579 /* ChartStyle.swift in Sources */,
 				BACE714B2236020C00068579 /* Style.swift in Sources */,
