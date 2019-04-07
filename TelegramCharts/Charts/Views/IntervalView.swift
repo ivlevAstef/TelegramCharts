@@ -53,12 +53,16 @@ public class IntervalView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
 
+        update(use: chartViewModel)
+    }
+    
+    private func update(use chartViewModel: ChartViewModel) {
         let aabb = visibleAABB
         
         columnsView.setColumns(chartViewModel.columns)
         columnsView.setLineWidth(1.0)
         columnsView.update(aabb: aabb, animated: false, duration: 0.0)
-
+        
         intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
                                     animated: false, duration: 0.0)
     }
@@ -82,6 +86,10 @@ public class IntervalView: UIView
         self.columnsView.frame = CGRect(x: Consts.padding, y: Consts.verticalPadding,
                                         width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
         self.intervalDrawableView.frame = bounds
+        
+        if let vm = chartViewModel {
+            update(use: vm)
+        }
     }
 
     @objc

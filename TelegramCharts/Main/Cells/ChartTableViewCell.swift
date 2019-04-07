@@ -15,6 +15,10 @@ private enum Consts {
 internal class ChartTableViewCell: UITableViewCell, Stylizing
 {
     internal let identifier: String = "ChartTableViewCell"
+    
+    override internal var frame: CGRect {
+        didSet { updateFrame() }
+    }
 
     private let chartView = ChartWithIntervalView(intervalViewHeight: nil)
     

@@ -33,6 +33,10 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
 {
     internal let identifier: String = "SwitchColumnVisibleTableViewCell"
     
+    override internal var frame: CGRect {
+        didSet { updateFrame() }
+    }
+    
     private var togglers: [ColumnToggler] = []
     
     internal func applyStyle(_ style: Style) {
@@ -47,7 +51,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
     internal func updateFrame() {
         var lastColumnToggler: ColumnToggler? = nil
         for columnToggler in togglers {
-            SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: contentView.bounds.width)
+            SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: bounds.width)
             lastColumnToggler = columnToggler
         }
     }
@@ -78,7 +82,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
             clickHandler()
         }
         
-        SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: contentView.bounds.width)
+        SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: bounds.width)
         
         contentView.addSubview(columnToggler)
         togglers.append(columnToggler)

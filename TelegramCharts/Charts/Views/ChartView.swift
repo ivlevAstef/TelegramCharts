@@ -46,15 +46,19 @@ public class ChartView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
         
+        update(use: chartViewModel)
+    }
+    
+    private func update(use chartViewModel: ChartViewModel) {
         columnsView.setColumns(chartViewModel.columns)
         columnsView.setLineWidth(2.0)
         columnsView.update(aabb: visibleAABB, animated: false, duration: 0.0)
-
+        
         verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
-
+        
         horizontalAxisView.setFullInterval(chartViewModel.fullInterval)
         horizontalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
-
+        
         hintView.setColumns(chartViewModel.columns)
         hintView.setAABB(aabb: visibleAABB)
     }
@@ -74,12 +78,16 @@ public class ChartView: UIView
     }
     
     private func updateFrame() {
-        self.columnsView.frame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
-        self.horizontalAxisView.frame = CGRect(x: 0, y: self.columnsView.bounds.maxY + Consts.spacing * 0.5,
+        self.columnsView.frame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - 2 * Consts.spacing)
+        self.horizontalAxisView.frame = CGRect(x: 0, y: self.columnsView.bounds.maxY + Consts.spacing,
                                                width: bounds.width, height: Consts.horizontalAxisHeight)
         
         self.verticalAxisView.frame = self.columnsView.frame
         self.hintView.frame = self.columnsView.frame
+        
+        if let vm = chartViewModel {
+            update(use: vm)
+        }
     }
 
     internal required init?(coder aDecoder: NSCoder) {

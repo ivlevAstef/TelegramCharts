@@ -63,6 +63,10 @@ internal class VerticalAxisView: UIView
     
     private func updateFrame() {
         self.bottomLine.frame = CGRect(x: 0, y: bounds.height - 1.0, width: bounds.width, height: 1.0)
+        
+        for subview in subviews.compactMap({ $0 as? ValueView }) {
+            subview.setWidth(bounds.width)
+        }
     }
 
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
@@ -205,6 +209,11 @@ private class ValueView: UIView
     internal func setStyle(color: UIColor, lineColor: UIColor) {
         label.textColor = color
         line.backgroundColor = lineColor
+    }
+    
+    internal func setWidth(_ width: CGFloat) {
+        frame.size.width = width
+        line.frame.size.width = width
     }
 
     internal func setPosition(_ position: CGFloat, limits: CGRect) {

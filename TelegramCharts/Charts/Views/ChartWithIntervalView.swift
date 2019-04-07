@@ -46,7 +46,7 @@ public class ChartWithIntervalView: UIView
     }
 
     public static func calculateHeight() -> CGFloat {
-        return UIScreen.main.bounds.width
+        return min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
     }
 
     private func configureSubviews() {
