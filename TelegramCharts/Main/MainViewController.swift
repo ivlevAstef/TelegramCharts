@@ -17,6 +17,8 @@ internal class MainViewController: UITableViewController, Stylizing
     private var statusBarStyle: UIStatusBarStyle = .default
     private var chartViewModels: [ChartViewModel] = []
 
+    @IBOutlet private var switchStyleButton: UIBarButtonItem!
+  
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return statusBarStyle
     }
@@ -48,20 +50,24 @@ internal class MainViewController: UITableViewController, Stylizing
         setNeedsStatusBarAppearanceUpdate()
 
         StyleController.recursiveApplyStyle(on: tableView, style: style)
+        
+        switchStyleButton.tintColor = style.activeElementColor
+        switchStyleButton.title = textForSwitch(by: StyleController.nextStyle)
+    }
 
-        for switchCells in tableView.visibleCells.compactMap({ $0 as? SwitchStyleModeTableViewCell }) {
-            switchCells.setText(by: StyleController.nextStyle)
-        }
+    
+    private func textForSwitch(by style: Style) -> String {
+        return "\(style.name) Mode"
     }
     
-    private func processChartsResult(_ result: [[PolygonLine]]) {
-        chartViewModels = result.map { ChartViewModel(polygonLines: $0, from: 0.6, to: 1.0) }
+    private func processChartsResult(_ result: [[Column]]) {
+        chartViewModels = result.map { ChartViewModel(columns: $0, from: 0.6, to: 1.0) }
         tableView.reloadData()
     }
 
     // MARK: Table View
     internal override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1 + chartViewModels.count
+        return chartViewModels.count
     }
 
     internal override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -73,14 +79,17 @@ internal class MainViewController: UITableViewController, Stylizing
     }
     
     private func cellHeight(for indexPath: IndexPath) -> CGFloat {
-        if 0 <= indexPath.section && indexPath.section < chartViewModels.count {
-            if 0 == indexPath.row {
-                return ChartTableViewCell.calculateHeight()
-            }
-            return 44
+        if 0 == indexPath.row {
+            return ChartTableViewCell.calculateHeight()
         }
         
-        return 50
+        if !(0 <= indexPath.section && indexPath.section < chartViewModels.count) {
+            fatalError("incorrect section number: \(indexPath.section)")
+        }
+        
+        let chartViewModel = chartViewModels[indexPath.section]
+        let names = chartViewModel.columns.map { $0.name }
+        return SwitchColumnVisibleTableViewCell.calculateHeight(names: names, width: tableView.bounds.width)
     }
     
     internal override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -88,19 +97,15 @@ internal class MainViewController: UITableViewController, Stylizing
     }
     
     internal override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section < chartViewModels.count {
-            let label = UILabel(frame: CGRect(x: 16, y: 16, width: tableView.bounds.width - 16, height: 16))
-            label.font = UIFont.systemFont(ofSize: 14.0)
-            label.textColor = subTitleColor
-            label.text = "CHART \(section + 1)"
-            
-            let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
-            view.addSubview(label)
-            
-            return view
-        }
+        let label = UILabel(frame: CGRect(x: 16, y: 16, width: tableView.bounds.width - 16, height: 16))
+        label.font = UIFont.systemFont(ofSize: 14.0)
+        label.textColor = subTitleColor
+        label.text = "CHART \(section + 1)"
         
-        return nil
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
+        view.addSubview(label)
+        
+        return view
     }
     
     internal override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -109,61 +114,47 @@ internal class MainViewController: UITableViewController, Stylizing
 
     internal override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if 0 <= section && section < chartViewModels.count {
-            return 1 + chartViewModels[section].polygonLines.count
+            return 2 // Chart + switch column visible
         }
         
-        return 1
+        return 0
     }
 
     internal override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if 0 <= indexPath.section && indexPath.section < chartViewModels.count {
-            let chartViewModel = chartViewModels[indexPath.section]
-            
-            if 0 == indexPath.row {
-                let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
-                chartCell.applyStyle(StyleController.currentStyle)
-                chartCell.setChart(chartViewModel)
-                
-                return chartCell
-            }
-            
-            let index = indexPath.row - 1
-            let polygonLine = chartViewModel.polygonLines[index]
-            
-            let infoChartCell: InfoPolygonLineTableViewCell = dequeueReusableCell(for: indexPath)
-            infoChartCell.applyStyle(StyleController.currentStyle)
-            infoChartCell.setColor(polygonLine.color)
-            infoChartCell.setName(polygonLine.name)
-            infoChartCell.setCheckmark(polygonLine.isVisible)
-            infoChartCell.setEnabledSeparator(isEnabled: index + 1 < chartViewModel.polygonLines.count)
-            return infoChartCell
+        if !(0 <= indexPath.section && indexPath.section < chartViewModels.count) {
+            fatalError("incorrect section number: \(indexPath.section)")
         }
         
-        let switchStyleCell: SwitchStyleModeTableViewCell = dequeueReusableCell(for: indexPath)
-        switchStyleCell.applyStyle(StyleController.currentStyle)
-        switchStyleCell.setText(by: StyleController.nextStyle)
-        switchStyleCell.tapCallback = { [weak self] in
-            self?.switchStyle()
+        let chartViewModel = chartViewModels[indexPath.section]
+        
+        if 0 == indexPath.row {
+            let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
+            chartCell.updateFrame()
+            chartCell.applyStyle(StyleController.currentStyle)
+            chartCell.setChart(chartViewModel)
+            
+            return chartCell
         }
         
-        return switchStyleCell
-    }
-
-    internal override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if 0 <= indexPath.section && indexPath.section < chartViewModels.count && indexPath.row >= 1 {
-            let index = indexPath.row - 1
-            
-            let chartViewModel = chartViewModels[indexPath.section]
-            let polygonLine = chartViewModel.polygonLines[index]
-            chartViewModel.toogleVisiblePolygonLine(polygonLine)
-
-            if let cell = tableView.cellForRow(at: indexPath) as? InfoPolygonLineTableViewCell {
-                cell.setCheckmark(polygonLine.isVisible)
-            }
+        let switchColumnVisibleCell: SwitchColumnVisibleTableViewCell = dequeueReusableCell(for: indexPath)
+        switchColumnVisibleCell.updateFrame()
+        switchColumnVisibleCell.clean()
+        for columnVM in chartViewModel.columns {
+            switchColumnVisibleCell.addColumnVisibleToogler(
+                name: columnVM.name,
+                color: columnVM.color,
+                isVisible: columnVM.isVisible,
+                clickHandler: { [weak chartViewModel] in
+                chartViewModel?.toogleVisibleColumn(columnVM)
+            })
         }
+        
+        switchColumnVisibleCell.applyStyle(StyleController.currentStyle)
+        
+        return switchColumnVisibleCell
     }
 
-    internal func switchStyle() {
+    @IBAction private func switchStyle(_ sender: Any) {
         StyleController.next()
         UIView.animate(withDuration: 0.1) { [weak self, style = StyleController.currentStyle] in
             self?.applyStyle(style)

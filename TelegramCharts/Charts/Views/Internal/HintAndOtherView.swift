@@ -24,7 +24,7 @@ private enum Consts
 internal class HintAndOtherView: UIView
 {
     private var aabb: AABB?
-    private var polygonLinesViewModels: [PolygonLineViewModel] = []
+    private var columnsViewModels: [ColumnViewModel] = []
 
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
@@ -55,8 +55,8 @@ internal class HintAndOtherView: UIView
         hintView.textColor = style.hintTextColor
     }
 
-    internal func setPolygonLines(_ polygonLinesViewModels: [PolygonLineViewModel]) {
-        self.polygonLinesViewModels = polygonLinesViewModels
+    internal func setColumns(_ columnsViewModels: [ColumnViewModel]) {
+        self.columnsViewModels = columnsViewModels
     }
 
     internal func setAABB(aabb: AABB?) {
@@ -92,13 +92,13 @@ internal class HintAndOtherView: UIView
         }
     }
 
-    private func showHintAndOther(aroundDate: PolygonLine.Date) {
+    private func showHintAndOther(aroundDate: Column.Date) {
         guard let aabb = self.aabb else {
             hide(animated: true)
             return
         }
 
-        let polylineViewModels = polygonLinesViewModels.filter { $0.isVisible }
+        let polylineViewModels = columnsViewModels.filter { $0.isVisible }
 
         let dates = polylineViewModels.map { $0.pointByDate(date: aroundDate).date }
         guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
@@ -224,7 +224,7 @@ private class HintView: UIView
         self.layer.cornerRadius = Consts.hintCornerRadius
     }
 
-    internal func setData(date: PolygonLine.Date, lines: [(UIColor, PolygonLine.Value)]) {
+    internal func setData(date: Column.Date, lines: [(UIColor, Column.Value)]) {
         subviews.forEach { $0.removeFromSuperview() }
 
         // Date

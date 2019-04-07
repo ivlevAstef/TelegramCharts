@@ -19,40 +19,40 @@ public class ChartViewModel
     public struct Interval
     {
         public static let empty: Interval = Interval(from: 0, to: 0)
-        public let from: PolygonLine.Date
-        public let to: PolygonLine.Date
+        public let from: Column.Date
+        public let to: Column.Date
     }
 
-    public private(set) var polygonLines: [PolygonLineViewModel]
-    public var visiblePolygonLines: [PolygonLineViewModel] {
-        return polygonLines.filter { $0.isVisible }
+    public private(set) var columns: [ColumnViewModel]
+    public var visibleColumns: [ColumnViewModel] {
+        return columns.filter { $0.isVisible }
     }
 
     public private(set) var interval: Interval = Interval.empty
     public private(set) var fullInterval: Interval = Interval.empty
 
     internal private(set) lazy var aabb: AABB? = {
-        return calculateAABB(for: polygonLines)
+        return calculateAABB(for: columns)
     }()
     internal var visibleaabb: AABB? {
-        return calculateAABB(for: visiblePolygonLines)
+        return calculateAABB(for: visibleColumns)
     }
     internal var visibleInIntervalAABB: AABB? {
-        return calculateAABBInInterval(for: visiblePolygonLines, from: interval.from, to: interval.to)
+        return calculateAABBInInterval(for: visibleColumns, from: interval.from, to: interval.to)
     }
 
     private var updateListeners: [WeakRef<ChartUpdateListener>] = []
 
-    public init(polygonLines: [PolygonLine], from: Double = 0.0, to: Double = 1.0) {
-        self.polygonLines = polygonLines.map { polygonLine in
-            let points = polygonLine.points.map { PolygonLineViewModel.Point(date: $0.date, value: $0.value) }
-            return PolygonLineViewModel(name: polygonLine.name, points: points, color: UIColor(hex: polygonLine.color))
+    public init(columns: [Column], from: Double = 0.0, to: Double = 1.0) {
+        self.columns = columns.map { column in
+            let points = column.points.map { ColumnViewModel.Point(date: $0.date, value: $0.value) }
+            return ColumnViewModel(name: column.name, points: points, color: UIColor(hex: column.color))
         }
 
         if let aabb = self.aabb {
             let length = Double(aabb.maxDate - aabb.minDate)
-            self.interval = Interval(from: aabb.minDate + PolygonLine.Date(length * from),
-                                     to: aabb.minDate + PolygonLine.Date(length * to))
+            self.interval = Interval(from: aabb.minDate + Column.Date(length * from),
+                                     to: aabb.minDate + Column.Date(length * to))
                 
             self.fullInterval = Interval(from: aabb.minDate, to: aabb.maxDate)
         } else {
@@ -73,21 +73,21 @@ public class ChartViewModel
         updateListeners.removeAll(where: { $0.value == nil })
     }
 
-    public func toogleVisiblePolygonLine(_ polygonLine: PolygonLineViewModel) {
-        assert(polygonLines.contains(where: { $0 === polygonLine }), "Doen't found polygon line in data")
-        polygonLine.isVisible.toggle()
+    public func toogleVisibleColumn(_ column: ColumnViewModel) {
+        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
+        column.isVisible.toggle()
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
-    public func enablePolygonLine(_ polygonLine: PolygonLineViewModel) {
-        assert(polygonLines.contains(where: { $0 === polygonLine }), "Doen't found polygon line in data")
-        polygonLine.isVisible = true
+    public func enableColumn(_ column: ColumnViewModel) {
+        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
+        column.isVisible = true
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
-    public func disablePolygonLine(_ polygonLine: PolygonLineViewModel) {
-        assert(polygonLines.contains(where: { $0 === polygonLine }), "Doen't found polygon line in data")
-        polygonLine.isVisible = false
+    public func disableColumn(_ column: ColumnViewModel) {
+        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
+        column.isVisible = false
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
@@ -96,11 +96,11 @@ public class ChartViewModel
         updateListeners.forEach { $0.value?.chartIntervalIsChanged(self) }
     }
 
-    private func calculateAABB(for polygonLines: [PolygonLineViewModel]) -> AABB? {
-        let minDate = polygonLines.map { $0.aabb.minDate }.min()
-        let maxDate = polygonLines.map { $0.aabb.maxDate }.max()
-        let minValue = polygonLines.map { $0.aabb.minValue }.min()
-        let maxValue = polygonLines.map { $0.aabb.maxValue }.max()
+    private func calculateAABB(for columns: [ColumnViewModel]) -> AABB? {
+        let minDate = columns.map { $0.aabb.minDate }.min()
+        let maxDate = columns.map { $0.aabb.maxDate }.max()
+        let minValue = columns.map { $0.aabb.minValue }.min()
+        let maxValue = columns.map { $0.aabb.maxValue }.max()
 
         if let minDate = minDate, let maxDate = maxDate,
             let minValue = minValue, let maxValue = maxValue
@@ -111,8 +111,8 @@ public class ChartViewModel
         return nil
     }
 
-    private func calculateAABBInInterval(for polygonLines: [PolygonLineViewModel], from: PolygonLine.Date, to: PolygonLine.Date) -> AABB? {
-        let aabbs = polygonLines.compactMap { $0.calculateAABBInInterval(from: from, to: to) }
+    private func calculateAABBInInterval(for columns: [ColumnViewModel], from: Column.Date, to: Column.Date) -> AABB? {
+        let aabbs = columns.compactMap { $0.calculateAABBInInterval(from: from, to: to) }
 
         let minValue = aabbs.map { $0.minValue }.min()
         let maxValue = aabbs.map { $0.maxValue }.max()

@@ -1,5 +1,5 @@
 //
-//  CPolygonLineViewModel.swift
+//  CColumnViewModel.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 11/03/2019.
@@ -8,12 +8,12 @@
 
 import UIKit
 
-public class PolygonLineViewModel
+public class ColumnViewModel
 {
     public struct Point
     {
-        public let date: PolygonLine.Date
-        public let value: PolygonLine.Value
+        public let date: Column.Date
+        public let value: Column.Value
     }
 
     public struct Color
@@ -29,10 +29,10 @@ public class PolygonLineViewModel
     public internal(set) var isVisible: Bool = true
 
     internal private(set) lazy var aabb: AABB = {
-        var minDate: PolygonLine.Date = PolygonLine.Date.max
-        var maxDate: PolygonLine.Date = PolygonLine.Date.min
-        var minValue: PolygonLine.Value = PolygonLine.Value.max
-        var maxValue: PolygonLine.Value = PolygonLine.Value.min
+        var minDate: Column.Date = Column.Date.max
+        var maxDate: Column.Date = Column.Date.min
+        var minValue: Column.Value = Column.Value.max
+        var maxValue: Column.Value = Column.Value.min
         for point in points {
             minDate = min(minDate, point.date)
             maxDate = max(maxDate, point.date)
@@ -50,7 +50,7 @@ public class PolygonLineViewModel
         self.color = color
     }
 
-    internal func pointByDate(date: PolygonLine.Date) -> Point {
+    internal func pointByDate(date: Column.Date) -> Point {
         guard var lastPoint = points.first else {
             return Point(date: 0, value: 0)
         }
@@ -67,9 +67,9 @@ public class PolygonLineViewModel
         return points.last ?? Point(date: 0, value: 0)
     }
 
-    internal func calculateAABBInInterval(from: PolygonLine.Date, to: PolygonLine.Date) -> AABB? {
-        var minValue: PolygonLine.Value = PolygonLine.Value.max
-        var maxValue: PolygonLine.Value = PolygonLine.Value.min
+    internal func calculateAABBInInterval(from: Column.Date, to: Column.Date) -> AABB? {
+        var minValue: Column.Value = Column.Value.max
+        var maxValue: Column.Value = Column.Value.min
 
         var hasPoints: Bool = false
         for i in 0..<points.count {
@@ -82,13 +82,13 @@ public class PolygonLineViewModel
 
                 if let prevPoint = points[safe: i - 1], prevPoint.date < from {
                     let t = Double(from - prevPoint.date) / Double(point.date - prevPoint.date)
-                    let value = prevPoint.value + PolygonLine.Value(t * Double(point.value - prevPoint.value))
+                    let value = prevPoint.value + Column.Value(t * Double(point.value - prevPoint.value))
                     minValue = min(minValue, value)
                     maxValue = max(maxValue, value)
                 }
                 if let nextPoint = points[safe: i + 1], nextPoint.date > to {
                     let t = Double(to - point.date) / Double(nextPoint.date - point.date)
-                    let value = point.value + PolygonLine.Value(t * Double(nextPoint.value - point.value))
+                    let value = point.value + Column.Value(t * Double(nextPoint.value - point.value))
                     minValue = min(minValue, value)
                     maxValue = max(maxValue, value)
                 }
@@ -108,7 +108,7 @@ public class PolygonLineViewModel
     }
 
     internal func calculateUIPoints(for rect: CGRect, aabb: AABB) -> [CGPoint] {
-        return PolygonLineViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
+        return ColumnViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
     }
     
     internal static func calculateUIPoints(for points: [Point], rect: CGRect, aabb: AABB) -> [CGPoint] {

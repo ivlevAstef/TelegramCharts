@@ -1,5 +1,5 @@
 //
-//  PolygonLinesView.swift
+//  ColumnsView.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 17/03/2019.
@@ -8,9 +8,9 @@
 
 import UIKit
 
-internal class PolygonLinesView: UIView
+internal class ColumnsView: UIView
 {
-    private var polygonLineLayers: [PolygonLineLayerWrapper] = []
+    private var columnLayers: [ColumnLayerWrapper] = []
 
     private var lastAABB: AABB?
     
@@ -22,25 +22,25 @@ internal class PolygonLinesView: UIView
     }
 
     internal func setLineWidth(_ lineWidth: CGFloat) {
-        for polygonLineLayer in polygonLineLayers {
-            polygonLineLayer.layer.lineWidth = lineWidth
+        for columnLayer in columnLayers {
+            columnLayer.layer.lineWidth = lineWidth
         }
     }
 
     internal func setParentLayer() {
-        polygonLineLayers.forEach { $0.layer.removeFromSuperlayer() }
-        for polygonLineLayer in polygonLineLayers {
-            polygonLineLayer.layer.frame = layer.bounds
-            layer.addSublayer(polygonLineLayer.layer)
+        columnLayers.forEach { $0.layer.removeFromSuperlayer() }
+        for columnLayer in columnLayers {
+            columnLayer.layer.frame = layer.bounds
+            layer.addSublayer(columnLayer.layer)
         }
     }
 
-    internal func setPolygonLines(_ polygonLineViewModels: [PolygonLineViewModel]) {
-        polygonLineLayers.forEach { $0.layer.removeFromSuperlayer() }
-        polygonLineLayers.removeAll()
-        for polygonLine in polygonLineViewModels {
-            let polygonLineLayer = PolygonLineLayerWrapper(polygonLineViewModel: polygonLine)
-            polygonLineLayers.append(polygonLineLayer)
+    internal func setColumns(_ columnViewModels: [ColumnViewModel]) {
+        columnLayers.forEach { $0.layer.removeFromSuperlayer() }
+        columnLayers.removeAll()
+        for column in columnViewModels {
+            let columnLayer = ColumnLayerWrapper(columnViewModel: column)
+            columnLayers.append(columnLayer)
         }
 
         setParentLayer()
@@ -54,8 +54,8 @@ internal class PolygonLinesView: UIView
         let usedAABB = aabb ?? lastAABB ?? AABB.empty
         lastAABB = aabb
 
-        for polygonLineLayer in polygonLineLayers {
-            polygonLineLayer.update(aabb: usedAABB,
+        for columnLayer in columnLayers {
+            columnLayer.update(aabb: usedAABB,
                                     animatedPath: animatedPath,
                                     animatedOpacity: animatedOpacity,
                                     duration: duration)

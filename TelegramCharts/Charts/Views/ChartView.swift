@@ -16,12 +16,16 @@ private enum Consts
 
 public class ChartView: UIView
 {
+    override public var frame: CGRect {
+        didSet { updateFrame() }
+    }
+    
     private var chartViewModel: ChartViewModel? = nil
     private var visibleAABB: AABB? {
         return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
     
-    private let polygonLinesView: PolygonLinesView = PolygonLinesView()
+    private let columnsView: ColumnsView = ColumnsView()
     private let verticalAxisView: VerticalAxisView = VerticalAxisView()
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
@@ -29,7 +33,7 @@ public class ChartView: UIView
     public init() {
         super.init(frame: .zero)
         
-        initialize()
+        configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -42,27 +46,22 @@ public class ChartView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
         
-        polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
-        polygonLinesView.setLineWidth(2.0)
-        polygonLinesView.update(aabb: visibleAABB, animated: false, duration: 0.0)
+        columnsView.setColumns(chartViewModel.columns)
+        columnsView.setLineWidth(2.0)
+        columnsView.update(aabb: visibleAABB, animated: false, duration: 0.0)
 
         verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
 
         horizontalAxisView.setFullInterval(chartViewModel.fullInterval)
         horizontalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
 
-        hintView.setPolygonLines(chartViewModel.polygonLines)
+        hintView.setColumns(chartViewModel.columns)
         hintView.setAABB(aabb: visibleAABB)
     }
 
-    private func initialize() {
-        configureSubviews()
-        makeConstraints()
-    }
-
     private func configureSubviews() {
-        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(polygonLinesView)
+        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(columnsView)
         
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
@@ -74,33 +73,19 @@ public class ChartView: UIView
         addSubview(hintView)
     }
     
-    private func makeConstraints() {
-        self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor, constant: Consts.spacing).isActive = true
-        self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+    private func updateFrame() {
+        self.columnsView.frame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
+        self.horizontalAxisView.frame = CGRect(x: 0, y: self.columnsView.bounds.maxY + Consts.spacing * 0.5,
+                                               width: bounds.width, height: Consts.horizontalAxisHeight)
         
-        self.polygonLinesView.bottomAnchor.constraint(equalTo: self.horizontalAxisView.topAnchor).isActive = true
-        
-        self.horizontalAxisView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.horizontalAxisView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        self.horizontalAxisView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -Consts.spacing).isActive = true
-        self.horizontalAxisView.heightAnchor.constraint(equalToConstant: Consts.horizontalAxisHeight).isActive = true
-
-        self.verticalAxisView.topAnchor.constraint(equalTo: self.polygonLinesView.topAnchor).isActive = true
-        self.verticalAxisView.leftAnchor.constraint(equalTo: self.polygonLinesView.leftAnchor).isActive = true
-        self.verticalAxisView.rightAnchor.constraint(equalTo: self.polygonLinesView.rightAnchor).isActive = true
-        self.verticalAxisView.bottomAnchor.constraint(equalTo: self.polygonLinesView.bottomAnchor).isActive = true
-
-        self.hintView.topAnchor.constraint(equalTo: self.polygonLinesView.topAnchor).isActive = true
-        self.hintView.leftAnchor.constraint(equalTo: self.polygonLinesView.leftAnchor).isActive = true
-        self.hintView.rightAnchor.constraint(equalTo: self.polygonLinesView.rightAnchor).isActive = true
-        self.hintView.bottomAnchor.constraint(equalTo: self.polygonLinesView.bottomAnchor).isActive = true
+        self.verticalAxisView.frame = self.columnsView.frame
+        self.hintView.frame = self.columnsView.frame
     }
 
     internal required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        initialize()
+        configureSubviews()
     }
 }
 
@@ -108,7 +93,7 @@ extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        polygonLinesView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         hintView.setAABB(aabb: aabb)
@@ -116,7 +101,7 @@ extension ChartView: ChartUpdateListener
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        polygonLinesView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
+        columnsView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForValuesDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForDatesDuration)
         hintView.setAABB(aabb: aabb)

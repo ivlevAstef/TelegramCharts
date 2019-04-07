@@ -64,7 +64,7 @@ internal class HorizontalAxisView: UIView
         dateLabels.removeAll()
 
         // stride not works... WTF?
-        let step: PolygonLine.Date = calculateStep(aabb: aabb)
+        let step: Column.Date = calculateStep(aabb: aabb)
         // can optimization - calculate correct interval
         var iter = fullInterval.from
         while iter <= fullInterval.to {
@@ -117,9 +117,9 @@ internal class HorizontalAxisView: UIView
         })
     }
 
-    private func calculateStep(aabb: AABB) -> PolygonLine.Date {
+    private func calculateStep(aabb: AABB) -> Column.Date {
         let div = calculateNearPowerTwoAndReturnNumber(aabb: aabb)
-        return (fullInterval.to - fullInterval.from) / PolygonLine.Date(div * minScreenCount)
+        return (fullInterval.to - fullInterval.from) / Column.Date(div * minScreenCount)
     }
 
     private func calculateNearPowerTwoAndReturnNumber(aabb: AABB) -> Int {
@@ -169,9 +169,9 @@ private class DateLabel: UILabel
         return dateFormatter
     }()
     
-    internal let date: PolygonLine.Date
+    internal let date: Column.Date
     
-    internal init(date: PolygonLine.Date, font: UIFont, color: UIColor) {
+    internal init(date: Column.Date, font: UIFont, color: UIColor) {
         self.date = date
         super.init(frame: .zero)
         

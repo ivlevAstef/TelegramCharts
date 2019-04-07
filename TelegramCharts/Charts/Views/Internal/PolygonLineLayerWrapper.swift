@@ -1,5 +1,5 @@
 //
-//  PolygonLineLayerWrapper.swift
+//  ColumnLayerWrapper.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 14/03/2019.
@@ -8,20 +8,20 @@
 
 import UIKit
 
-internal final class PolygonLineLayerWrapper
+internal final class ColumnLayerWrapper
 {
     internal let layer: CAShapeLayer = CAShapeLayer()
-    private let polygonLineViewModel: PolygonLineViewModel
+    private let columnViewModel: ColumnViewModel
 
     private let pathIndexCounter: IndexCounter = IndexCounter()
     private let opacityIndexCounter: IndexCounter = IndexCounter()
 
-    internal init(polygonLineViewModel: PolygonLineViewModel) {
-        self.polygonLineViewModel = polygonLineViewModel
+    internal init(columnViewModel: ColumnViewModel) {
+        self.columnViewModel = columnViewModel
         
         layer.lineWidth = 1.0
         layer.lineCap = .round
-        layer.strokeColor = polygonLineViewModel.color.cgColor
+        layer.strokeColor = columnViewModel.color.cgColor
         layer.fillColor = nil
     }
     
@@ -39,7 +39,7 @@ internal final class PolygonLineLayerWrapper
             layer.path = newPath.cgPath
         }
         
-        let newOpacity: Float = polygonLineViewModel.isVisible ? 1.0 : 0.0
+        let newOpacity: Float = columnViewModel.isVisible ? 1.0 : 0.0
         if animatedOpacity {
             let animation = CASaveStateAnimation(keyPath: "opacity")
             animation.duration = duration
@@ -53,7 +53,7 @@ internal final class PolygonLineLayerWrapper
     }
     
     private func makePath(aabb: AABB) -> UIBezierPath {
-        var uiPoints = polygonLineViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
+        var uiPoints = columnViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
         let path = UIBezierPath()
         
         if uiPoints.isEmpty {

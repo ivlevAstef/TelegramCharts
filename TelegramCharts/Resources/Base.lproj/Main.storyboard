@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="tsu-BP-aNn">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="tsu-BP-aNn">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -30,97 +30,15 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="kGp-Ca-htI" id="aLd-dH-og4">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="199.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="97T-PH-use" customClass="ChartWithIntervalView" customModule="TelegramCharts" customModuleProvider="target">
-                                            <rect key="frame" x="16" y="11" width="343" height="178"/>
-                                            <color key="backgroundColor" red="1" green="0.06974860209" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                        </view>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="97T-PH-use" firstAttribute="top" secondItem="aLd-dH-og4" secondAttribute="topMargin" id="5pI-Ys-HtX"/>
-                                        <constraint firstItem="97T-PH-use" firstAttribute="leading" secondItem="aLd-dH-og4" secondAttribute="leadingMargin" id="NQ3-FZ-17q"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="97T-PH-use" secondAttribute="bottom" id="NwF-KD-mau"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="97T-PH-use" secondAttribute="trailing" id="qKv-H9-Fc7"/>
-                                    </constraints>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="chartView" destination="97T-PH-use" id="azN-1y-9YP"/>
-                                </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="InfoPolygonLineTableViewCell" rowHeight="44" id="zBx-Ys-Mdd" customClass="InfoPolygonLineTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="SwitchColumnVisibleTableViewCell" rowHeight="44" id="zBx-Ys-Mdd" customClass="SwitchColumnVisibleTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="271.5" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="zBx-Ys-Mdd" id="0fl-Dr-Maq">
-                                    <rect key="frame" x="0.0" y="0.0" width="335" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Joined Channel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jsy-Tx-gCb">
-                                            <rect key="frame" x="42" y="12" width="285" height="19.5"/>
-                                            <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="K5D-zU-muR">
-                                            <rect key="frame" x="16" y="15" width="14" height="14"/>
-                                            <color key="backgroundColor" red="1" green="0.06974860209" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="14" id="9RJ-Gs-tRI"/>
-                                                <constraint firstAttribute="height" constant="14" id="fc0-4s-GVz"/>
-                                            </constraints>
-                                        </view>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IRt-xp-oAv">
-                                            <rect key="frame" x="42" y="42.5" width="335" height="1"/>
-                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="1" id="eF6-hm-iXi"/>
-                                            </constraints>
-                                        </view>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="Jsy-Tx-gCb" firstAttribute="leading" secondItem="K5D-zU-muR" secondAttribute="trailing" constant="12" id="9F5-nc-Ttc"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="Jsy-Tx-gCb" secondAttribute="trailing" id="NGs-N7-VCd"/>
-                                        <constraint firstAttribute="bottom" secondItem="IRt-xp-oAv" secondAttribute="bottom" id="ONb-aT-9Yt"/>
-                                        <constraint firstItem="Jsy-Tx-gCb" firstAttribute="centerY" secondItem="0fl-Dr-Maq" secondAttribute="centerY" id="Sdf-Ud-KcP"/>
-                                        <constraint firstItem="K5D-zU-muR" firstAttribute="leading" secondItem="0fl-Dr-Maq" secondAttribute="leadingMargin" id="lFM-cK-bOu"/>
-                                        <constraint firstItem="Jsy-Tx-gCb" firstAttribute="leading" secondItem="IRt-xp-oAv" secondAttribute="leading" id="mDs-oH-vAB"/>
-                                        <constraint firstItem="Jsy-Tx-gCb" firstAttribute="centerY" secondItem="K5D-zU-muR" secondAttribute="centerY" id="o46-hW-hGg"/>
-                                        <constraint firstItem="IRt-xp-oAv" firstAttribute="width" secondItem="0fl-Dr-Maq" secondAttribute="width" id="qh6-uh-8kD"/>
-                                    </constraints>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="colorView" destination="K5D-zU-muR" id="Sml-l7-o7I"/>
-                                    <outlet property="nameLabel" destination="Jsy-Tx-gCb" id="Rtn-qa-D7I"/>
-                                    <outlet property="separatorView" destination="IRt-xp-oAv" id="yJK-eP-eNy"/>
-                                    <outlet property="separatorViewHeightConstraint" destination="eF6-hm-iXi" id="9w9-BX-Chb"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="SwitchStyleModeTableViewCell" rowHeight="50" id="DaO-dk-wXN" customClass="SwitchStyleModeTableViewCell" customModule="TelegramCharts" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="315.5" width="375" height="50"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="DaO-dk-wXN" id="0wR-hY-Jdr">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="49.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PrH-Rx-N2f">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="49.5"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <state key="normal" title="Switch to Night Mode"/>
-                                            <connections>
-                                                <action selector="switchButtonTapped:" destination="DaO-dk-wXN" eventType="touchUpInside" id="Ryl-TF-gRr"/>
-                                            </connections>
-                                        </button>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="PrH-Rx-N2f" firstAttribute="top" secondItem="0wR-hY-Jdr" secondAttribute="top" id="C9T-If-VW8"/>
-                                        <constraint firstItem="PrH-Rx-N2f" firstAttribute="leading" secondItem="0wR-hY-Jdr" secondAttribute="leading" id="bMu-2i-1wS"/>
-                                        <constraint firstAttribute="trailing" secondItem="PrH-Rx-N2f" secondAttribute="trailing" id="nMp-Jd-Ud7"/>
-                                        <constraint firstAttribute="bottom" secondItem="PrH-Rx-N2f" secondAttribute="bottom" id="zPq-iu-7UY"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="switchButton" destination="PrH-Rx-N2f" id="6dC-Gm-T7T"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <sections/>
@@ -131,7 +49,15 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="Ca0-gE-TE6">
                         <nil key="title"/>
+                        <barButtonItem key="rightBarButtonItem" title="Item" id="9gs-Ly-Cte">
+                            <connections>
+                                <action selector="switchStyle:" destination="MI2-34-3T1" id="VP4-FH-Nh2"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="switchStyleButton" destination="9gs-Ly-Cte" id="0rs-FW-qZ5"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2ja-GA-duU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

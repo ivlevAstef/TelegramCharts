@@ -10,7 +10,7 @@ import Foundation
 
 public class ChartProvider
 {
-    public func getCharts(_ completion: @escaping ([[PolygonLine]]) -> Void) {
+    public func getCharts(_ completion: @escaping ([[Column]]) -> Void) {
         guard let rawCharts = self.loadChartsFromFile() else {
             completion([])
             return
@@ -32,7 +32,7 @@ public class ChartProvider
         return try? JSONDecoder().decode([RawChart].self, from: data)
     }
 
-    private func convertToModel(_ rawCharts: RawChart) -> [PolygonLine] {
+    private func convertToModel(_ rawCharts: RawChart) -> [Column] {
         guard let timestampId = rawCharts.types.first(where: { $0.value == "x" })?.key else {
             return []
         }
@@ -46,7 +46,7 @@ public class ChartProvider
         let timestamps = timestampColumn.dropFirst().compactMap{ $0.value }
         assert(timestamps == timestamps.sorted(), "Invalid data. Timestamps doen't sort.")
 
-        var result: [PolygonLine] = []
+        var result: [Column] = []
 
         for column in rawCharts.columns {
             guard let id = column[safe: 0]?.name else {
@@ -64,12 +64,12 @@ public class ChartProvider
             let values = column.dropFirst().compactMap{ $0.value }
             assert(values.count == timestamps.count, "incorrect json - timestamp length not equals \(id) length")
 
-            let points = zip(timestamps, values).map { pair -> PolygonLine.Point in
+            let points = zip(timestamps, values).map { pair -> Column.Point in
                 let (timestamp, value) = pair
-                return PolygonLine.Point(date: timestamp, value: Int(value))
+                return Column.Point(date: timestamp, value: Int(value))
             }
 
-            result.append(PolygonLine(name: name, points: points, color: color))
+            result.append(Column(name: name, points: points, color: color))
         }
 
         return result

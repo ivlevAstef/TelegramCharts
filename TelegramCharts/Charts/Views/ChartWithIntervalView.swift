@@ -10,16 +10,22 @@ import UIKit
 
 public class ChartWithIntervalView: UIView
 {
+    override public var frame: CGRect {
+        didSet { updateFrame() }
+    }
+    
     private static let defaultIntervalViewHeight: CGFloat = 40.0
 
     private let noData: UILabel = UILabel(frame: .zero)
     private let chartView: ChartView = ChartView()
     private let intervalView: IntervalView = IntervalView()
+    private let intervalViewHeight: CGFloat
 
     public init(intervalViewHeight: CGFloat? = nil) {
+        self.intervalViewHeight = intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight
         super.init(frame: .zero)
 
-        initialize(intervalViewHeight: intervalViewHeight)
+        configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -43,12 +49,6 @@ public class ChartWithIntervalView: UIView
         return UIScreen.main.bounds.width
     }
 
-    private func initialize(intervalViewHeight: CGFloat?)
-    {
-        configureSubviews()
-        makeConstraints(intervalViewHeight: intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight)
-    }
-
     private func configureSubviews() {
         chartView.translatesAutoresizingMaskIntoConstraints = false
         intervalView.translatesAutoresizingMaskIntoConstraints = false
@@ -60,25 +60,15 @@ public class ChartWithIntervalView: UIView
         noData.text = "Select at least one column"
         noData.alpha = 0.0
     }
-
-    private func makeConstraints(intervalViewHeight: CGFloat) {
-        self.chartView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        self.chartView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.chartView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-
-        self.chartView.bottomAnchor.constraint(equalTo: self.intervalView.topAnchor).isActive = true
-
-        self.intervalView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.intervalView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        self.intervalView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-        self.intervalView.heightAnchor.constraint(equalToConstant: intervalViewHeight).isActive = true
-
-        self.noData.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        self.noData.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+    
+    private func updateFrame() {
+        self.chartView.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height - intervalViewHeight)
+        self.intervalView.frame = CGRect(x: 0, y: bounds.height - intervalViewHeight, width: bounds.width, height: intervalViewHeight)
+        self.noData.center = center
     }
     
     private func configureNoDataLabel(viewModel: ChartViewModel, animated: Bool) {
-        let hasVisiblePolyline = viewModel.polygonLines.contains(where: { $0.isVisible })
+        let hasVisiblePolyline = viewModel.columns.contains(where: { $0.isVisible })
         
         UIView.animateIf(animated, duration: Configs.visibleChangeDuration, animations: { [weak self] in
             self?.noData.alpha = hasVisiblePolyline ? 0.0 : 1.0
@@ -86,9 +76,10 @@ public class ChartWithIntervalView: UIView
     }
 
     internal required init?(coder aDecoder: NSCoder) {
+        self.intervalViewHeight = ChartWithIntervalView.defaultIntervalViewHeight
         super.init(coder: aDecoder)
 
-        initialize(intervalViewHeight: nil)
+        configureSubviews()
     }
 }
 

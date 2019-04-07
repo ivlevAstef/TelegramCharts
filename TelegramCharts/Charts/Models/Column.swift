@@ -6,7 +6,7 @@
 //  Copyright © 2019 SIA. All rights reserved.
 //
 
-public struct PolygonLine
+public struct Column
 {
     public typealias Date = Int64
     public typealias Value = Int

@@ -16,6 +16,10 @@ private enum Consts
 
 internal class VerticalAxisView: UIView
 {
+    override public var frame: CGRect {
+        didSet { updateFrame() }
+    }
+    
     private var lastAABB: AABB?
 
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
@@ -33,7 +37,6 @@ internal class VerticalAxisView: UIView
 
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomLine)
-        makeConstraints()
     }
 
     internal func setStyle(_ style: ChartStyle) {
@@ -57,12 +60,9 @@ internal class VerticalAxisView: UIView
         updateValues(aabb: aabb, animated: animated, duration: duration)
         lastAABB = aabb
     }
-
-    private func makeConstraints() {
-        self.bottomLine.heightAnchor.constraint(equalToConstant: 1.0).isActive = true
-        self.bottomLine.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.bottomLine.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        self.bottomLine.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+    
+    private func updateFrame() {
+        self.bottomLine.frame = CGRect(x: 0, y: bounds.height - 1.0, width: bounds.width, height: 1.0)
     }
 
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
@@ -116,11 +116,11 @@ internal class VerticalAxisView: UIView
         })
     }
 
-    private func calculateNewValues(aabb: AABB) -> [PolygonLine.Value] {
+    private func calculateNewValues(aabb: AABB) -> [Column.Value] {
         let begin = aabb.minValue
         let step = calculateValueStep(aabb: aabb)
 
-        var result: [PolygonLine.Value] = []
+        var result: [Column.Value] = []
 
         var value = begin
         for _ in 0..<valuesCount {
@@ -131,14 +131,14 @@ internal class VerticalAxisView: UIView
         return result
     }
 
-    private func checkIsMoreDiff(_ oldValues: [PolygonLine.Value], _ newValues: [PolygonLine.Value]) -> Bool {
+    private func checkIsMoreDiff(_ oldValues: [Column.Value], _ newValues: [Column.Value]) -> Bool {
         if (oldValues.isEmpty || newValues.isEmpty) && oldValues.count != newValues.count {
             return true
         }
 
         var maxDiff = 0
-        var minValue = PolygonLine.Value.max
-        var maxValue = PolygonLine.Value.min
+        var minValue = Column.Value.max
+        var maxValue = Column.Value.min
         for (old, new) in zip(oldValues, newValues) {
             maxDiff = max(maxDiff, abs(old - new))
             minValue = min(minValue, min(old, new))
@@ -153,7 +153,7 @@ internal class VerticalAxisView: UIView
         return Double(maxDiff) / Double(interval) > Configs.thresholdValueDiff
     }
 
-    private func calculateValueStep(aabb: AABB) -> PolygonLine.Value {
+    private func calculateValueStep(aabb: AABB) -> Column.Value {
         return (aabb.maxValue - aabb.minValue) / valuesCount
     }
 
@@ -178,12 +178,12 @@ internal class VerticalAxisView: UIView
 private class ValueView: UIView
 {
     internal let unique: String
-    internal let value: PolygonLine.Value
+    internal let value: Column.Value
 
     private let label: UILabel = UILabel(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
 
-    internal init(value: PolygonLine.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
+    internal init(value: Column.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
         self.value = value
         self.unique = ValueView.makeUnique(Int64(value))
 

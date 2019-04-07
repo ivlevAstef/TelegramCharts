@@ -11,15 +11,15 @@ import UIKit
 internal struct AABB
 {
     internal static let empty: AABB = AABB(minDate: 0, maxDate: 0, minValue: 0, maxValue: 0)
-    internal let minDate: PolygonLine.Date
-    internal let maxDate: PolygonLine.Date
-    internal let minValue: PolygonLine.Value
-    internal let maxValue: PolygonLine.Value
+    internal let minDate: Column.Date
+    internal let maxDate: Column.Date
+    internal let minValue: Column.Value
+    internal let maxValue: Column.Value
     
-    internal let dateInterval: PolygonLine.Date
-    internal let valueInterval: PolygonLine.Value
+    internal let dateInterval: Column.Date
+    internal let valueInterval: Column.Value
     
-    internal init(minDate: PolygonLine.Date, maxDate: PolygonLine.Date, minValue: PolygonLine.Value, maxValue: PolygonLine.Value) {
+    internal init(minDate: Column.Date, maxDate: Column.Date, minValue: Column.Value, maxValue: Column.Value) {
         self.minDate = minDate
         self.maxDate = maxDate
         self.minValue = minValue
@@ -37,14 +37,14 @@ internal struct AABB
     }
     
     internal func copyWithPadding(date datePadding: Double, value valuePadding: Double) -> AABB {
-        let minDate = self.minDate - PolygonLine.Date(Double(self.dateInterval) * datePadding)
-        let maxDate = self.maxDate + PolygonLine.Date(Double(self.dateInterval) * datePadding)
-        let minValue = self.minValue - PolygonLine.Value(Double(self.valueInterval) * valuePadding)
-        let maxValue = self.maxValue + PolygonLine.Value(Double(self.valueInterval) * valuePadding)
+        let minDate = self.minDate - Column.Date(Double(self.dateInterval) * datePadding)
+        let maxDate = self.maxDate + Column.Date(Double(self.dateInterval) * datePadding)
+        let minValue = self.minValue - Column.Value(Double(self.valueInterval) * valuePadding)
+        let maxValue = self.maxValue + Column.Value(Double(self.valueInterval) * valuePadding)
         return AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
     }
     
-    internal func calculateUIPoint(date: PolygonLine.Date, value: PolygonLine.Value, rect: CGRect) -> CGPoint {
+    internal func calculateUIPoint(date: Column.Date, value: Column.Value, rect: CGRect) -> CGPoint {
         let xScale = Double(rect.width) / Double(dateInterval)
         let yScale = Double(rect.height) / Double(valueInterval)
         
@@ -52,24 +52,24 @@ internal struct AABB
                        y: Double(rect.maxY) - Double(value - minValue) * yScale)
     }
     
-    internal func calculateDate(x: CGFloat, rect: CGRect) -> PolygonLine.Date {
+    internal func calculateDate(x: CGFloat, rect: CGRect) -> Column.Date {
         let x = max(rect.minX, min(x, rect.maxX))
         let xScale = Double(dateInterval) / Double(rect.width)
-        return minDate + PolygonLine.Date(Double(x - rect.minX) * xScale)
+        return minDate + Column.Date(Double(x - rect.minX) * xScale)
     }
 
 
-    private func calculateValueBegin() -> PolygonLine.Value {
+    private func calculateValueBegin() -> Column.Value {
         let roundScale = calculateValueRoundScale()
         return minValue - minValue % roundScale
     }
 
-    private func calculateValueEnd() -> PolygonLine.Value {
+    private func calculateValueEnd() -> Column.Value {
         let roundScale = calculateValueRoundScale()
         return maxValue + (roundScale - maxValue % roundScale)
     }
 
-    private func calculateValueRoundScale() -> PolygonLine.Value {
+    private func calculateValueRoundScale() -> Column.Value {
         var interval = Double(maxValue - minValue)
         if interval <= 50 {
             return 1

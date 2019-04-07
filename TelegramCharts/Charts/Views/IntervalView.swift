@@ -21,8 +21,12 @@ private enum Consts
 
 public class IntervalView: UIView
 {
+    override public var frame: CGRect {
+        didSet { updateFrame() }
+    }
+    
     private var chartViewModel: ChartViewModel? = nil
-    private var polygonLinesView: PolygonLinesView = PolygonLinesView()
+    private var columnsView: ColumnsView = ColumnsView()
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
     
     private var visibleAABB: AABB? {
@@ -51,11 +55,11 @@ public class IntervalView: UIView
 
         let aabb = visibleAABB
         
-        polygonLinesView.setPolygonLines(chartViewModel.polygonLines)
-        polygonLinesView.setLineWidth(1.0)
-        polygonLinesView.update(aabb: aabb, animated: false, duration: 0.0)
+        columnsView.setColumns(chartViewModel.columns)
+        columnsView.setLineWidth(1.0)
+        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
 
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
                                     animated: false, duration: 0.0)
     }
 
@@ -67,25 +71,17 @@ public class IntervalView: UIView
         gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
 
-        polygonLinesView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(polygonLinesView)
+        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(columnsView)
 
         intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(intervalDrawableView)
-
-        makeConstraints()
     }
     
-    private func makeConstraints() {
-        self.polygonLinesView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        self.polygonLinesView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: Consts.padding).isActive = true
-        self.polygonLinesView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -Consts.padding).isActive = true
-        self.polygonLinesView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-
-        self.intervalDrawableView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        self.intervalDrawableView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
-        self.intervalDrawableView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        self.intervalDrawableView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+    private func updateFrame() {
+        self.columnsView.frame = CGRect(x: Consts.padding, y: Consts.verticalPadding,
+                                        width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
+        self.intervalDrawableView.frame = bounds
     }
 
     @objc
@@ -99,7 +95,7 @@ public class IntervalView: UIView
         }
 
         let interval = chartViewModel.interval
-        let rect = polygonLinesView.frame
+        let rect = columnsView.frame
         let sWidth = Consts.sliderWidth * 0.5
 
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x - sWidth
@@ -174,14 +170,14 @@ extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        polygonLinesView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+        columnsView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
                                     animated: true, duration: Configs.visibleChangeDuration)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: polygonLinesView.frame,
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
                                     animated: false, duration: 0)
     }
 }
