@@ -11,17 +11,19 @@ import Foundation
 public class ChartProvider
 {
     public func getCharts(_ completion: @escaping ([[Column]]) -> Void) {
-        guard let rawCharts = self.loadChartsFromFile() else {
-            completion([])
-            return
+        var anyRawCharts: [RawChart] = []
+        for chartIndex in 1...5 {
+            if let rawChart = loadChartFromFile(path: "chart_data/\(chartIndex)/overview") {
+                anyRawCharts.append(rawChart)
+            }
         }
-
-        let charts = rawCharts.map{ self.convertToModel($0) }
+        
+        let charts = anyRawCharts.map{ self.convertToModel($0) }
         completion(charts)
     }
 
-    private func loadChartsFromFile() -> [RawChart]? {
-        guard let path = Bundle.main.path(forResource: "chart_data", ofType: "json") else {
+    private func loadChartFromFile(path: String) -> RawChart? {
+        guard let path = Bundle.main.path(forResource: path, ofType: "json") else {
             return nil
         }
         let url = URL(fileURLWithPath: path)
@@ -29,7 +31,7 @@ public class ChartProvider
             return nil
         }
 
-        return try? JSONDecoder().decode([RawChart].self, from: data)
+        return try? JSONDecoder().decode(RawChart.self, from: data)
     }
 
     private func convertToModel(_ rawCharts: RawChart) -> [Column] {
@@ -53,12 +55,20 @@ public class ChartProvider
                 continue
             }
             
-            guard let name = rawCharts.names[id], let type = rawCharts.types[id], let color = rawCharts.colors[id] else {
+            guard let name = rawCharts.names[id], let rawType = rawCharts.types[id], let color = rawCharts.colors[id] else {
                 continue
             }
             
-            if column.isEmpty && type != "line" && id != timestampId {
+            if column.isEmpty || id == timestampId {
                 continue
+            }
+            
+            let type: Column.ColumnType
+            switch rawType {
+            case "line": type = .line
+            case "bar": type = .bar
+            case "area": type = .area
+            default: continue
             }
 
             let values = column.dropFirst().compactMap{ $0.value }
@@ -69,7 +79,7 @@ public class ChartProvider
                 return Column.Point(date: timestamp, value: Int(value))
             }
 
-            result.append(Column(name: name, points: points, color: color))
+            result.append(Column(name: name, points: points, color: color, type: type))
         }
 
         return result

@@ -16,8 +16,16 @@ public struct Column
         public let date: Date
         public let value: Value
     }
+    
+    public enum ColumnType {
+        case line
+        case bar
+        case area
+    }
 
     public let name: String
     public let points: [Point]
     public let color: String
+    
+    public let type: ColumnType
 }

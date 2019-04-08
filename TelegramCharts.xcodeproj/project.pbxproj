@@ -11,6 +11,7 @@
 		ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */; };
 		ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */; };
 		ABA05B24225B830E00A927D9 /* ColumnsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B23225B830E00A927D9 /* ColumnsView.swift */; };
+		ABA05B26225BB42E00A927D9 /* chart_data in Resources */ = {isa = PBXBuildFile; fileRef = ABA05B25225BB42E00A927D9 /* chart_data */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */; };
@@ -49,6 +50,7 @@
 		ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchColumnVisibleTableViewCell.swift; sourceTree = "<group>"; };
 		ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutMargins.swift; sourceTree = "<group>"; };
 		ABA05B23225B830E00A927D9 /* ColumnsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsView.swift; sourceTree = "<group>"; };
+		ABA05B25225BB42E00A927D9 /* chart_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = chart_data; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonLinesView.swift; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 		BACE716122363AD500068579 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				ABA05B25225BB42E00A927D9 /* chart_data */,
 				BACE716222363AD500068579 /* chart_data.json */,
 				BACE716322363AD500068579 /* Assets.xcassets */,
 				BACE716422363AD500068579 /* LaunchScreen.storyboard */,
@@ -285,6 +288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABA05B26225BB42E00A927D9 /* chart_data in Resources */,
 				BACE716B22363AD500068579 /* LaunchScreen.storyboard in Resources */,
 				BACE716A22363AD500068579 /* Assets.xcassets in Resources */,
 				BACE716922363AD500068579 /* chart_data.json in Resources */,
