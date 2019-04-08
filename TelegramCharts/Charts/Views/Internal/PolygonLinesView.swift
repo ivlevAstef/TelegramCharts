@@ -1,5 +1,5 @@
 //
-//  ColumnsView.swift
+//  PolygonLineView.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 17/03/2019.
@@ -8,9 +8,9 @@
 
 import UIKit
 
-internal class ColumnsView: UIView
+internal class PolygonLineView: UIView, ColumnsView
 {
-    private var columnLayers: [ColumnLayerWrapper] = []
+    private var columnLayers: [PolygonLineLayerWrapper] = []
 
     private var lastAABB: AABB?
     
@@ -21,17 +21,10 @@ internal class ColumnsView: UIView
         setParentLayer()
     }
 
-    internal func setLineWidth(_ lineWidth: CGFloat) {
+    internal func setSize(_ size: Double) {
+        let lineWidth: CGFloat = CGFloat(size)
         for columnLayer in columnLayers {
-            columnLayer.layer.lineWidth = lineWidth
-        }
-    }
-
-    internal func setParentLayer() {
-        columnLayers.forEach { $0.layer.removeFromSuperlayer() }
-        for columnLayer in columnLayers {
-            columnLayer.layer.frame = layer.bounds
-            layer.addSublayer(columnLayer.layer)
+            columnLayer.lineWidth = lineWidth
         }
     }
 
@@ -39,7 +32,7 @@ internal class ColumnsView: UIView
         columnLayers.forEach { $0.layer.removeFromSuperlayer() }
         columnLayers.removeAll()
         for column in columnViewModels {
-            let columnLayer = ColumnLayerWrapper(columnViewModel: column)
+            let columnLayer = PolygonLineLayerWrapper(columnViewModel: column)
             columnLayers.append(columnLayer)
         }
 
@@ -59,6 +52,14 @@ internal class ColumnsView: UIView
                                     animatedPath: animatedPath,
                                     animatedOpacity: animatedOpacity,
                                     duration: duration)
+        }
+    }
+    
+    private func setParentLayer() {
+        columnLayers.forEach { $0.layer.removeFromSuperlayer() }
+        for columnLayer in columnLayers {
+            columnLayer.layer.frame = layer.bounds
+            layer.addSublayer(columnLayer.layer)
         }
     }
 

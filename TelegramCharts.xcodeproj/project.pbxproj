@@ -10,6 +10,7 @@
 		AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB057E632242A1FD007A76E6 /* UIView+animate.swift */; };
 		ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */; };
 		ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */; };
+		ABA05B24225B830E00A927D9 /* ColumnsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B23225B830E00A927D9 /* ColumnsView.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */; };
@@ -47,6 +48,7 @@
 		AB057E632242A1FD007A76E6 /* UIView+animate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+animate.swift"; sourceTree = "<group>"; };
 		ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchColumnVisibleTableViewCell.swift; sourceTree = "<group>"; };
 		ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutMargins.swift; sourceTree = "<group>"; };
+		ABA05B23225B830E00A927D9 /* ColumnsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsView.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonLinesView.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 		ABAE7945223E176B0063B223 /* Internal */ = {
 			isa = PBXGroup;
 			children = (
+				ABA05B23225B830E00A927D9 /* ColumnsView.swift */,
 				ABAE7943223E17560063B223 /* HorizontalAxisView.swift */,
 				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 				ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */,
@@ -314,6 +317,7 @@
 				BACE7156223613DF00068579 /* ChartTableViewCell.swift in Sources */,
 				BA41DFCF2244D3D50021DC82 /* MainNavigationController.swift in Sources */,
 				BACE714F223612DC00068579 /* ChartWithIntervalView.swift in Sources */,
+				ABA05B24225B830E00A927D9 /* ColumnsView.swift in Sources */,
 				BACE71312235FBEA00068579 /* MainViewController.swift in Sources */,
 				BACE716F22363E1900068579 /* Column.swift in Sources */,
 				BACE715C22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift in Sources */,

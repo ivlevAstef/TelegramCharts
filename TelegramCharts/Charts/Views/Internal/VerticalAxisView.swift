@@ -81,7 +81,7 @@ internal class VerticalAxisView: UIView
         let newValues = calculateNewValues(aabb: aabb)
 
         if !checkIsMoreDiff(oldValues, newValues) {
-            UIView.animateIf(animated, duration: duration, animations: {
+            UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
                 updatePositionOnSubviews()
             })
             return
@@ -117,6 +117,10 @@ internal class VerticalAxisView: UIView
             updatePositionOnSubviews()
         }, completion: { _ in
             prevViews.forEach { $0.removeFromSuperview() }
+        })
+        
+        UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
+            updatePositionOnSubviews()
         })
     }
 

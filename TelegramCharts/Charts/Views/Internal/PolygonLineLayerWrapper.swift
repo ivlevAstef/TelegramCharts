@@ -1,5 +1,5 @@
 //
-//  ColumnLayerWrapper.swift
+//  PolygonLineLayerWrapper.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 14/03/2019.
@@ -8,47 +8,66 @@
 
 import UIKit
 
-internal final class ColumnLayerWrapper
+internal final class PolygonLineLayerWrapper
 {
-    internal let layer: CAShapeLayer = CAShapeLayer()
+    internal let layer: CALayer = CALayer()
+    internal var lineWidth: CGFloat = 1.0
+    
+    private var pathLayer: CAShapeLayer?
     private let columnViewModel: ColumnViewModel
-
-    private let pathIndexCounter: IndexCounter = IndexCounter()
-    private let opacityIndexCounter: IndexCounter = IndexCounter()
+    
+    private var isFirst: Bool = true
 
     internal init(columnViewModel: ColumnViewModel) {
         self.columnViewModel = columnViewModel
-        
-        layer.lineWidth = 1.0
+    }
+    
+    internal func fillLayer(_ layer: CAShapeLayer) {
+        layer.lineWidth = lineWidth
         layer.lineCap = .round
+        layer.lineJoin = .round
         layer.strokeColor = columnViewModel.color.cgColor
         layer.fillColor = nil
+        layer.opacity = 1.0
     }
     
     internal func update(aabb: AABB, animatedPath: Bool, animatedOpacity: Bool, duration: TimeInterval) {
+        let oldKeys = Set(layer.animationKeys() ?? [])
+        
         let newPath = makePath(aabb: aabb)
-
-        if animatedPath && nil != layer.path {
-            let animation = CASaveStateAnimation(keyPath: "path")
+        let oldPath = pathLayer?.presentation()?.path ?? pathLayer?.path
+        
+        pathLayer?.removeFromSuperlayer()
+        
+        let newLayer = CAShapeLayer()
+        newLayer.path = newPath.cgPath
+        self.fillLayer(newLayer)
+        self.pathLayer = newLayer
+        self.layer.addSublayer(newLayer)
+        
+        let newKeys = Set(layer.animationKeys() ?? [])
+        for key in newKeys.subtracting(oldKeys) {
+            self.layer.removeAnimation(forKey: key)
+        }
+        
+        if animatedPath && nil != oldPath {
+            let animation = CABasicAnimation(keyPath: "path")
+            animation.beginTime = CACurrentMediaTime()
             animation.duration = duration
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.fromValue = oldPath
             animation.toValue = newPath.cgPath
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
-            animation.fillMode = .both
-            animation.startAnimation(on: layer, indexCounter: pathIndexCounter)
-        } else {
-            layer.path = newPath.cgPath
+            animation.isRemovedOnCompletion = true
+            newLayer.add(animation, forKey: "path")
         }
         
         let newOpacity: Float = columnViewModel.isVisible ? 1.0 : 0.0
-        if animatedOpacity {
-            let animation = CASaveStateAnimation(keyPath: "opacity")
-            animation.duration = duration
-            animation.toValue = newOpacity
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
-            animation.fillMode = .both
-            animation.startAnimation(on: layer, indexCounter: opacityIndexCounter)
-        } else {
+        if newOpacity != layer.opacity {
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(animatedOpacity ? duration: 0.0)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
             layer.opacity = newOpacity
+            CATransaction.commit()
         }
     }
     
@@ -62,65 +81,12 @@ internal final class ColumnLayerWrapper
 
         var lastPoint = uiPoints.removeFirst()
 
+        path.move(to: lastPoint)
         for point in uiPoints {
-            path.move(to: lastPoint)
             path.addLine(to: point)
             lastPoint = point
         }
         
         return path
-    }
-}
-
-private class IndexCounter
-{
-    private var counter: Int64 = 0
-    private var lastExecuted: Int64 = 0
-
-    func next() -> Int64 {
-        counter += 1
-        return counter
-    }
-
-    func finished(_ number: Int64) -> Bool {
-        if lastExecuted < number {
-            lastExecuted = number
-            return true
-        }
-        return false
-    }
-}
-
-private class CASaveStateAnimation: CABasicAnimation, CAAnimationDelegate
-{
-    private var uniqueIndex: Int64!
-    private var indexCounter: IndexCounter!
-    private var uniqueKey: String { return "\(keyPath!)\(uniqueIndex!)"}
-    
-    private weak var parentLayer: CALayer?
-    private var selfRetain: CASaveStateAnimation?
-
-    internal func startAnimation(on layer: CALayer, indexCounter: IndexCounter) {
-        self.indexCounter = indexCounter
-        self.uniqueIndex = indexCounter.next()
-
-        parentLayer = layer
-        isRemovedOnCompletion = false
-        delegate = self
-        layer.add(self, forKey: uniqueKey)
-    }
-    
-    @objc
-    func animationDidStart(_ anim: CAAnimation) {
-        selfRetain = self
-    }
-    
-    @objc
-    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        if indexCounter.finished(uniqueIndex) {
-            parentLayer?.setValue(toValue, forKey: keyPath!)
-        }
-        selfRetain = nil
-        parentLayer?.removeAnimation(forKey: uniqueKey)
     }
 }

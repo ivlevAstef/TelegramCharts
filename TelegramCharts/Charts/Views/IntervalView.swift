@@ -26,7 +26,7 @@ public class IntervalView: UIView
     }
     
     private var chartViewModel: ChartViewModel? = nil
-    private var columnsView: ColumnsView = ColumnsView()
+    private var columnsView: UIView & ColumnsView = PolygonLineView()
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
     
     private var visibleAABB: AABB? {
@@ -60,7 +60,7 @@ public class IntervalView: UIView
         let aabb = visibleAABB
         
         columnsView.setColumns(chartViewModel.columns)
-        columnsView.setLineWidth(1.0)
+        columnsView.setSize(1.0)
         columnsView.update(aabb: aabb, animated: false, duration: 0.0)
         
         intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,

@@ -25,7 +25,7 @@ public class ChartView: UIView
         return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
     
-    private let columnsView: ColumnsView = ColumnsView()
+    private let columnsView: UIView & ColumnsView = PolygonLineView()
     private let verticalAxisView: VerticalAxisView = VerticalAxisView()
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
@@ -51,7 +51,7 @@ public class ChartView: UIView
     
     private func update(use chartViewModel: ChartViewModel) {
         columnsView.setColumns(chartViewModel.columns)
-        columnsView.setLineWidth(2.0)
+        columnsView.setSize(2.0)
         columnsView.update(aabb: visibleAABB, animated: false, duration: 0.0)
         
         verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
