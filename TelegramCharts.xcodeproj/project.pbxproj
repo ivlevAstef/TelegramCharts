@@ -35,7 +35,6 @@
 		BACE715C22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE715B22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift */; };
 		BACE715E22362E4B00068579 /* Array+SafeGet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE715D22362E4B00068579 /* Array+SafeGet.swift */; };
 		BACE7160223633D700068579 /* UIColor+Init.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE715F223633D700068579 /* UIColor+Init.swift */; };
-		BACE716922363AD500068579 /* chart_data.json in Resources */ = {isa = PBXBuildFile; fileRef = BACE716222363AD500068579 /* chart_data.json */; };
 		BACE716A22363AD500068579 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BACE716322363AD500068579 /* Assets.xcassets */; };
 		BACE716B22363AD500068579 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BACE716422363AD500068579 /* LaunchScreen.storyboard */; };
 		BACE716C22363AD500068579 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BACE716622363AD500068579 /* Main.storyboard */; };
@@ -75,7 +74,6 @@
 		BACE715B22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableViewController+dequeueReusableCell.swift"; sourceTree = "<group>"; };
 		BACE715D22362E4B00068579 /* Array+SafeGet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+SafeGet.swift"; sourceTree = "<group>"; };
 		BACE715F223633D700068579 /* UIColor+Init.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Init.swift"; sourceTree = "<group>"; };
-		BACE716222363AD500068579 /* chart_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = chart_data.json; sourceTree = "<group>"; };
 		BACE716322363AD500068579 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BACE716522363AD500068579 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BACE716722363AD500068579 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -220,7 +218,6 @@
 			isa = PBXGroup;
 			children = (
 				ABA05B25225BB42E00A927D9 /* chart_data */,
-				BACE716222363AD500068579 /* chart_data.json */,
 				BACE716322363AD500068579 /* Assets.xcassets */,
 				BACE716422363AD500068579 /* LaunchScreen.storyboard */,
 				BACE716622363AD500068579 /* Main.storyboard */,
@@ -291,7 +288,6 @@
 				ABA05B26225BB42E00A927D9 /* chart_data in Resources */,
 				BACE716B22363AD500068579 /* LaunchScreen.storyboard in Resources */,
 				BACE716A22363AD500068579 /* Assets.xcassets in Resources */,
-				BACE716922363AD500068579 /* chart_data.json in Resources */,
 				BACE716C22363AD500068579 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
