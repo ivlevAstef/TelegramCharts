@@ -19,6 +19,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     override internal var frame: CGRect {
         didSet { updateFrame() }
     }
+    private var prevFrame: CGRect = .zero
 
     private let chartView = ChartWithIntervalView(intervalViewHeight: nil)
     
@@ -37,6 +38,11 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     }
     
     internal func updateFrame() {
+        if prevFrame.equalTo(frame) {
+            return
+        }
+        prevFrame = frame
+        
         chartView.frame = CGRect(x: Consts.margins.left,
                                  y: Consts.margins.top,
                                  width: frame.width - Consts.margins.left - Consts.margins.right,
@@ -51,6 +57,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     }
 
     internal func setChart(_ chartViewModel: ChartViewModel) {
+        prevFrame = .zero
         chartView.setChart(chartViewModel)
     }
 

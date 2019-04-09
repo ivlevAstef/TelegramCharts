@@ -10,10 +10,12 @@ import UIKit
 
 private enum Consts
 {
-    internal static let sliderWidth: CGFloat = 10.0
+    internal static let sliderWidth: CGFloat = 12.0
 
     internal static let sliderTouchWidth: CGFloat = 32.0
     internal static let minSliderIntervalWidth: CGFloat = 32.0
+    
+    internal static let cornerRadius: CGFloat = 6.0
 
     internal static let verticalPadding: CGFloat = 2.0
     internal static let padding: CGFloat = 0.0
@@ -55,7 +57,7 @@ public class IntervalView: UIView
         chartViewModel.registerUpdateListener(self)
         
         columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 1.0, parent: self)
-        self.addSubview(intervalDrawableView) // move to top
+        addSubview(intervalDrawableView) // move to top
 
         update(use: chartViewModel)
     }
@@ -88,9 +90,12 @@ public class IntervalView: UIView
                                  width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
         for columnView in columnsViews {
             columnView.frame = columnsViewRect
+            columnView.layer.cornerRadius = Consts.cornerRadius
+            columnView.layer.masksToBounds = true
         }
         
-        self.intervalDrawableView.frame = bounds
+        self.intervalDrawableView.frame = CGRect(x: Consts.padding, y: 0,
+                                                 width: bounds.width - 2 * Consts.padding, height: bounds.height)
         
         if let vm = chartViewModel {
             update(use: vm)
@@ -241,33 +246,40 @@ private class IntervalDrawableView: UIView
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: polyRect).x
         let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: polyRect).x
         
-        let cornerRadii = CGSize(width: 2, height: 2)
+        let cornerRadii = CGSize(width: Consts.cornerRadius, height: Consts.cornerRadius)
 
         let unvisibleRect = CGRect(x: bounds.origin.x, y: bounds.origin.y + Consts.verticalPadding,
                                    width: bounds.width, height: bounds.height - 2 * Consts.verticalPadding)
 
         unvisibleLeftView.frame = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
-                                         width: leftX - unvisibleRect.minX - Consts.sliderWidth, height: unvisibleRect.height)
-        unvisibleRightView.frame = CGRect(x: rightX + Consts.sliderWidth, y: unvisibleRect.minY,
-                                          width: unvisibleRect.width - rightX, height: unvisibleRect.height)
+                                         width: leftX - unvisibleRect.minX + Consts.sliderWidth, height: unvisibleRect.height)
+        let unvisibleLeftMask = CAShapeLayer()
+        unvisibleLeftMask.path = UIBezierPath(roundedRect: unvisibleLeftView.bounds, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: cornerRadii).cgPath
+        unvisibleLeftView.layer.mask = unvisibleLeftMask
         
-        leftSliderView.frame = CGRect(x: leftX - Consts.sliderWidth, y: bounds.minY,
+        unvisibleRightView.frame = CGRect(x: rightX - Consts.sliderWidth, y: unvisibleRect.minY,
+                                          width: unvisibleRect.width - rightX + Consts.sliderWidth, height: unvisibleRect.height)
+        let unvisibleRightMask = CAShapeLayer()
+        unvisibleRightMask.path = UIBezierPath(roundedRect: unvisibleRightView.bounds, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: cornerRadii).cgPath
+        unvisibleRightView.layer.mask = unvisibleRightMask
+        
+        leftSliderView.frame = CGRect(x: leftX, y: bounds.minY,
                                       width: Consts.sliderWidth, height: bounds.height)
         let leftMask = CAShapeLayer()
         leftMask.path = UIBezierPath(roundedRect: leftSliderView.bounds, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: cornerRadii).cgPath
         leftSliderView.layer.mask = leftMask
         
-        rightSliderView.frame = CGRect(x: rightX, y: bounds.minY,
+        rightSliderView.frame = CGRect(x: rightX - Consts.sliderWidth, y: bounds.minY,
                                        width: Consts.sliderWidth, height: bounds.height)
         let rightMask = CAShapeLayer()
         rightMask.path = UIBezierPath(roundedRect: rightSliderView.bounds, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: cornerRadii).cgPath
         rightSliderView.layer.mask = rightMask
 
-        topBorderView.frame = CGRect(x: leftX, y: bounds.minY,
-                                     width: rightX - leftX, height: 2)
+        topBorderView.frame = CGRect(x: leftX + Consts.sliderWidth - 0.5, y: bounds.minY,
+                                     width: rightX - leftX - 2 * Consts.sliderWidth + 0.5, height: 2)
 
-        bottomBorderView.frame = CGRect(x: leftX, y: bounds.maxY - 2,
-                                        width: rightX - leftX, height: 2)
+        bottomBorderView.frame = CGRect(x: leftX + Consts.sliderWidth - 0.5, y: bounds.maxY - 2,
+                                        width: rightX - leftX - 2 * Consts.sliderWidth + 0.5, height: 2)
 
         leftArrow.center = leftSliderView.center
         rightArrow.center = rightSliderView.center
@@ -297,11 +309,11 @@ private class IntervalDrawableView: UIView
     }
 
     private static func makeArrow(reverse: Bool) -> UIImage? {
-        let centerArrowX: CGFloat = 3
-        let edgeArrowX: CGFloat = 6
-        let arrowHeight: CGFloat = 10
+        let centerArrowX: CGFloat = 4
+        let edgeArrowX: CGFloat = Consts.sliderWidth - 4
+        let arrowHeight: CGFloat = 11
 
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: Consts.sliderWidth, height: arrowHeight), false, UIScreen.main.scale)
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: Consts.sliderWidth, height: arrowHeight + 2), false, UIScreen.main.scale)
 
         guard let context = UIGraphicsGetCurrentContext() else {
             return nil
@@ -310,16 +322,17 @@ private class IntervalDrawableView: UIView
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(2.0)
         context.setLineCap(.round)
+        context.setLineJoin(.round)
 
         context.beginPath()
         if reverse {
-            context.move(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 0))
-            context.addLine(to: CGPoint(x: Consts.sliderWidth - centerArrowX, y: arrowHeight * 0.5))
-            context.addLine(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: arrowHeight))
+            context.move(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 1))
+            context.addLine(to: CGPoint(x: Consts.sliderWidth - centerArrowX, y: 1 + arrowHeight * 0.5))
+            context.addLine(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 1 + arrowHeight))
         } else {
-            context.move(to: CGPoint(x: edgeArrowX, y: 0))
-            context.addLine(to: CGPoint(x: centerArrowX, y: arrowHeight * 0.5))
-            context.addLine(to: CGPoint(x: edgeArrowX, y: arrowHeight))
+            context.move(to: CGPoint(x: edgeArrowX, y: 1))
+            context.addLine(to: CGPoint(x: centerArrowX, y: 1 + arrowHeight * 0.5))
+            context.addLine(to: CGPoint(x: edgeArrowX, y: 1 + arrowHeight))
         }
         context.strokePath()
 

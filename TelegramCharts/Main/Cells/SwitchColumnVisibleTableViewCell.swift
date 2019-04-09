@@ -36,6 +36,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
     override internal var frame: CGRect {
         didSet { updateFrame() }
     }
+    private var prevFrame: CGRect = .zero
     
     private var togglers: [ColumnToggler] = []
     
@@ -47,8 +48,13 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
         self.togglers.forEach { $0.removeFromSuperview() }
         self.togglers.removeAll()
     }
-    
+
     internal func updateFrame() {
+        if prevFrame.equalTo(frame) {
+            return
+        }
+        prevFrame = frame
+        
         var lastColumnToggler: ColumnToggler? = nil
         for columnToggler in togglers {
             SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: bounds.width)
@@ -72,6 +78,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
     }
     
     internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping () -> Void) {
+        prevFrame = .zero
         let columnToggler = ColumnToggler(name: name, color: color)
         
         columnToggler.isVisible = isVisible
