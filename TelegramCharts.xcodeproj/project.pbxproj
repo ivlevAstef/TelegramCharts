@@ -10,13 +10,15 @@
 		AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB057E632242A1FD007A76E6 /* UIView+animate.swift */; };
 		ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */; };
 		ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */; };
-		ABA05B24225B830E00A927D9 /* ColumnsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B23225B830E00A927D9 /* ColumnsView.swift */; };
+		ABA05B24225B830E00A927D9 /* ColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B23225B830E00A927D9 /* ColumnView.swift */; };
 		ABA05B26225BB42E00A927D9 /* chart_data in Resources */ = {isa = PBXBuildFile; fileRef = ABA05B25225BB42E00A927D9 /* chart_data */; };
+		ABA05B28225C3F3100A927D9 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B27225C3F3100A927D9 /* Chart.swift */; };
+		ABA05B2B225C409900A927D9 /* ColumnsViewFabric.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
-		ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */; };
+		ABAE7942223DF1D40063B223 /* PolyLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolyLineView.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
-		ABB87D3B223A393B00E31808 /* PolygonLineLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */; };
+		ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */; };
 		ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D3A223A393B00E31808 /* ChartView.swift */; };
 		BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */; };
 		BA41DFC02240DF0B0021DC82 /* HintAndOtherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */; };
@@ -48,13 +50,15 @@
 		AB057E632242A1FD007A76E6 /* UIView+animate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+animate.swift"; sourceTree = "<group>"; };
 		ABA05B1F225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchColumnVisibleTableViewCell.swift; sourceTree = "<group>"; };
 		ABA05B21225A6F3800A927D9 /* LayoutMargins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutMargins.swift; sourceTree = "<group>"; };
-		ABA05B23225B830E00A927D9 /* ColumnsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsView.swift; sourceTree = "<group>"; };
+		ABA05B23225B830E00A927D9 /* ColumnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnView.swift; sourceTree = "<group>"; };
 		ABA05B25225BB42E00A927D9 /* chart_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = chart_data; sourceTree = "<group>"; };
+		ABA05B27225C3F3100A927D9 /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
+		ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsViewFabric.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
-		ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolygonLinesView.swift; sourceTree = "<group>"; };
+		ABAE7941223DF1D40063B223 /* PolyLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolyLineView.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
-		ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolygonLineLayerWrapper.swift; sourceTree = "<group>"; };
+		ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolyLineLayerWrapper.swift; sourceTree = "<group>"; };
 		ABB87D3A223A393B00E31808 /* ChartView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalAxisView.swift; sourceTree = "<group>"; };
 		BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HintAndOtherView.swift; sourceTree = "<group>"; };
@@ -106,14 +110,23 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		ABA05B29225C407600A927D9 /* ColumnsView */ = {
+			isa = PBXGroup;
+			children = (
+				ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */,
+				ABA05B23225B830E00A927D9 /* ColumnView.swift */,
+				ABAE7941223DF1D40063B223 /* PolyLineView.swift */,
+				ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */,
+			);
+			path = ColumnsView;
+			sourceTree = "<group>";
+		};
 		ABAE7945223E176B0063B223 /* Internal */ = {
 			isa = PBXGroup;
 			children = (
-				ABA05B23225B830E00A927D9 /* ColumnsView.swift */,
+				ABA05B29225C407600A927D9 /* ColumnsView */,
 				ABAE7943223E17560063B223 /* HorizontalAxisView.swift */,
 				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
-				ABAE7941223DF1D40063B223 /* PolygonLinesView.swift */,
-				ABB87D39223A393B00E31808 /* PolygonLineLayerWrapper.swift */,
 				BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */,
 			);
 			path = Internal;
@@ -166,6 +179,7 @@
 				BACE71422235FC3A00068579 /* ColumnViewModel.swift */,
 				BACE716E22363E1900068579 /* Column.swift */,
 				ABAE793B223DE8230063B223 /* AABB.swift */,
+				ABA05B27225C3F3100A927D9 /* Chart.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -308,7 +322,7 @@
 				BACE71772238D18300068579 /* WeakRef.swift in Sources */,
 				BACE7160223633D700068579 /* UIColor+Init.swift in Sources */,
 				ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */,
-				ABAE7942223DF1D40063B223 /* PolygonLinesView.swift in Sources */,
+				ABAE7942223DF1D40063B223 /* PolyLineView.swift in Sources */,
 				BACE71712238BB5E00068579 /* IntervalView.swift in Sources */,
 				BA41DFC7224269DA0021DC82 /* StyleController.swift in Sources */,
 				AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */,
@@ -317,19 +331,21 @@
 				BACE7156223613DF00068579 /* ChartTableViewCell.swift in Sources */,
 				BA41DFCF2244D3D50021DC82 /* MainNavigationController.swift in Sources */,
 				BACE714F223612DC00068579 /* ChartWithIntervalView.swift in Sources */,
-				ABA05B24225B830E00A927D9 /* ColumnsView.swift in Sources */,
+				ABA05B24225B830E00A927D9 /* ColumnView.swift in Sources */,
 				BACE71312235FBEA00068579 /* MainViewController.swift in Sources */,
 				BACE716F22363E1900068579 /* Column.swift in Sources */,
 				BACE715C22362DFC00068579 /* UITableViewController+dequeueReusableCell.swift in Sources */,
 				BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */,
 				BACE715E22362E4B00068579 /* Array+SafeGet.swift in Sources */,
+				ABA05B28225C3F3100A927D9 /* Chart.swift in Sources */,
 				BACE714D223602E400068579 /* Style+Styles.swift in Sources */,
 				BACE71432235FC3A00068579 /* ColumnViewModel.swift in Sources */,
 				ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */,
 				ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */,
 				ABAE793C223DE8230063B223 /* AABB.swift in Sources */,
-				ABB87D3B223A393B00E31808 /* PolygonLineLayerWrapper.swift in Sources */,
+				ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */,
 				ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */,
+				ABA05B2B225C409900A927D9 /* ColumnsViewFabric.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

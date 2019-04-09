@@ -25,7 +25,7 @@ public class ChartView: UIView
         return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
     
-    private let columnsView: UIView & ColumnsView = PolygonLineView()
+    private var columnsViews: [UIView & ColumnView] = []
     private let verticalAxisView: VerticalAxisView = VerticalAxisView()
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
@@ -46,13 +46,15 @@ public class ChartView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
         
+        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 2.0, parent: self)
+        
         update(use: chartViewModel)
     }
     
     private func update(use chartViewModel: ChartViewModel) {
-        columnsView.setColumns(chartViewModel.columns)
-        columnsView.setSize(2.0)
-        columnsView.update(aabb: visibleAABB, animated: false, duration: 0.0)
+        for columnView in columnsViews {
+            columnView.update(aabb: visibleAABB, animated: false, duration: 0.0)
+        }
         
         verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
         
@@ -64,8 +66,7 @@ public class ChartView: UIView
     }
 
     private func configureSubviews() {
-        columnsView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(columnsView)
+        
         
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
@@ -78,12 +79,15 @@ public class ChartView: UIView
     }
     
     private func updateFrame() {
-        self.columnsView.frame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - 2 * Consts.spacing)
-        self.horizontalAxisView.frame = CGRect(x: 0, y: self.columnsView.bounds.maxY + Consts.spacing,
-                                               width: bounds.width, height: Consts.horizontalAxisHeight)
+        let fullFrame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
+        for columnView in columnsViews {
+            columnView.frame = fullFrame
+        }
         
-        self.verticalAxisView.frame = self.columnsView.frame
-        self.hintView.frame = self.columnsView.frame
+        self.horizontalAxisView.frame = CGRect(x: 0, y: fullFrame.maxY, width: bounds.width, height: Consts.horizontalAxisHeight)
+        
+        self.verticalAxisView.frame = fullFrame
+        self.hintView.frame = fullFrame
         
         if let vm = chartViewModel {
             update(use: vm)
@@ -101,7 +105,9 @@ extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        for columnView in columnsViews {
+            columnView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
+        }
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         hintView.setAABB(aabb: aabb)
@@ -109,7 +115,9 @@ extension ChartView: ChartUpdateListener
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        columnsView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
+        for columnView in columnsViews {
+            columnView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
+        }
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForValuesDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForDatesDuration)
         hintView.setAABB(aabb: aabb)

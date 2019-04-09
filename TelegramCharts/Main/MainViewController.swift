@@ -16,6 +16,8 @@ internal class MainViewController: UITableViewController, Stylizing
     private var subTitleColor: UIColor = .white
     private var statusBarStyle: UIStatusBarStyle = .default
     private var chartViewModels: [ChartViewModel] = []
+    
+    private var heightByNamesCache: [String: CGFloat] = [:]
 
     @IBOutlet private var switchStyleButton: UIBarButtonItem!
   
@@ -60,8 +62,8 @@ internal class MainViewController: UITableViewController, Stylizing
         return "\(style.name) Mode"
     }
     
-    private func processChartsResult(_ result: [[Column]]) {
-        chartViewModels = result.map { ChartViewModel(columns: $0, from: 0.6, to: 1.0) }
+    private func processChartsResult(_ result: [Chart]) {
+        chartViewModels = result.map { ChartViewModel(chart: $0, from: 0.6, to: 1.0) }
         tableView.reloadData()
     }
 
@@ -89,7 +91,14 @@ internal class MainViewController: UITableViewController, Stylizing
         
         let chartViewModel = chartViewModels[indexPath.section]
         let names = chartViewModel.columns.map { $0.name }
-        return SwitchColumnVisibleTableViewCell.calculateHeight(names: names, width: tableView.bounds.width)
+        
+        let cacheKey = names.joined(separator: "")
+        if let height = heightByNamesCache[cacheKey] {
+            return height
+        }
+        let height = SwitchColumnVisibleTableViewCell.calculateHeight(names: names, width: tableView.bounds.width)
+        heightByNamesCache[cacheKey] = height
+        return height
     }
     
     internal override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {

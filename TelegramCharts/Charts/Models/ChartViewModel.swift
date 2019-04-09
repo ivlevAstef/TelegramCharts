@@ -23,6 +23,10 @@ public class ChartViewModel
         public let to: Column.Date
     }
 
+    public let yScaled: Bool
+    public let stacked: Bool
+    public let percentage: Bool
+    
     public private(set) var columns: [ColumnViewModel]
     public var visibleColumns: [ColumnViewModel] {
         return columns.filter { $0.isVisible }
@@ -43,11 +47,20 @@ public class ChartViewModel
 
     private var updateListeners: [WeakRef<ChartUpdateListener>] = []
 
-    public init(columns: [Column], from: Double = 0.0, to: Double = 1.0) {
-        self.columns = columns.map { column in
+    public init(chart: Chart, from: Double = 0.0, to: Double = 1.0) {
+        self.columns = chart.columns.map { column in
             let points = column.points.map { ColumnViewModel.Point(date: $0.date, value: $0.value) }
-            return ColumnViewModel(name: column.name, points: points, color: UIColor(hex: column.color))
+            let type: ColumnViewModel.ColumnType
+            switch column.type {
+            case .line: type = .line
+            case .area: type = .area
+            case .bar: type = .bar
+            }
+            return ColumnViewModel(name: column.name, points: points, color: UIColor(hex: column.color), type: type)
         }
+        self.yScaled = chart.yScaled
+        self.stacked = chart.stacked
+        self.percentage = chart.percentage
 
         if let aabb = self.aabb {
             let length = Double(aabb.maxDate - aabb.minDate)

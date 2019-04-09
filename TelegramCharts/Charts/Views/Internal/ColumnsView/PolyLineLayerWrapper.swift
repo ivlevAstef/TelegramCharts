@@ -1,5 +1,5 @@
 //
-//  PolygonLineLayerWrapper.swift
+//  PolyLineLayerWrapper.swift
 //  TelegramCharts
 //
 //  Created by Alexander Ivlev on 14/03/2019.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-internal final class PolygonLineLayerWrapper
+internal final class PolyLineLayerWrapper
 {
     internal let layer: CALayer = CALayer()
     internal var lineWidth: CGFloat = 1.0

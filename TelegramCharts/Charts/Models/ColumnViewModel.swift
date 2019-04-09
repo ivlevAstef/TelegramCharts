@@ -22,10 +22,18 @@ public class ColumnViewModel
         public let g: UInt8
         public let b: UInt8
     }
+    
+    public enum ColumnType {
+        case line
+        case bar
+        case area
+    }
 
     public let name: String
     public let points: [Point]
     public let color: UIColor
+    public let type: ColumnType
+    
     public internal(set) var isVisible: Bool = true
 
     internal private(set) lazy var aabb: AABB = {
@@ -43,11 +51,12 @@ public class ColumnViewModel
         return AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
     }()
 
-    public init(name: String, points: [Point], color: UIColor) {
+    public init(name: String, points: [Point], color: UIColor, type: ColumnType) {
         assert(points.count > 0)
         self.name = name
         self.points = points
         self.color = color
+        self.type = type
     }
 
     internal func pointByDate(date: Column.Date) -> Point {

@@ -26,7 +26,8 @@ public class IntervalView: UIView
     }
     
     private var chartViewModel: ChartViewModel? = nil
-    private var columnsView: UIView & ColumnsView = PolygonLineView()
+    private var columnsViews: [UIView & ColumnView] = []
+    private var columnsViewRect: CGRect = .zero
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
     
     private var visibleAABB: AABB? {
@@ -52,6 +53,9 @@ public class IntervalView: UIView
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
+        
+        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 1.0, parent: self)
+        self.addSubview(intervalDrawableView) // move to top
 
         update(use: chartViewModel)
     }
@@ -59,11 +63,11 @@ public class IntervalView: UIView
     private func update(use chartViewModel: ChartViewModel) {
         let aabb = visibleAABB
         
-        columnsView.setColumns(chartViewModel.columns)
-        columnsView.setSize(1.0)
-        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
+        for columnView in columnsViews {
+            columnView.update(aabb: aabb, animated: false, duration: 0.0)
+        }
         
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
                                     animated: false, duration: 0.0)
     }
 
@@ -75,16 +79,17 @@ public class IntervalView: UIView
         gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
 
-        columnsView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(columnsView)
-
         intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(intervalDrawableView)
     }
     
     private func updateFrame() {
-        self.columnsView.frame = CGRect(x: Consts.padding, y: Consts.verticalPadding,
-                                        width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
+        columnsViewRect = CGRect(x: Consts.padding, y: Consts.verticalPadding,
+                                 width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
+        for columnView in columnsViews {
+            columnView.frame = columnsViewRect
+        }
+        
         self.intervalDrawableView.frame = bounds
         
         if let vm = chartViewModel {
@@ -103,7 +108,7 @@ public class IntervalView: UIView
         }
 
         let interval = chartViewModel.interval
-        let rect = columnsView.frame
+        let rect = columnsViewRect
         let sWidth = Consts.sliderWidth * 0.5
 
         let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x - sWidth
@@ -178,14 +183,16 @@ extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        columnsView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
+        for columnView in columnsViews {
+            columnView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
+        }
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
                                     animated: true, duration: Configs.visibleChangeDuration)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsView.frame,
+        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
                                     animated: false, duration: 0)
     }
 }

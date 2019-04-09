@@ -10,7 +10,7 @@ import Foundation
 
 public class ChartProvider
 {
-    public func getCharts(_ completion: @escaping ([[Column]]) -> Void) {
+    public func getCharts(_ completion: @escaping ([Chart]) -> Void) {
         var anyRawCharts: [RawChart] = []
         for chartIndex in 1...5 {
             if let rawChart = loadChartFromFile(path: "chart_data/\(chartIndex)/overview") {
@@ -18,7 +18,7 @@ public class ChartProvider
             }
         }
         
-        let charts = anyRawCharts.map{ self.convertToModel($0) }
+        let charts = anyRawCharts.compactMap { self.convertToModel($0) }
         completion(charts)
     }
 
@@ -34,22 +34,21 @@ public class ChartProvider
         return try? JSONDecoder().decode(RawChart.self, from: data)
     }
 
-    private func convertToModel(_ rawCharts: RawChart) -> [Column] {
+    private func convertToModel(_ rawCharts: RawChart) -> Chart? {
         guard let timestampId = rawCharts.types.first(where: { $0.value == "x" })?.key else {
-            return []
+            return nil
         }
         guard let timestampColumn = rawCharts.columns.first(where: { $0[safe: 0]?.name == timestampId }) else {
-            return []
+            return nil
         }
         if timestampColumn.isEmpty {
-            return []
+            return nil
         }
 
         let timestamps = timestampColumn.dropFirst().compactMap{ $0.value }
         assert(timestamps == timestamps.sorted(), "Invalid data. Timestamps doen't sort.")
 
-        var result: [Column] = []
-
+        var columns: [Column] = []
         for column in rawCharts.columns {
             guard let id = column[safe: 0]?.name else {
                 continue
@@ -79,10 +78,17 @@ public class ChartProvider
                 return Column.Point(date: timestamp, value: Int(value))
             }
 
-            result.append(Column(name: name, points: points, color: color, type: type))
+            columns.append(Column(name: name, points: points, color: color, type: type))
         }
-
-        return result
+        
+        if columns.isEmpty {
+            return nil
+        }
+        
+        return Chart(columns: columns,
+                     yScaled: rawCharts.y_scaled ?? false,
+                     stacked: rawCharts.stacked ?? false,
+                     percentage: rawCharts.percentage ?? false)
     }
 }
 
@@ -114,4 +120,8 @@ private struct RawChart: Decodable
     internal let types: [ChartName: ChartType]
     internal let names: [ChartName: String]
     internal let colors: [ChartName: String]
+    
+    internal let y_scaled: Bool?
+    internal let stacked: Bool?
+    internal let percentage: Bool?
 }

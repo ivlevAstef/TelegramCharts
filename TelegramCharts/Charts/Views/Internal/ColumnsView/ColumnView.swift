@@ -8,10 +8,10 @@
 
 import UIKit
 
-internal protocol ColumnsView: class
+internal protocol ColumnView: class
 {
+    init(_ columnViewModel: ColumnViewModel)
     // 1 - for interval, 2 - for normal
     func setSize(_ size: Double)
-    func setColumns(_ columnViewModels: [ColumnViewModel])
     func update(aabb: AABB?, animated: Bool, duration: TimeInterval)
 }
