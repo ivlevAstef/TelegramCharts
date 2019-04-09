@@ -8,6 +8,7 @@
 
 public struct Chart
 {
+    public let name: String
     public let columns: [Column]
     public let yScaled: Bool
     public let stacked: Bool

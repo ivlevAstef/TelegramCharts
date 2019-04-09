@@ -11,14 +11,31 @@ import Foundation
 public class ChartProvider
 {
     public func getCharts(_ completion: @escaping ([Chart]) -> Void) {
-        var anyRawCharts: [RawChart] = []
-        for chartIndex in 1...5 {
-            if let rawChart = loadChartFromFile(path: "chart_data/\(chartIndex)/overview") {
-                anyRawCharts.append(rawChart)
+        var anyRawChartsWithName: [(RawChart,String)] = []
+
+        guard let resourcePath = Bundle.main.resourcePath as NSString? else {
+            completion([])
+            return
+        }
+
+        let chartDataPath = resourcePath.appendingPathComponent("chart_data")
+        guard let fileNames = try? FileManager.default.contentsOfDirectory(atPath: chartDataPath) else {
+            completion([])
+            return
+        }
+
+        let fileInfos: [(String, Int, String)] = fileNames.map { fileName in
+            let formattedFileName = fileName.split(separator: "_")
+            return (fileName, Int(formattedFileName[0])!, String(formattedFileName[1]))
+        }
+
+        for (fileName, _, name) in fileInfos.sorted(by: { $0.1 < $1.1 }) {
+            if let rawChart = loadChartFromFile(path: "chart_data/\(fileName)/overview") {
+                anyRawChartsWithName.append((rawChart, name))
             }
         }
         
-        let charts = anyRawCharts.compactMap { self.convertToModel($0) }
+        let charts = anyRawChartsWithName.compactMap { self.convertToModel($0, $1) }
         completion(charts)
     }
 
@@ -34,7 +51,7 @@ public class ChartProvider
         return try? JSONDecoder().decode(RawChart.self, from: data)
     }
 
-    private func convertToModel(_ rawCharts: RawChart) -> Chart? {
+    private func convertToModel(_ rawCharts: RawChart, _ name: String) -> Chart? {
         guard let timestampId = rawCharts.types.first(where: { $0.value == "x" })?.key else {
             return nil
         }
@@ -85,7 +102,8 @@ public class ChartProvider
             return nil
         }
         
-        return Chart(columns: columns,
+        return Chart(name: name,
+                     columns: columns,
                      yScaled: rawCharts.y_scaled ?? false,
                      stacked: rawCharts.stacked ?? false,
                      percentage: rawCharts.percentage ?? false)

@@ -45,10 +45,6 @@ public class ChartWithIntervalView: UIView
         configureNoDataLabel(viewModel: chart, animated: false)
     }
 
-    public static func calculateHeight() -> CGFloat {
-        return min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-    }
-
     private func configureSubviews() {
         chartView.translatesAutoresizingMaskIntoConstraints = false
         intervalView.translatesAutoresizingMaskIntoConstraints = false

@@ -29,7 +29,7 @@ private enum Consts {
     internal static let font: UIFont = UIFont.systemFont(ofSize: 15.0, weight: .regular)
 }
 
-internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
+internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IActualizedCell
 {
     internal let identifier: String = "SwitchColumnVisibleTableViewCell"
     
@@ -39,42 +39,24 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
     private var prevFrame: CGRect = .zero
     
     private var togglers: [ColumnToggler] = []
+
+    internal init() {
+        super.init(style: .default, reuseIdentifier: nil)
+
+        self.selectionStyle = .none
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    internal func actualizeFrame(width: CGFloat) {
+        let height = (togglers.last?.frame.maxY ?? Consts.margins.top) + Consts.margins.bottom
+        self.frame = CGRect(x: 0, y: 0, width: width, height: height)
+    }
     
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
-    }
-    
-    internal func clean() {
-        self.togglers.forEach { $0.removeFromSuperview() }
-        self.togglers.removeAll()
-    }
-
-    internal func updateFrame() {
-        if prevFrame.equalTo(frame) {
-            return
-        }
-        prevFrame = frame
-        
-        var lastColumnToggler: ColumnToggler? = nil
-        for columnToggler in togglers {
-            SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: bounds.width)
-            lastColumnToggler = columnToggler
-        }
-    }
-    
-    internal static func calculateHeight(names: [String], width: CGFloat) -> CGFloat {
-        var lastColumnToggler: ColumnToggler? = nil
-        for name in names {
-            let columnToggler = ColumnToggler(name: name, color: .white)
-            SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: width)
-            lastColumnToggler = columnToggler
-        }
-        
-        if let toggler = lastColumnToggler {
-            return toggler.frame.maxY + Consts.margins.bottom
-        }
-        
-        return 0
     }
     
     internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping () -> Void) {
@@ -93,6 +75,21 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing
         
         contentView.addSubview(columnToggler)
         togglers.append(columnToggler)
+
+        self.frame.size.height = columnToggler.frame.maxY + Consts.margins.bottom
+    }
+
+    private func updateFrame() {
+        if prevFrame.equalTo(frame) {
+            return
+        }
+        prevFrame = frame
+
+        var lastColumnToggler: ColumnToggler? = nil
+        for columnToggler in togglers {
+            SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: bounds.width)
+            lastColumnToggler = columnToggler
+        }
     }
     
     private static func layoutColumnToggler(columnToggler: ColumnToggler, last: ColumnToggler?, width: CGFloat) {

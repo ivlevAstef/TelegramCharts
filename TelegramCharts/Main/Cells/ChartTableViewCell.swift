@@ -12,7 +12,7 @@ private enum Consts {
     internal static let margins: UIEdgeInsets = layoutMargins
 }
 
-internal class ChartTableViewCell: UITableViewCell, Stylizing
+internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
 {
     internal let identifier: String = "ChartTableViewCell"
     
@@ -22,19 +22,23 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     private var prevFrame: CGRect = .zero
 
     private let chartView = ChartWithIntervalView(intervalViewHeight: nil)
-    
-    internal override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
+    internal init() {
+        super.init(style: .default, reuseIdentifier: nil)
+
+        self.selectionStyle = .none
+
         chartView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(chartView)
     }
-    
-    internal required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(chartView)
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    internal func actualizeFrame(width: CGFloat) {
+        let height =  min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+        self.frame = CGRect(x: 0, y: 0, width: width, height: height)
     }
     
     internal func updateFrame() {
@@ -59,9 +63,5 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing
     internal func setChart(_ chartViewModel: ChartViewModel) {
         prevFrame = .zero
         chartView.setChart(chartViewModel)
-    }
-
-    internal static func calculateHeight() -> CGFloat {
-        return ChartWithIntervalView.calculateHeight()
     }
 }

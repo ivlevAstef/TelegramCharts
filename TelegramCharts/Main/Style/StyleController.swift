@@ -26,13 +26,4 @@ internal class StyleController {
             return Style.dayStyle
         }
     }
-
-    static func recursiveApplyStyle(on view: UIView, style: Style) {
-        (view as? Stylizing)?.applyStyle(style)
-
-        for subview in view.subviews {
-            recursiveApplyStyle(on: subview, style: style)
-        }
-    }
-
 }

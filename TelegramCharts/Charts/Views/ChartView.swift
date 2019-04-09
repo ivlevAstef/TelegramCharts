@@ -25,13 +25,14 @@ public class ChartView: UIView
         return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
     }
     
-    private var columnsViews: [UIView & ColumnView] = []
+    private var columnsView: ColumnsView = ColumnsView()
     private let verticalAxisView: VerticalAxisView = VerticalAxisView()
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
 
     public init() {
         super.init(frame: .zero)
+        columnsView.parent = self
         
         configureSubviews()
     }
@@ -45,29 +46,26 @@ public class ChartView: UIView
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
-        
-        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 2.0, parent: self)
-        
+
+        columnsView.setChart(chartViewModel)
+
         update(use: chartViewModel)
     }
     
     private func update(use chartViewModel: ChartViewModel) {
-        for columnView in columnsViews {
-            columnView.update(aabb: visibleAABB, animated: false, duration: 0.0)
-        }
+        let aabb = visibleAABB
         
-        verticalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
+        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
+        verticalAxisView.update(aabb: aabb, animated: false, duration: 0.0)
         
         horizontalAxisView.setFullInterval(chartViewModel.fullInterval)
-        horizontalAxisView.update(aabb: visibleAABB, animated: false, duration: 0.0)
+        horizontalAxisView.update(aabb: aabb, animated: false, duration: 0.0)
         
         hintView.setColumns(chartViewModel.columns)
-        hintView.setAABB(aabb: visibleAABB)
+        hintView.setAABB(aabb: aabb)
     }
 
     private func configureSubviews() {
-        
-        
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
 
@@ -80,9 +78,7 @@ public class ChartView: UIView
     
     private func updateFrame() {
         let fullFrame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
-        for columnView in columnsViews {
-            columnView.frame = fullFrame
-        }
+        columnsView.updateFrame(frame: fullFrame)
         
         self.horizontalAxisView.frame = CGRect(x: 0, y: fullFrame.maxY, width: bounds.width, height: Consts.horizontalAxisHeight)
         
@@ -105,9 +101,7 @@ extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        for columnView in columnsViews {
-            columnView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
-        }
+        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         hintView.setAABB(aabb: aabb)
@@ -115,9 +109,7 @@ extension ChartView: ChartUpdateListener
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        for columnView in columnsViews {
-            columnView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
-        }
+        columnsView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
         verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForValuesDuration)
         horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForDatesDuration)
         hintView.setAABB(aabb: aabb)

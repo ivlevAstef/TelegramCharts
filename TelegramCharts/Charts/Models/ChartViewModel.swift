@@ -23,6 +23,7 @@ public class ChartViewModel
         public let to: Column.Date
     }
 
+    public let name: String
     public let yScaled: Bool
     public let stacked: Bool
     public let percentage: Bool
@@ -58,6 +59,7 @@ public class ChartViewModel
             }
             return ColumnViewModel(name: column.name, points: points, color: UIColor(hex: column.color), type: type)
         }
+        self.name = chart.name
         self.yScaled = chart.yScaled
         self.stacked = chart.stacked
         self.percentage = chart.percentage

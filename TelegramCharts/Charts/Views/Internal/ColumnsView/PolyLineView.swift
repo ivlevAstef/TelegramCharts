@@ -15,7 +15,6 @@ internal class PolyLineView: UIView, ColumnView
     }
     
     private let columnLayer: PolyLineLayerWrapper
-
     private var lastAABB: AABB?
     
     required internal init(_ columnViewModel: ColumnViewModel) {
@@ -23,7 +22,6 @@ internal class PolyLineView: UIView, ColumnView
         super.init(frame: .zero)
         
         clipsToBounds = true
-        
         layer.addSublayer(columnLayer.layer)
     }
 

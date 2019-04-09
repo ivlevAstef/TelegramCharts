@@ -16,8 +16,8 @@ internal class MainViewController: UITableViewController, Stylizing
     private var subTitleColor: UIColor = .white
     private var statusBarStyle: UIStatusBarStyle = .default
     private var chartViewModels: [ChartViewModel] = []
-    
-    private var heightByNamesCache: [String: CGFloat] = [:]
+
+    private var cellCache: [IndexPath: UITableViewCell & IActualizedCell & Stylizing] = [:]
 
     @IBOutlet private var switchStyleButton: UIBarButtonItem!
   
@@ -51,7 +51,9 @@ internal class MainViewController: UITableViewController, Stylizing
         statusBarStyle = style.statusBarStyle
         setNeedsStatusBarAppearanceUpdate()
 
-        StyleController.recursiveApplyStyle(on: tableView, style: style)
+        for cell in cellCache.values {
+            cell.applyStyle(style)
+        }
         
         switchStyleButton.tintColor = style.activeElementColor
         switchStyleButton.title = textForSwitch(by: StyleController.nextStyle)
@@ -80,27 +82,6 @@ internal class MainViewController: UITableViewController, Stylizing
         return cellHeight(for: indexPath)
     }
     
-    private func cellHeight(for indexPath: IndexPath) -> CGFloat {
-        if 0 == indexPath.row {
-            return ChartTableViewCell.calculateHeight()
-        }
-        
-        if !(0 <= indexPath.section && indexPath.section < chartViewModels.count) {
-            fatalError("incorrect section number: \(indexPath.section)")
-        }
-        
-        let chartViewModel = chartViewModels[indexPath.section]
-        let names = chartViewModel.columns.map { $0.name }
-        
-        let cacheKey = names.joined(separator: "")
-        if let height = heightByNamesCache[cacheKey] {
-            return height
-        }
-        let height = SwitchColumnVisibleTableViewCell.calculateHeight(names: names, width: tableView.bounds.width)
-        heightByNamesCache[cacheKey] = height
-        return height
-    }
-    
     internal override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 36
     }
@@ -109,7 +90,7 @@ internal class MainViewController: UITableViewController, Stylizing
         let label = UILabel(frame: CGRect(x: 16, y: 16, width: tableView.bounds.width - 16, height: 16))
         label.font = UIFont.systemFont(ofSize: 14.0)
         label.textColor = subTitleColor
-        label.text = "CHART \(section + 1)"
+        label.text = chartViewModels[safe: section]?.name
         
         let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
         view.addSubview(label)
@@ -130,36 +111,54 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     internal override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return makeCellWithUseCache(indexPath: indexPath)
+    }
+
+    private func cellHeight(for indexPath: IndexPath) -> CGFloat {
+        let cell = makeCellWithUseCache(indexPath: indexPath)
+        return cell.frame.height
+    }
+
+    private func makeCellWithUseCache(indexPath: IndexPath) -> UITableViewCell {
+        if let cell = cellCache[indexPath] {
+            return cell
+        }
+
+        let cell = makeCell(indexPath: indexPath)
+        cellCache[indexPath] = cell
+        return cell
+    }
+
+    private func makeCell(indexPath: IndexPath) -> UITableViewCell & IActualizedCell & Stylizing {
         if !(0 <= indexPath.section && indexPath.section < chartViewModels.count) {
             fatalError("incorrect section number: \(indexPath.section)")
         }
-        
+
         let chartViewModel = chartViewModels[indexPath.section]
-        
+
         if 0 == indexPath.row {
-            let chartCell: ChartTableViewCell = dequeueReusableCell(for: indexPath)
-            chartCell.updateFrame()
+            let chartCell = ChartTableViewCell()
+            chartCell.actualizeFrame(width: tableView.bounds.width)
             chartCell.applyStyle(StyleController.currentStyle)
             chartCell.setChart(chartViewModel)
-            
+
             return chartCell
         }
-        
-        let switchColumnVisibleCell: SwitchColumnVisibleTableViewCell = dequeueReusableCell(for: indexPath)
-        switchColumnVisibleCell.updateFrame()
-        switchColumnVisibleCell.clean()
+
+        let switchColumnVisibleCell = SwitchColumnVisibleTableViewCell()
+        switchColumnVisibleCell.actualizeFrame(width: tableView.bounds.width)
         for columnVM in chartViewModel.columns {
             switchColumnVisibleCell.addColumnVisibleToogler(
                 name: columnVM.name,
                 color: columnVM.color,
                 isVisible: columnVM.isVisible,
                 clickHandler: { [weak chartViewModel] in
-                chartViewModel?.toogleVisibleColumn(columnVM)
+                    chartViewModel?.toogleVisibleColumn(columnVM)
             })
         }
-        
+
         switchColumnVisibleCell.applyStyle(StyleController.currentStyle)
-        
+
         return switchColumnVisibleCell
     }
 

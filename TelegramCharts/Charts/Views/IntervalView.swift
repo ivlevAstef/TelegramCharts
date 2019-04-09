@@ -28,7 +28,7 @@ public class IntervalView: UIView
     }
     
     private var chartViewModel: ChartViewModel? = nil
-    private var columnsViews: [UIView & ColumnView] = []
+    private var columnsView: ColumnsView = ColumnsView()
     private var columnsViewRect: CGRect = .zero
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
     
@@ -44,6 +44,7 @@ public class IntervalView: UIView
 
     public init() {
         super.init(frame: .zero)
+        columnsView.parent = self
 
         initialize()
     }
@@ -55,8 +56,8 @@ public class IntervalView: UIView
     public func setChart(_ chartViewModel: ChartViewModel) {
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
-        
-        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 1.0, parent: self)
+
+        columnsView.setChart(chartViewModel)
         addSubview(intervalDrawableView) // move to top
 
         update(use: chartViewModel)
@@ -64,11 +65,8 @@ public class IntervalView: UIView
     
     private func update(use chartViewModel: ChartViewModel) {
         let aabb = visibleAABB
-        
-        for columnView in columnsViews {
-            columnView.update(aabb: aabb, animated: false, duration: 0.0)
-        }
-        
+
+        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
         intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
                                     animated: false, duration: 0.0)
     }
@@ -88,11 +86,9 @@ public class IntervalView: UIView
     private func updateFrame() {
         columnsViewRect = CGRect(x: Consts.padding, y: Consts.verticalPadding,
                                  width: bounds.width - 2 * Consts.padding, height: bounds.height - 2 * Consts.verticalPadding)
-        for columnView in columnsViews {
-            columnView.frame = columnsViewRect
-            columnView.layer.cornerRadius = Consts.cornerRadius
-            columnView.layer.masksToBounds = true
-        }
+
+        columnsView.updateFrame(frame: columnsViewRect)
+        columnsView.setCornerRadius(Consts.cornerRadius)
         
         self.intervalDrawableView.frame = CGRect(x: Consts.padding, y: 0,
                                                  width: bounds.width - 2 * Consts.padding, height: bounds.height)
@@ -188,9 +184,7 @@ extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
         let aabb = visibleAABB
-        for columnView in columnsViews {
-            columnView.update(aabb: visibleAABB, animated: true, duration: Configs.visibleChangeDuration)
-        }
+        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
         intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
                                     animated: true, duration: Configs.visibleChangeDuration)
     }
