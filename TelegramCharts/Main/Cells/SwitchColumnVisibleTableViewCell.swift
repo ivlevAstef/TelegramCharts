@@ -60,7 +60,6 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     }
     
     internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping () -> Void) {
-        prevFrame = .zero
         let columnToggler = ColumnToggler(name: name, color: color)
         
         columnToggler.isVisible = isVisible
@@ -80,7 +79,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     }
 
     private func updateFrame() {
-        if prevFrame.equalTo(frame) {
+        if prevFrame.size.equalTo(frame.size) {
             return
         }
         prevFrame = frame

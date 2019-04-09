@@ -72,21 +72,12 @@ internal class VerticalAxisView: UIView
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
         func updatePositionOnSubviews() {
             for view in subviews.compactMap({ $0 as? ValueView }) {
-                let position = aabb.calculateUIPoint(date: 0, value: view.value, rect: bounds).y
-                view.setPosition(position, limits: bounds)
+                let position = aabb.calculateUIPoint(date: 0, value: view.unique, rect: bounds).y
+                view.setPosition(position)
             }
         }
 
-        let oldValues = valueViews.map { $0.value }
         let newValues = calculateNewValues(aabb: aabb)
-
-        if !checkIsMoreDiff(oldValues, newValues) {
-            UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
-                updatePositionOnSubviews()
-            })
-            return
-        }
-
         var prevViews = valueViews
         var newViews: [ValueView] = []
 
@@ -96,13 +87,13 @@ internal class VerticalAxisView: UIView
             let view: ValueView
             let unique = ValueView.makeUnique(Int64(value))
 
-            if let prevView = prevViews.first, prevView.unique == unique {
-                view = prevView
-                prevViews.removeFirst()
+            if let prevViewIndex = prevViews.firstIndex(where: { $0.unique == unique }) {
+                view = prevViews[prevViewIndex]
+                prevViews.remove(at: prevViewIndex)
             } else {
                 view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
-                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: value, rect: bounds).y
-                view.setPosition(position, limits: bounds)
+                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: view.unique, rect: bounds).y
+                view.setPosition(position)
 
                 addSubview(view)
                 newViews.append(view)
@@ -114,7 +105,6 @@ internal class VerticalAxisView: UIView
         UIView.animateIf(animated, duration: duration, animations: {
             prevViews.forEach { $0.alpha = 0.0 }
             newViews.forEach { $0.alpha = 1.0 }
-            updatePositionOnSubviews()
         }, completion: { _ in
             prevViews.forEach { $0.removeFromSuperview() }
         })
@@ -137,28 +127,6 @@ internal class VerticalAxisView: UIView
         }
 
         return result
-    }
-
-    private func checkIsMoreDiff(_ oldValues: [Column.Value], _ newValues: [Column.Value]) -> Bool {
-        if (oldValues.isEmpty || newValues.isEmpty) && oldValues.count != newValues.count {
-            return true
-        }
-
-        var maxDiff = 0
-        var minValue = Column.Value.max
-        var maxValue = Column.Value.min
-        for (old, new) in zip(oldValues, newValues) {
-            maxDiff = max(maxDiff, abs(old - new))
-            minValue = min(minValue, min(old, new))
-            maxValue = max(maxValue, max(old, new))
-        }
-
-        if maxValue < minValue {
-            return true
-        }
-
-        let interval = maxValue - minValue
-        return Double(maxDiff) / Double(interval) > Configs.thresholdValueDiff
     }
 
     private func calculateValueStep(aabb: AABB) -> Column.Value {
@@ -185,8 +153,8 @@ internal class VerticalAxisView: UIView
 
 private class ValueView: UIView
 {
-    internal let unique: String
     internal let value: Column.Value
+    internal let unique: Column.Value
 
     private let label: UILabel = UILabel(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
@@ -220,41 +188,34 @@ private class ValueView: UIView
         line.frame.size.width = width
     }
 
-    internal func setPosition(_ position: CGFloat, limits: CGRect) {
+    internal func setPosition(_ position: CGFloat) {
         frame.origin = CGPoint(x: 0, y: position - frame.height)
-
-        var limitOpacity: CGFloat = 1.0
-        if frame.minY < limits.minY {
-            limitOpacity = 0.0
-        }
-        if frame.maxY > limits.maxY {
-            limitOpacity = 0.0
-        }
-        
-        UIView.animate(withDuration: 0.1) { [weak self] in
-            self?.label.alpha = limitOpacity
-            self?.line.alpha = limitOpacity
-        }
     }
 
-    internal static func makeUnique(_ number: Int64) -> String {
-        return abbreviationNumber(number)
+    internal static func makeUnique(_ number: Int64) -> Column.Value {
+        let (roundedNum, exp) = simplifyNumber(number)
+        return Column.Value((floor(10.0 * roundedNum) * pow(1000.0, Double(exp))) / 10.0)
     }
 
     private static func abbreviationNumber(_ number: Int64) -> String {
-        if abs(number) < 1000 {
+        let (roundedNum, exp) = simplifyNumber(number)
+        if exp < 1 {
             return "\(number)"
         }
 
-        let sign = number < 0 ? "-" : ""
-        let number = abs(number)
-
-        let exp = Int(log10(Double(number)) / 3.0)
         let units: [String] = ["K","M","B","T","q","Q","s","S"]
-
+        return "\(roundedNum)\(units[exp - 1])"
+    }
+    
+    private static func simplifyNumber(_ number: Int64) -> (Double, Int) {
+        if abs(number) < 1000 {
+            return (Double(number), 0)
+        }
+        
+        let exp = Int(log10(Double(abs(number))) / 3.0)
         let roundedNum: Double = round(10 * Double(number) / pow(1000.0, Double(exp))) / 10.0
-
-        return "\(sign)\(roundedNum)\(units[exp - 1])"
+        
+        return (roundedNum, exp)
     }
 
     internal required init?(coder aDecoder: NSCoder) {

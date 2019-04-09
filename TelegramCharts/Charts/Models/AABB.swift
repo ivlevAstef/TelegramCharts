@@ -55,9 +55,8 @@ internal struct AABB
     internal func calculateDate(x: CGFloat, rect: CGRect) -> Column.Date {
         let x = max(rect.minX, min(x, rect.maxX))
         let xScale = Double(dateInterval) / Double(rect.width)
-        return minDate + Column.Date(Double(x - rect.minX) * xScale)
+        return minDate + Column.Date(round(Double(x - rect.minX) * xScale))
     }
-
 
     private func calculateValueBegin() -> Column.Value {
         let roundScale = calculateValueRoundScale()

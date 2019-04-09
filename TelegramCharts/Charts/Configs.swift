@@ -7,9 +7,7 @@
 //
 
 internal enum Configs
-{
-    internal static let thresholdValueDiff: Double = 0.08 // 8%
-    
+{    
     internal static let padding: Double = 0.06 // 6%
 
     internal static let visibleChangeDuration: Double = 0.3

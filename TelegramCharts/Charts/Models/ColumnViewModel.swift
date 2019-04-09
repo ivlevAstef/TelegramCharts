@@ -112,17 +112,24 @@ public class ColumnViewModel
         return nil
     }
 
+    @inline(__always)
     internal func calculateUIPoints(for rect: CGRect) -> [CGPoint] {
-        return calculateUIPoints(for: rect, aabb: aabb)
+        return ColumnViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
     }
 
+    @inline(__always)
     internal func calculateUIPoints(for rect: CGRect, aabb: AABB) -> [CGPoint] {
         return ColumnViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
     }
     
     internal static func calculateUIPoints(for points: [Point], rect: CGRect, aabb: AABB) -> [CGPoint] {
-        return points.map { point in
-            aabb.calculateUIPoint(date: point.date, value: point.value, rect: rect)
+        let xScale = rect.width / CGFloat(aabb.dateInterval)
+        let yScale = rect.height / CGFloat(aabb.valueInterval)
+        let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
+        let yOffset = rect.maxY + CGFloat(aabb.minValue) * yScale
+        
+        return points.map {
+            CGPoint(x: xOffset + CGFloat($0.date) * xScale, y: yOffset - CGFloat($0.value) * yScale)
         }
     }
 }

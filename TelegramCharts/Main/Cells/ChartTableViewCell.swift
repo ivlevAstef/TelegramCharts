@@ -42,7 +42,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
     }
     
     internal func updateFrame() {
-        if prevFrame.equalTo(frame) {
+        if prevFrame.size.equalTo(frame.size) {
             return
         }
         prevFrame = frame
@@ -61,7 +61,6 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
     }
 
     internal func setChart(_ chartViewModel: ChartViewModel) {
-        prevFrame = .zero
         chartView.setChart(chartViewModel)
     }
 }

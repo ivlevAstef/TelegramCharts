@@ -25,6 +25,7 @@ internal class ColumnsView
 
     internal func setChart(_ chartViewModel: ChartViewModel) {
         columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 2.0, parent: parent)
+        updateFrame(frame: self.frame)
     }
 
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
@@ -54,33 +55,23 @@ internal class ColumnsView
         self.updateCacheBlock?.cancel()
         hideCacheState()
 
-        var capturedBlock: DispatchWorkItem? = nil
         let block = DispatchWorkItem { [weak self] in
-            let image = self?.cacheLayerState()
-            DispatchQueue.main.sync {
-                if false == capturedBlock?.isCancelled {
-                    self?.cacheImageView.image = image
-                    self?.showCacheState()
-                }
-            }
+            self?.cacheImageView.image = self?.cacheLayerState()
+            self?.showCacheState()
         }
-        capturedBlock = block
         updateCacheBlock = block
 
         let duration = animated ? duration : 0.0
-        DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + duration, execute: block)
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: block)
     }
 
     private func cacheLayerState() -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(frame.size, false, UIScreen.main.scale)
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-
-        columnsViews.forEach { $0.layer.render(in: context) }
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
+        defer { UIGraphicsEndImageContext() }
+        
+        columnsViews.forEach { $0.drawHierarchy(in: CGRect(origin: .zero, size: frame.size), afterScreenUpdates: true) }
+        
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
 
     private func hideCacheState() {
