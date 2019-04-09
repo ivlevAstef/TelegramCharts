@@ -20,12 +20,14 @@ internal class ColumnsView
     private var columnsViews: [UIView & ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
 
+    private var cornerRadius: CGFloat = 0.0
     private var frame: CGRect = .zero
     private var updateCacheBlock: DispatchWorkItem?
 
     internal func setChart(_ chartViewModel: ChartViewModel) {
         columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 2.0, parent: parent)
         updateFrame(frame: self.frame)
+        setCornerRadius(cornerRadius)
     }
 
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
@@ -45,9 +47,10 @@ internal class ColumnsView
     }
 
     internal func setCornerRadius(_ cornerRadius: CGFloat) {
+        self.cornerRadius = cornerRadius
         for columnView in columnsViews {
             columnView.layer.cornerRadius = cornerRadius
-            columnView.layer.masksToBounds = true
+            columnView.layer.masksToBounds = cornerRadius > 0
         }
     }
 
