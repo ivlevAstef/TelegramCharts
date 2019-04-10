@@ -49,6 +49,7 @@ public class ChartView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
 
+        verticalAxisView.setChart(chartViewModel)
         columnsView.setChart(margins: self.margins, chartViewModel)
 
         update(use: chartViewModel)

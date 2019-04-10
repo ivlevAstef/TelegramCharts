@@ -19,16 +19,18 @@ internal class VerticalAxisView: UIView
     override public var frame: CGRect {
         didSet { updateFrame() }
     }
-    
-    private var lastAABB: AABB?
 
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
+    private var chartViewModel: ChartViewModel?
 
     private let bottomLine: UIView = UIView(frame: .zero)
 
-    private var valueViews: [ValueView] = []
+    private var leftLastAABB: AABB?
+    private var rightLastAABB: AABB?
+    private var leftValueViews: [ValueView<Left>] = []
+    private var rightValueViews: [ValueView<Right>] = []
 
     internal init() {
         super.init(frame: .zero)
@@ -38,66 +40,100 @@ internal class VerticalAxisView: UIView
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomLine)
     }
+    
+    internal func setChart(_ chartViewModel: ChartViewModel) {
+        self.chartViewModel = chartViewModel
+    }
 
     internal func setStyle(_ style: ChartStyle) {
         color = style.textColor
         lineColor = style.linesColor
         bottomLine.backgroundColor = style.focusLineColor
 
-        for subview in subviews.compactMap({ $0 as? ValueView }) {
+        for subview in subviews.compactMap({ $0 as? ValueViewProtocol }) {
             subview.setStyle(color: color, lineColor: lineColor)
         }
     }
 
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
+        func cleanLeft() {
+            leftLastAABB = nil
+            leftValueViews.forEach { $0.removeFromSuperview() }
+            leftValueViews.removeAll()
+        }
+        func cleanRight() {
+            rightLastAABB = nil
+            rightValueViews.forEach { $0.removeFromSuperview() }
+            rightValueViews.removeAll()
+        }
+        
         guard let aabb = aabb else {
-            lastAABB = nil
-            subviews.forEach { $0.removeFromSuperview() }
-            valueViews.removeAll()
+            cleanLeft()
+            cleanRight()
             return
         }
 
-        updateValues(aabb: aabb, animated: animated, duration: duration)
-        lastAABB = aabb
+        guard let chartViewModel = chartViewModel, chartViewModel.yScaled else {
+            updateValues(aabb: aabb, lastAABB: leftLastAABB,
+                         columnColor: nil, valueViews: &leftValueViews,
+                         animated: animated, duration: duration)
+            leftLastAABB = aabb
+            return
+        }
+        
+        // Support Y-Scaled...
+        if let leftColumn = chartViewModel.columns.first, leftColumn.isVisible,
+            let leftAABB = aabb.childs.first(where: { $0.id == leftColumn.id }) {
+            updateValues(aabb: leftAABB, lastAABB: leftLastAABB,
+                         columnColor: leftColumn.color, valueViews: &leftValueViews,
+                         animated: animated, duration: duration)
+            leftLastAABB = leftAABB
+        } else {
+            cleanLeft()
+        }
+        
+        if let rightColumn = chartViewModel.columns.dropFirst().first, rightColumn.isVisible,
+           let rightAABB = aabb.childs.first(where: { $0.id == rightColumn.id }) {
+            updateValues(aabb: rightAABB, lastAABB: rightLastAABB,
+                         columnColor: rightColumn.color, valueViews: &rightValueViews,
+                         animated: animated, duration: duration)
+            rightLastAABB = rightAABB
+        } else {
+            cleanRight()
+        }
     }
     
     private func updateFrame() {
         self.bottomLine.frame = CGRect(x: 0, y: bounds.height - 1.0, width: bounds.width, height: 1.0)
         
-        for subview in subviews.compactMap({ $0 as? ValueView }) {
+        for subview in subviews.compactMap({ $0 as? ValueViewProtocol }) {
             subview.setWidth(bounds.width)
         }
     }
 
-    private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
-        func updatePositionOnSubviews() {
-            for view in subviews.compactMap({ $0 as? ValueView }) {
-                let position = aabb.calculateUIPoint(date: 0, value: AABB.Value(view.unique), rect: bounds).y
-                view.setPosition(position)
-            }
-        }
-
+    private func updateValues<T>(aabb: AABB, lastAABB: AABB?, columnColor: UIColor?, valueViews: inout [ValueView<T>], animated: Bool, duration: TimeInterval) {
         let newValues = calculateNewValues(aabb: aabb)
         var prevViews = valueViews
-        var newViews: [ValueView] = []
+        var newViews: [ValueView<T>] = []
 
         valueViews.removeAll()
 
         for value in newValues {
-            let view: ValueView
-            let unique = ValueView.makeUnique(Int64(value))
+            let view: ValueView<T>
+            let unique = ValueView<T>.makeUnique(Int64(value))
 
             if let prevViewIndex = prevViews.firstIndex(where: { $0.unique == unique }) {
                 view = prevViews[prevViewIndex]
                 prevViews.remove(at: prevViewIndex)
             } else {
                 view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
-                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: AABB.Value(view.unique), rect: bounds).y
+                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: value, rect: bounds).y
                 view.setPosition(position)
 
                 addSubview(view)
                 newViews.append(view)
             }
+            view.columnColor = columnColor
             valueViews.append(view)
         }
 
@@ -109,6 +145,13 @@ internal class VerticalAxisView: UIView
             prevViews.forEach { $0.removeFromSuperview() }
         })
         
+        func updatePositionOnSubviews() {
+            for view in subviews.compactMap({ $0 as? ValueView<T> }) {
+                let position = aabb.calculateUIPoint(date: 0, value: view.value, rect: bounds).y
+                view.setPosition(position)
+            }
+        }
+        
         UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
             updatePositionOnSubviews()
         })
@@ -116,7 +159,7 @@ internal class VerticalAxisView: UIView
 
     private func calculateNewValues(aabb: AABB) -> [AABB.Value] {
         let begin = aabb.minValue
-        let step = calculateValueStep(aabb: aabb)
+        let step = (aabb.maxValue - aabb.minValue) / Double(valuesCount)
 
         var result: [AABB.Value] = []
 
@@ -127,10 +170,6 @@ internal class VerticalAxisView: UIView
         }
 
         return result
-    }
-
-    private func calculateValueStep(aabb: AABB) -> AABB.Value {
-        return (aabb.maxValue - aabb.minValue) / Double(valuesCount)
     }
 
     private var valuesCount: Int {
@@ -151,10 +190,25 @@ internal class VerticalAxisView: UIView
 
 }
 
-private class ValueView: UIView
+private class Left {}
+private class Right {}
+
+private protocol ValueViewProtocol {
+    func setStyle(color: UIColor, lineColor: UIColor)
+    func setWidth(_ width: CGFloat)
+}
+
+private class ValueView<T>: UIView, ValueViewProtocol
 {
     internal let value: AABB.Value
     internal let unique: Int64
+    
+    internal var columnColor: UIColor? {
+        didSet {
+            // unwork in reverse.. :(
+            label.textColor = columnColor ?? label.textColor
+        }
+    }
 
     private let label: UILabel = UILabel(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
@@ -171,6 +225,13 @@ private class ValueView: UIView
         label.font = font
         label.textColor = color
         label.sizeToFit()
+        label.frame.size.width = parentWidth
+        
+        if T.self is Right.Type {
+            label.textAlignment = .right
+        } else {
+            label.textAlignment = .left
+        }
 
         frame.size.height = label.frame.height + 1
 
@@ -179,7 +240,7 @@ private class ValueView: UIView
     }
 
     internal func setStyle(color: UIColor, lineColor: UIColor) {
-        label.textColor = color
+        label.textColor = columnColor ?? color
         line.backgroundColor = lineColor
     }
     

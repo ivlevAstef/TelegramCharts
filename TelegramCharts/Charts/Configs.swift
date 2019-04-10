@@ -8,7 +8,7 @@
 
 internal enum Configs
 {    
-    internal static let padding: Double = 0.06 // 6%
+    internal static let padding: Double = 0.02 // 2%
 
     internal static let visibleChangeDuration: Double = 0.3
 
