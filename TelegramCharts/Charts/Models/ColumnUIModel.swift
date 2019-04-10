@@ -72,4 +72,14 @@ internal struct ColumnUIModel
 
         return result
     }
+    
+    internal func find(by date: Chart.Date) -> Data? {
+        for iter in data {
+            if iter.date == date {
+                return iter
+            }
+        }
+        return nil
+    }
+
 }

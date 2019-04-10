@@ -68,51 +68,54 @@ internal class HintAndOtherView: UIView
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
-//        guard let aabb = self.aabb else {
-//            hide(animated: true)
-//            return
-//        }
-//
-//        switch state {
-//        case .began:
-//            fallthrough
-//        case .changed:
-//            lastTouchPosition = tapPosition
-//            let date = aabb.calculateDate(x: tapPosition.x, rect: bounds)
-//            showHintAndOther(aroundDate: date)
-//            break
-//        default:
-//            lastTouchPosition = nil
-//            hide(animated: true)
-//        }
+        guard let ui = self.ui else {
+            hide(animated: true)
+            return
+        }
+
+        switch state {
+        case .began:
+            fallthrough
+        case .changed:
+            lastTouchPosition = tapPosition
+            let date = ui.translate(x: tapPosition.x, from: bounds)
+            showHintAndOther(aroundDate: date)
+            break
+        default:
+            lastTouchPosition = nil
+            hide(animated: true)
+        }
     }
 
-//    private func showHintAndOther(aroundDate: Column.Date) {
-//        guard let aabb = self.aabb else {
-//            hide(animated: true)
-//            return
-//        }
-//
-//        let polylineViewModels = columnsViewModels.filter { $0.isVisible }
-//
-//        let dates = polylineViewModels.map { $0.getPoint(by: aroundDate).date }
-//        guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
-//            hide(animated: true)
-//            return
-//        }
-//        let position = aabb.calculateUIPoint(date: nearDate, value: 0, rect: bounds).x
-//
-//        show(animated: true)
-//
-//        let lines = polylineViewModels.map { ($0.color, $0.getPoint(by: nearDate).pair.to) }
-//        hintView.setData(date: nearDate, lines: lines)
-//        hintView.setPosition(position, limit: bounds)
-//
-//        let points = lines.map { ($0.0, aabb.calculateUIPoint(date: nearDate, value: $0.1, rect: bounds).y) }
-//        lineView.setPoints(points)
-//        lineView.setHeightAndOrigin(height: frame.height, origin: hintView.frame.maxY)
-//        lineView.setPosition(position, limit: bounds)
-//    }
+    private func showHintAndOther(aroundDate: Chart.Date) {
+        guard let ui = self.ui else {
+            hide(animated: true)
+            return
+        }
+
+        let columnUIs = ui.columns.filter { $0.isVisible }
+
+        let nearDate = ui.find(around: aroundDate)
+        let position = ui.translate(date: nearDate, to: bounds)
+
+        show(animated: true)
+
+        let columnInfo = columnUIs.compactMap { columnUI in
+            return columnUI.find(by: nearDate).flatMap { (columnUI, $0) }
+        }
+        
+        let lines = columnInfo.map { ($0.color, $1.to) }
+        
+        hintView.setData(date: nearDate, lines: lines)
+        hintView.setPosition(position, limit: bounds)
+
+        let points = columnInfo.map {
+            return ($0.color, $0.translate(data: $1, to: bounds).to.y)
+        }
+        lineView.setPoints(points)
+        lineView.setHeightAndOrigin(height: frame.height, origin: hintView.frame.maxY)
+        lineView.setPosition(position, limit: bounds)
+    }
 
     private func hide(animated: Bool) {
         UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in

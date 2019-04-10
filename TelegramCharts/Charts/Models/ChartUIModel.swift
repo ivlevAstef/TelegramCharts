@@ -10,6 +10,7 @@ import UIKit
 
 internal struct ChartUIModel
 {
+    internal let dates: [Chart.Date]
     internal let columns: [ColumnUIModel]
     internal let aabb: AABB
     
@@ -17,6 +18,7 @@ internal struct ChartUIModel
     public let fullInterval: ChartViewModel.Interval
     
     public init(viewModel: ChartViewModel, fully: Bool, size: Double) {
+        self.dates = viewModel.dates
         self.interval = viewModel.interval
         self.fullInterval = viewModel.fullInterval
         
@@ -40,6 +42,19 @@ internal struct ChartUIModel
         let x = max(rect.minX, min(x, rect.maxX))
         let xScale = Double(aabb.dateInterval) / Double(rect.width)
         return aabb.minDate + Chart.Date(round(Double(x - rect.minX) * xScale))
+    }
+    
+    internal func find(around date: Chart.Date) -> Chart.Date {
+        for i in 1..<dates.count {
+            if date <= dates[i] {
+                if (date - dates[i - 1]) < (dates[i] - date) {
+                    return dates[i - 1]
+                }
+                return dates[i]
+            }
+        }
+        // uncritical
+        return dates[dates.count - 1]
     }
 
 }
@@ -153,32 +168,3 @@ private func roundAABB(_ aabb: AABB) -> AABB {
     
     return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
 }
-
-//private var visibleAABB: AABB? {
-//    return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
-//}
-
-
-//private func updateDataWithoutInterval() {
-//    for column in columns {
-//        let pairs = column.values.map { ColumnViewModel.Pair(from: AABB.Value($0), to: AABB.Value($0)) }
-//        column.update(pairs: pairs)
-//    }
-//    
-//    visibleAABB = calculateAABB(for: visibleColumns)
-//    
-//    if let
-//    
-//    for column in columns {
-//        let pairs = column.values.map { ColumnViewModel.Pair(from: visibleAABB?.minValue, to: AABB.Value($0)) }
-//        column.update(pairs: )
-//    }
-//}
-//private func updateDataWithInterval() {
-//    visibleInIntervalAABB = calculateAABBInInterval(for: visibleColumns, from: interval.from, to: interval.to)
-//}
-//
-//private func update() {
-//    updateDataWithoutInterval()
-//    updateDataWithInterval()
-//}
