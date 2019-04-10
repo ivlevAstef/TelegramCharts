@@ -16,6 +16,7 @@ internal class PolyLineView: UIView, ColumnView
     
     internal let id: UUID
     
+    private let contentView: UIView = UIView(frame: .zero)
     private let margins: UIEdgeInsets
     private let columnLayer: PolyLineLayerWrapper
     private var lastAABB: AABB?
@@ -25,9 +26,11 @@ internal class PolyLineView: UIView, ColumnView
         self.margins = margins
         self.columnLayer = PolyLineLayerWrapper(columnViewModel: columnViewModel)
         super.init(frame: .zero)
+        addSubview(contentView)
         
-        clipsToBounds = true
-        layer.addSublayer(columnLayer.layer)
+        // without contentView clipsToBounds unwork... WTF?
+        contentView.clipsToBounds = true
+        contentView.layer.addSublayer(columnLayer.layer)
     }
 
     internal func setSize(_ size: Double) {
@@ -48,10 +51,12 @@ internal class PolyLineView: UIView, ColumnView
     }
     
     private func updateFrame() {
-        let rect = CGRect(x: layer.bounds.minX + margins.left,
-                          y: layer.bounds.minY + margins.top,
-                          width: layer.bounds.width - margins.left - margins.right,
-                          height: layer.bounds.height - margins.top - margins.bottom)
+        contentView.frame = bounds
+        
+        let rect = CGRect(x: bounds.minX + margins.left,
+                          y: bounds.minY + margins.top,
+                          width: bounds.width - margins.left - margins.right,
+                          height: bounds.height - margins.top - margins.bottom)
         columnLayer.layer.frame = rect
     }
 

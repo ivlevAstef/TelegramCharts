@@ -13,7 +13,6 @@ internal class ColumnsView
 {
     internal var parent: UIView! {
         didSet {
-            parent.clipsToBounds = true
             parent.addSubview(cacheImageView)
         }
     }

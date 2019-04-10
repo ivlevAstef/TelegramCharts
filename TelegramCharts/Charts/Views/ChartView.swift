@@ -79,7 +79,8 @@ public class ChartView: UIView
     }
     
     private func updateFrame() {
-        let fullFrame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
+        let fullFrame = CGRect(x: 0, y: Consts.spacing,
+                               width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
         columnsView.updateFrame(frame: fullFrame)
         
         let marginsFrame = CGRect(x: fullFrame.origin.x + margins.left,
