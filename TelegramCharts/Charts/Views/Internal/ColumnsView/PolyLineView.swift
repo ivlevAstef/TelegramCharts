@@ -14,10 +14,12 @@ internal class PolyLineView: UIView, ColumnView
         didSet { updateFrame() }
     }
     
+    private let margins: UIEdgeInsets
     private let columnLayer: PolyLineLayerWrapper
     private var lastAABB: AABB?
     
-    required internal init(_ columnViewModel: ColumnViewModel) {
+    required internal init(margins: UIEdgeInsets, _ columnViewModel: ColumnViewModel) {
+        self.margins = margins
         self.columnLayer = PolyLineLayerWrapper(columnViewModel: columnViewModel)
         super.init(frame: .zero)
         
@@ -43,7 +45,11 @@ internal class PolyLineView: UIView, ColumnView
     }
     
     private func updateFrame() {
-        columnLayer.layer.frame = layer.bounds
+        let rect = CGRect(x: layer.bounds.minX + margins.left,
+                          y: layer.bounds.minY + margins.top,
+                          width: layer.bounds.width - margins.left - margins.right,
+                          height: layer.bounds.height - margins.top - margins.bottom)
+        columnLayer.layer.frame = rect
     }
 
     internal required init?(coder aDecoder: NSCoder) {

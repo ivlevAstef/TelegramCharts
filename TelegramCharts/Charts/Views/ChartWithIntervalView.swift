@@ -17,12 +17,14 @@ public class ChartWithIntervalView: UIView
     private static let defaultIntervalViewHeight: CGFloat = 40.0
 
     private let noData: UILabel = UILabel(frame: .zero)
-    private let chartView: ChartView = ChartView()
-    private let intervalView: IntervalView = IntervalView()
+    private let chartView: ChartView
+    private let intervalView: IntervalView
     private let intervalViewHeight: CGFloat
 
-    public init(intervalViewHeight: CGFloat? = nil) {
+    public init(margins: UIEdgeInsets, intervalViewHeight: CGFloat? = nil) {
         self.intervalViewHeight = intervalViewHeight ?? ChartWithIntervalView.defaultIntervalViewHeight
+        self.chartView = ChartView(margins: margins)
+        self.intervalView = IntervalView(margins: margins)
         super.init(frame: .zero)
 
         configureSubviews()
@@ -72,10 +74,7 @@ public class ChartWithIntervalView: UIView
     }
 
     internal required init?(coder aDecoder: NSCoder) {
-        self.intervalViewHeight = ChartWithIntervalView.defaultIntervalViewHeight
-        super.init(coder: aDecoder)
-
-        configureSubviews()
+        fatalError()
     }
 }
 

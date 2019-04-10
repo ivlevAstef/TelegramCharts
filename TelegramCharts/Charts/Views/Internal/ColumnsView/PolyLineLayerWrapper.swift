@@ -39,7 +39,7 @@ internal final class PolyLineLayerWrapper
     internal func update(aabb: AABB, animatedPath: Bool, animatedOpacity: Bool, duration: TimeInterval) {
         let oldKeys = Set(layer.animationKeys() ?? [])
         
-        let newPoints = columnViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
+        let newPoints = calculatePoints(aabb: aabb)
         let newPath = makePath(by: newPoints).cgPath
         
         let t = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
@@ -90,6 +90,15 @@ internal final class PolyLineLayerWrapper
             layer.opacity = newOpacity
             CATransaction.commit()
         }
+    }
+    
+    private func calculatePoints(aabb: AABB) -> [CGPoint] {
+        let pairs = columnViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
+        var result = [CGPoint](repeating: CGPoint.zero, count: pairs.count)
+        for i in 0..<pairs.count {
+            result[i] = pairs[i].to
+        }
+        return result
     }
     
     private func interpolate(fromPoints: [CGPoint], toPoints: [CGPoint], t: CGFloat) -> [CGPoint] {

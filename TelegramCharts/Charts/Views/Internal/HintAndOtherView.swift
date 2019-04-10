@@ -100,7 +100,7 @@ internal class HintAndOtherView: UIView
 
         let polylineViewModels = columnsViewModels.filter { $0.isVisible }
 
-        let dates = polylineViewModels.map { $0.pointByDate(date: aroundDate).date }
+        let dates = polylineViewModels.map { $0.getPoint(by: aroundDate).date }
         guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
             hide(animated: true)
             return
@@ -109,7 +109,7 @@ internal class HintAndOtherView: UIView
 
         show(animated: true)
 
-        let lines = polylineViewModels.map { ($0.color, $0.pointByDate(date: nearDate).value) }
+        let lines = polylineViewModels.map { ($0.color, $0.getPoint(by: nearDate).pair.to) }
         hintView.setData(date: nearDate, lines: lines)
         hintView.setPosition(position, limit: bounds)
 
@@ -224,7 +224,7 @@ private class HintView: UIView
         self.layer.cornerRadius = Consts.hintCornerRadius
     }
 
-    internal func setData(date: Column.Date, lines: [(UIColor, Column.Value)]) {
+    internal func setData(date: Column.Date, lines: [(UIColor, AABB.Value)]) {
         subviews.forEach { $0.removeFromSuperview() }
 
         // Date

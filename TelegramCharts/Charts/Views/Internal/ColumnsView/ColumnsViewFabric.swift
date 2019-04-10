@@ -10,15 +10,15 @@ import UIKit
 
 internal final class ColumnsViewFabric
 {
-    internal static func makeColumnViews(by models: [ColumnViewModel], size: Double, parent: UIView) -> [UIView & ColumnView] {
+    internal static func makeColumnViews(by models: [ColumnViewModel], margins: UIEdgeInsets, size: Double, parent: UIView) -> [UIView & ColumnView] {
         let views: [UIView & ColumnView] = models.map { model in
             switch model.type {
             case .line:
-                return PolyLineView(model)
+                return PolyLineView(margins: margins, model)
             case .area:
-                return PolyLineView(model)
+                return PolyLineView(margins: margins, model)
             case .bar:
-                return PolyLineView(model)
+                return PolyLineView(margins: margins, model)
             }
         }
         

@@ -20,6 +20,7 @@ public class ChartView: UIView
         didSet { updateFrame() }
     }
     
+    private let margins: UIEdgeInsets
     private var chartViewModel: ChartViewModel? = nil
     private var visibleAABB: AABB? {
         return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
@@ -30,7 +31,8 @@ public class ChartView: UIView
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
 
-    public init() {
+    public init(margins: UIEdgeInsets) {
+        self.margins = margins
         super.init(frame: .zero)
         columnsView.parent = self
         
@@ -47,7 +49,7 @@ public class ChartView: UIView
         self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
 
-        columnsView.setChart(chartViewModel)
+        columnsView.setChart(margins: self.margins, chartViewModel)
 
         update(use: chartViewModel)
     }
@@ -80,10 +82,16 @@ public class ChartView: UIView
         let fullFrame = CGRect(x: 0, y: Consts.spacing, width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
         columnsView.updateFrame(frame: fullFrame)
         
-        self.horizontalAxisView.frame = CGRect(x: 0, y: fullFrame.maxY, width: bounds.width, height: Consts.horizontalAxisHeight)
+        let marginsFrame = CGRect(x: fullFrame.origin.x + margins.left,
+                                  y: fullFrame.origin.y + margins.top,
+                                  width: fullFrame.width - margins.left - margins.right,
+                                  height: fullFrame.height - margins.top - margins.bottom)
         
-        self.verticalAxisView.frame = fullFrame
-        self.hintView.frame = fullFrame
+        self.horizontalAxisView.frame = CGRect(x: marginsFrame.minX, y: marginsFrame.maxY,
+                                               width: marginsFrame.width, height: Consts.horizontalAxisHeight)
+        
+        self.verticalAxisView.frame = marginsFrame
+        self.hintView.frame = marginsFrame
         
         if let vm = chartViewModel {
             update(use: vm)
@@ -91,9 +99,7 @@ public class ChartView: UIView
     }
 
     internal required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-
-        configureSubviews()
+        fatalError()
     }
 }
 

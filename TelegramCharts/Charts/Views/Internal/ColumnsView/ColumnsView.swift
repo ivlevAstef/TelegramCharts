@@ -13,6 +13,7 @@ internal class ColumnsView
 {
     internal var parent: UIView! {
         didSet {
+            parent.clipsToBounds = true
             parent.addSubview(cacheImageView)
         }
     }
@@ -24,8 +25,8 @@ internal class ColumnsView
     private var frame: CGRect = .zero
     private var updateCacheBlock: DispatchWorkItem?
 
-    internal func setChart(_ chartViewModel: ChartViewModel) {
-        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, size: 2.0, parent: parent)
+    internal func setChart(margins: UIEdgeInsets, _ chartViewModel: ChartViewModel) {
+        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, margins: margins, size: 2.0, parent: parent)
         updateFrame(frame: self.frame)
         setCornerRadius(cornerRadius)
     }

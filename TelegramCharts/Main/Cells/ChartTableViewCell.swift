@@ -10,6 +10,7 @@ import UIKit
 
 private enum Consts {
     internal static let margins: UIEdgeInsets = layoutMargins
+    internal static let internalMargins: UIEdgeInsets = UIEdgeInsets(top: 0, left: layoutMargins.left, bottom: 0, right: layoutMargins.right)
 }
 
 internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
@@ -21,7 +22,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
     }
     private var prevFrame: CGRect = .zero
 
-    private let chartView = ChartWithIntervalView(intervalViewHeight: nil)
+    private let chartView = ChartWithIntervalView(margins: Consts.internalMargins, intervalViewHeight: nil)
 
     internal init() {
         super.init(style: .default, reuseIdentifier: nil)
@@ -47,9 +48,9 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
         }
         prevFrame = frame
         
-        chartView.frame = CGRect(x: Consts.margins.left,
+        chartView.frame = CGRect(x: 0,
                                  y: Consts.margins.top,
-                                 width: frame.width - Consts.margins.left - Consts.margins.right,
+                                 width: frame.width,
                                  height: frame.height - Consts.margins.top - Consts.margins.bottom)
     }
 

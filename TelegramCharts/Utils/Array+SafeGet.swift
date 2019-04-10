@@ -14,4 +14,10 @@ extension Array
         }
         return nil
     }
+    subscript(safe index: Int, default defaultIndex: Int) -> Element {
+        if 0 <= index && index < count {
+            return self[index]
+        }
+        return self[defaultIndex]
+    }
 }

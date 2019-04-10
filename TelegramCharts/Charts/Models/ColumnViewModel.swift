@@ -10,10 +10,13 @@ import UIKit
 
 public class ColumnViewModel
 {
-    public struct Point
+    public typealias Value = Column.Value
+    public typealias Date = Column.Date
+    
+    internal struct Pair
     {
-        public let date: Column.Date
-        public let value: Column.Value
+        public let from: AABB.Value
+        public let to: AABB.Value
     }
 
     public struct Color
@@ -30,77 +33,82 @@ public class ColumnViewModel
     }
 
     public let name: String
-    public let points: [Point]
+    public let dates: [Date]
+    public let values: [Value]
     public let color: UIColor
     public let type: ColumnType
     
     public internal(set) var isVisible: Bool = true
 
-    internal private(set) lazy var aabb: AABB = {
-        var minDate: Column.Date = Column.Date.max
-        var maxDate: Column.Date = Column.Date.min
-        var minValue: Column.Value = Column.Value.max
-        var maxValue: Column.Value = Column.Value.min
-        for point in points {
-            minDate = min(minDate, point.date)
-            maxDate = max(maxDate, point.date)
-            minValue = min(minValue, point.value)
-            maxValue = max(maxValue, point.value)
-        }
+    internal private(set) var aabb: AABB = AABB.empty
+    internal private(set) var pairs: [Pair] = []
 
-        return AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
-    }()
-
-    public init(name: String, points: [Point], color: UIColor, type: ColumnType) {
-        assert(points.count > 0)
+    public init(name: String, dates: [Column.Date], values: [Value], color: UIColor, type: ColumnType) {
+        assert(dates.count > 0 && values.count > 0 && dates.count == values.count)
         self.name = name
-        self.points = points
+        self.dates = dates
+        self.values = values
         self.color = color
         self.type = type
     }
-
-    internal func pointByDate(date: Column.Date) -> Point {
-        guard var lastPoint = points.first else {
-            return Point(date: 0, value: 0)
+    
+    internal func update(pairs: [Pair]) {
+        self.pairs = pairs
+        
+        var minDate: Date = Date.max
+        var maxDate: Date = Date.min
+        var minValue: AABB.Value = AABB.Value.greatestFiniteMagnitude
+        var maxValue: AABB.Value = -AABB.Value.greatestFiniteMagnitude
+        for date in dates {
+            minDate = min(minDate, date)
+            maxDate = max(maxDate, date)
         }
-        // Or interpolation?
-        for point in points {
-            if lastPoint.date <= date && date <= point.date {
-                if (date - lastPoint.date) < (point.date - date) {
-                    return lastPoint
-                }
-                return point
-            }
-            lastPoint = point
+        for value in pairs {
+            minValue = min(minValue, min(value.from, value.to))
+            maxValue = max(maxValue, max(value.from, value.to))
         }
-        return points.last ?? Point(date: 0, value: 0)
+        
+        self.aabb = AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
     }
 
-    internal func calculateAABBInInterval(from: Column.Date, to: Column.Date) -> AABB? {
-        var minValue: Column.Value = Column.Value.max
-        var maxValue: Column.Value = Column.Value.min
+    internal func getPoint(by date: Date) -> (date: Date, pair: Pair) {
+        for i in 1..<dates.count {
+            if date <= dates[i] {
+                if (date - dates[i-1]) < (dates[i] - date) {
+                    return (dates[i-1], pairs[i-1])
+                }
+                return (dates[i], pairs[i])
+            }
+        }
+        // uncritical
+        return (dates.last!, pairs.last!)
+    }
+
+    internal func calculateAABBInInterval(from: Date, to: Date) -> AABB? {
+        var minValue: AABB.Value = AABB.Value.greatestFiniteMagnitude
+        var maxValue: AABB.Value = -AABB.Value.greatestFiniteMagnitude
 
         var hasPoints: Bool = false
-        for i in 0..<points.count {
-            let point = points[i]
-            if from <= point.date && point.date <= to {
+        for i in 0..<dates.count {
+            if from <= dates[safe: i + 1, default: i] && dates[safe: i - 1, default: i] <= to {
                 hasPoints = true
+                
+                let value = pairs[i]
+                minValue = min(minValue, min(value.from, value.to))
+                maxValue = max(maxValue, max(value.from, value.to))
 
-                minValue = min(minValue, points[i].value)
-                maxValue = max(maxValue, points[i].value)
-
-                if let prevPoint = points[safe: i - 1], prevPoint.date < from {
-                    let t = Double(from - prevPoint.date) / Double(point.date - prevPoint.date)
-                    let value = prevPoint.value + Column.Value(t * Double(point.value - prevPoint.value))
-                    minValue = min(minValue, value)
-                    maxValue = max(maxValue, value)
-                }
-                if let nextPoint = points[safe: i + 1], nextPoint.date > to {
-                    let t = Double(to - point.date) / Double(nextPoint.date - point.date)
-                    let value = point.value + Column.Value(t * Double(nextPoint.value - point.value))
-                    minValue = min(minValue, value)
-                    maxValue = max(maxValue, value)
-                }
+//                if let prevPoint = points[safe: i - 1], prevPoint.date < from {
+//                    let t = Double(from - prevPoint.date) / Double(point.date - prevPoint.date)
+//                    let value = prevPoint.value + Column.Value(t * Double(point.value - prevPoint.value))
+//                    minValue = min(minValue, value)
+//                    maxValue = max(maxValue, value)
+//                }
+//                if let nextPoint = points[safe: i + 1], nextPoint.date > to {
+//                    let t = Double(to - point.date) / Double(nextPoint.date - point.date)
+//                    let value = point.value + Column.Value(t * Double(nextPoint.value - point.value))
+//                    minValue = min(minValue, value)
+//                    maxValue = max(maxValue, value)
+//                }
 
             }
         }
@@ -113,23 +121,31 @@ public class ColumnViewModel
     }
 
     @inline(__always)
-    internal func calculateUIPoints(for rect: CGRect) -> [CGPoint] {
-        return ColumnViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
+    internal func calculateUIPoints(for rect: CGRect) -> [(from: CGPoint, to: CGPoint)] {
+        return ColumnViewModel.calculateUIPoints(for: dates, and: pairs, rect: rect, aabb: aabb)
     }
 
     @inline(__always)
-    internal func calculateUIPoints(for rect: CGRect, aabb: AABB) -> [CGPoint] {
-        return ColumnViewModel.calculateUIPoints(for: points, rect: rect, aabb: aabb)
+    internal func calculateUIPoints(for rect: CGRect, aabb: AABB) -> [(from: CGPoint, to: CGPoint)] {
+        return ColumnViewModel.calculateUIPoints(for: dates, and: pairs, rect: rect, aabb: aabb)
     }
     
-    internal static func calculateUIPoints(for points: [Point], rect: CGRect, aabb: AABB) -> [CGPoint] {
+    internal static func calculateUIPoints(for dates: [Date], and pairs: [Pair], rect: CGRect, aabb: AABB) -> [(from: CGPoint, to: CGPoint)] {
+        assert(dates.count == pairs.count)
         let xScale = rect.width / CGFloat(aabb.dateInterval)
         let yScale = rect.height / CGFloat(aabb.valueInterval)
         let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
         let yOffset = rect.maxY + CGFloat(aabb.minValue) * yScale
         
-        return points.map {
-            CGPoint(x: xOffset + CGFloat($0.date) * xScale, y: yOffset - CGFloat($0.value) * yScale)
+        var result: [(from: CGPoint, to: CGPoint)] = .init(repeating: (.zero, .zero), count: dates.count)
+        for i in 0..<dates.count {
+            let x = xOffset + CGFloat(dates[i]) * xScale
+            result[i].from.y = yOffset - CGFloat(pairs[i].from) * yScale
+            result[i].to.y = yOffset - CGFloat(pairs[i].to) * yScale
+            result[i].from.x = x
+            result[i].to.x = x
         }
+        
+        return result
     }
 }

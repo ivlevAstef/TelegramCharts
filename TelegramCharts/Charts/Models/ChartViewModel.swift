@@ -36,40 +36,37 @@ public class ChartViewModel
     public private(set) var interval: Interval = Interval.empty
     public private(set) var fullInterval: Interval = Interval.empty
 
-    internal private(set) lazy var aabb: AABB? = {
-        return calculateAABB(for: columns)
-    }()
-    internal var visibleaabb: AABB? {
-        return calculateAABB(for: visibleColumns)
-    }
-    internal var visibleInIntervalAABB: AABB? {
-        return calculateAABBInInterval(for: visibleColumns, from: interval.from, to: interval.to)
-    }
+    internal private(set) var visibleAABB: AABB? = nil
+    internal private(set) var visibleInIntervalAABB: AABB? = nil
 
     private var updateListeners: [WeakRef<ChartUpdateListener>] = []
 
     public init(chart: Chart, from: Double = 0.0, to: Double = 1.0) {
         self.columns = chart.columns.map { column in
-            let points = column.points.map { ColumnViewModel.Point(date: $0.date, value: $0.value) }
+            let dates = column.points.map { $0.date }
+            let values = column.points.map { $0.value }
             let type: ColumnViewModel.ColumnType
             switch column.type {
             case .line: type = .line
             case .area: type = .area
             case .bar: type = .bar
             }
-            return ColumnViewModel(name: column.name, points: points, color: UIColor(hex: column.color), type: type)
+            return ColumnViewModel(name: column.name, dates: dates, values: values, color: UIColor(hex: column.color), type: type)
         }
         self.name = chart.name
         self.yScaled = chart.yScaled
         self.stacked = chart.stacked
         self.percentage = chart.percentage
 
-        if let aabb = self.aabb {
+        updateDataWithoutInterval()
+        if let aabb = calculateAABB(for: columns) {
             let length = Double(aabb.maxDate - aabb.minDate)
             self.interval = Interval(from: aabb.minDate + Column.Date(length * from),
                                      to: aabb.minDate + Column.Date(length * to))
                 
             self.fullInterval = Interval(from: aabb.minDate, to: aabb.maxDate)
+            
+            updateDataWithInterval()
         } else {
             assertionFailure("Can't make AABB for polygon lines...")
         }
@@ -91,24 +88,44 @@ public class ChartViewModel
     public func toogleVisibleColumn(_ column: ColumnViewModel) {
         assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
         column.isVisible.toggle()
+        update()
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
     public func enableColumn(_ column: ColumnViewModel) {
         assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
         column.isVisible = true
+        update()
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
     public func disableColumn(_ column: ColumnViewModel) {
         assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
         column.isVisible = false
+        update()
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
     public func updateInterval(_ interval: Interval) {
         self.interval = interval
+        update()
         updateListeners.forEach { $0.value?.chartIntervalIsChanged(self) }
+    }
+    
+    private func updateDataWithoutInterval() {
+        for column in columns {
+            column.update(pairs: column.values.map { ColumnViewModel.Pair(from: AABB.Value($0), to: AABB.Value($0)) })
+        }
+        
+        visibleAABB = calculateAABB(for: visibleColumns)
+    }
+    private func updateDataWithInterval() {
+        visibleInIntervalAABB = calculateAABBInInterval(for: visibleColumns, from: interval.from, to: interval.to)
+    }
+    
+    private func update() {
+        updateDataWithoutInterval()
+        updateDataWithInterval()
     }
 
     private func calculateAABB(for columns: [ColumnViewModel]) -> AABB? {

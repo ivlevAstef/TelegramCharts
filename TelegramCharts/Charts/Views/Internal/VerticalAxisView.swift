@@ -72,7 +72,7 @@ internal class VerticalAxisView: UIView
     private func updateValues(aabb: AABB, animated: Bool, duration: TimeInterval) {
         func updatePositionOnSubviews() {
             for view in subviews.compactMap({ $0 as? ValueView }) {
-                let position = aabb.calculateUIPoint(date: 0, value: view.unique, rect: bounds).y
+                let position = aabb.calculateUIPoint(date: 0, value: AABB.Value(view.unique), rect: bounds).y
                 view.setPosition(position)
             }
         }
@@ -92,7 +92,7 @@ internal class VerticalAxisView: UIView
                 prevViews.remove(at: prevViewIndex)
             } else {
                 view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
-                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: view.unique, rect: bounds).y
+                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: AABB.Value(view.unique), rect: bounds).y
                 view.setPosition(position)
 
                 addSubview(view)
@@ -114,11 +114,11 @@ internal class VerticalAxisView: UIView
         })
     }
 
-    private func calculateNewValues(aabb: AABB) -> [Column.Value] {
+    private func calculateNewValues(aabb: AABB) -> [AABB.Value] {
         let begin = aabb.minValue
         let step = calculateValueStep(aabb: aabb)
 
-        var result: [Column.Value] = []
+        var result: [AABB.Value] = []
 
         var value = begin
         for _ in 0..<valuesCount {
@@ -129,8 +129,8 @@ internal class VerticalAxisView: UIView
         return result
     }
 
-    private func calculateValueStep(aabb: AABB) -> Column.Value {
-        return (aabb.maxValue - aabb.minValue) / valuesCount
+    private func calculateValueStep(aabb: AABB) -> AABB.Value {
+        return (aabb.maxValue - aabb.minValue) / Double(valuesCount)
     }
 
     private var valuesCount: Int {
@@ -153,13 +153,13 @@ internal class VerticalAxisView: UIView
 
 private class ValueView: UIView
 {
-    internal let value: Column.Value
-    internal let unique: Column.Value
+    internal let value: AABB.Value
+    internal let unique: Int64
 
     private let label: UILabel = UILabel(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
 
-    internal init(value: Column.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
+    internal init(value: AABB.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
         self.value = value
         self.unique = ValueView.makeUnique(Int64(value))
 
@@ -192,9 +192,9 @@ private class ValueView: UIView
         frame.origin = CGPoint(x: 0, y: position - frame.height)
     }
 
-    internal static func makeUnique(_ number: Int64) -> Column.Value {
+    internal static func makeUnique(_ number: Int64) -> Int64 {
         let (roundedNum, exp) = simplifyNumber(number)
-        return Column.Value((floor(10.0 * roundedNum) * pow(1000.0, Double(exp))) / 10.0)
+        return Int64((floor(10.0 * roundedNum) * pow(1000.0, Double(exp))) / 10.0)
     }
 
     private static func abbreviationNumber(_ number: Int64) -> String {
