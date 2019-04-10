@@ -87,15 +87,10 @@ public class ChartProvider
             default: continue
             }
 
-            let values = column.dropFirst().compactMap{ $0.value }
+            let values = column.dropFirst().compactMap { $0.value.flatMap { Int($0) } }
             assert(values.count == timestamps.count, "incorrect json - timestamp length not equals \(id) length")
 
-            let points = zip(timestamps, values).map { pair -> Column.Point in
-                let (timestamp, value) = pair
-                return Column.Point(date: timestamp, value: Int(value))
-            }
-
-            columns.append(Column(name: name, points: points, color: color, type: type))
+            columns.append(Column(name: name, values: values.map { Int($0) }, color: color, type: type))
         }
         
         if columns.isEmpty {
@@ -103,6 +98,7 @@ public class ChartProvider
         }
         
         return Chart(name: name,
+                     dates: timestamps,
                      columns: columns,
                      yScaled: rawCharts.y_scaled ?? false,
                      stacked: rawCharts.stacked ?? false,

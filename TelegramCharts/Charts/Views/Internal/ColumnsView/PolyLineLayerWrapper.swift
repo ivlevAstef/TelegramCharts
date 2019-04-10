@@ -11,7 +11,6 @@ import UIKit
 internal final class PolyLineLayerWrapper
 {
     internal let layer: CALayer = CALayer()
-    internal var lineWidth: CGFloat = 1.0
     
     private var oldFromPoints: [CGPoint]?
     private var oldToPoints: [CGPoint]?
@@ -19,30 +18,26 @@ internal final class PolyLineLayerWrapper
     private var oldDuration: TimeInterval = 0.0
     
     private var pathLayer: CAShapeLayer?
-    private let columnViewModel: ColumnViewModel
-    
-    private var isFirst: Bool = true
 
-    internal init(columnViewModel: ColumnViewModel) {
-        self.columnViewModel = columnViewModel
+    internal init() {
     }
     
-    internal func fillLayer(_ layer: CAShapeLayer) {
-        layer.lineWidth = lineWidth
+    internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
+        layer.lineWidth = CGFloat(ui.size)
         layer.lineCap = .round
         layer.lineJoin = .round
-        layer.strokeColor = columnViewModel.color.cgColor
+        layer.strokeColor = ui.color.cgColor
         layer.fillColor = nil
         layer.opacity = 1.0
     }
     
-    internal func update(aabb: AABB, animatedPath: Bool, animatedOpacity: Bool, duration: TimeInterval) {
+    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         let oldKeys = Set(layer.animationKeys() ?? [])
         
-        let newPoints = calculatePoints(aabb: aabb)
+        let newPoints = calculatePoints(ui: ui)
         let newPath = makePath(by: newPoints).cgPath
         
-        let t = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
+        let t: CGFloat = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
         let oldPath: CGPath?
         if let fromPoints = oldFromPoints, let toPoints = oldToPoints, t < 1 {
             let interpolatePoints = interpolate(fromPoints: fromPoints, toPoints: toPoints, t: t)
@@ -56,14 +51,14 @@ internal final class PolyLineLayerWrapper
             
             oldPath = pathLayer?.path
         }
-        oldDuration = animatedPath ? duration : 0.0
+        oldDuration = (animated && nil != oldPath) ? duration : 0.0
         oldTime = CACurrentMediaTime()
         
         pathLayer?.removeFromSuperlayer()
         
         let newLayer = CAShapeLayer()
         newLayer.path = newPath
-        self.fillLayer(newLayer)
+        self.fillLayer(newLayer, ui: ui)
         self.pathLayer = newLayer
         self.layer.addSublayer(newLayer)
         
@@ -72,7 +67,7 @@ internal final class PolyLineLayerWrapper
             self.layer.removeAnimation(forKey: key)
         }
         
-        if animatedPath && nil != oldPath {
+        if animated && nil != oldPath {
             let animation = CABasicAnimation(keyPath: "path")
             animation.duration = duration
             animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
@@ -82,21 +77,21 @@ internal final class PolyLineLayerWrapper
             newLayer.add(animation, forKey: "path")
         }
         
-        let newOpacity: Float = columnViewModel.isVisible ? 1.0 : 0.0
+        let newOpacity: Float = ui.isVisible ? 1.0 : 0.0
         if newOpacity != layer.opacity {
             CATransaction.begin()
-            CATransaction.setAnimationDuration(animatedOpacity ? duration: 0.0)
+            CATransaction.setAnimationDuration(animated ? duration : 0.0)
             CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
             layer.opacity = newOpacity
             CATransaction.commit()
         }
     }
     
-    private func calculatePoints(aabb: AABB) -> [CGPoint] {
-        let pairs = columnViewModel.calculateUIPoints(for: layer.bounds, aabb: aabb)
-        var result = [CGPoint](repeating: CGPoint.zero, count: pairs.count)
-        for i in 0..<pairs.count {
-            result[i] = pairs[i].to
+    private func calculatePoints(ui: ColumnUIModel) -> [CGPoint] {
+        let datas = ui.translate(to: layer.bounds)
+        var result = [CGPoint](repeating: CGPoint.zero, count: datas.count)
+        for i in 0..<datas.count {
+            result[i] = datas[i].to
         }
         return result
     }

@@ -21,10 +21,7 @@ public class ChartView: UIView
     }
     
     private let margins: UIEdgeInsets
-    private var chartViewModel: ChartViewModel? = nil
-    private var visibleAABB: AABB? {
-        return chartViewModel?.visibleInIntervalAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
-    }
+    private var ui: ChartUIModel? = nil
     
     private var columnsView: ColumnsView = ColumnsView()
     private let verticalAxisView: VerticalAxisView = VerticalAxisView()
@@ -46,26 +43,23 @@ public class ChartView: UIView
     }
     
     public func setChart(_ chartViewModel: ChartViewModel) {
-        self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
 
-        verticalAxisView.setChart(chartViewModel)
-        columnsView.setChart(margins: self.margins, chartViewModel)
+        columnsView.premake(margins: self.margins, types: chartViewModel.columns.map { $0.type })
 
-        update(use: chartViewModel)
+        self.ui = ChartUIModel(viewModel: chartViewModel, fully: false, size: 2.0)
+        update()
     }
     
-    private func update(use chartViewModel: ChartViewModel) {
-        let aabb = visibleAABB
+    private func update() {
+        guard let ui = self.ui else {
+            return
+        }
         
-        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
-        verticalAxisView.update(aabb: aabb, animated: false, duration: 0.0)
-        
-        horizontalAxisView.setFullInterval(chartViewModel.fullInterval)
-        horizontalAxisView.update(aabb: aabb, animated: false, duration: 0.0)
-        
-        hintView.setColumns(chartViewModel.columns)
-        hintView.setAABB(aabb: aabb)
+        columnsView.update(ui: ui, animated: false, duration: 0.0)
+        verticalAxisView.update(ui: ui, animated: false, duration: 0.0)
+        horizontalAxisView.update(ui: ui, animated: false, duration: 0.0)
+        hintView.update(ui: ui, animated: false, duration: 0.0)
     }
 
     private func configureSubviews() {
@@ -95,9 +89,7 @@ public class ChartView: UIView
         self.verticalAxisView.frame = marginsFrame
         self.hintView.frame = marginsFrame
         
-        if let vm = chartViewModel {
-            update(use: vm)
-        }
+        update()
     }
 
     internal required init?(coder aDecoder: NSCoder) {
@@ -108,18 +100,22 @@ public class ChartView: UIView
 extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        let aabb = visibleAABB
-        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
-        verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
-        horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
-        hintView.setAABB(aabb: aabb)
+        let ui = ChartUIModel(viewModel: viewModel, fully: false, size: 2.0)
+        self.ui = ui
+        
+        columnsView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
+        verticalAxisView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
+        horizontalAxisView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
+        hintView.update(ui: ui, animated: true, duration: 0.0)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        let aabb = visibleAABB
-        columnsView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForLinesDuration)
-        verticalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForValuesDuration)
-        horizontalAxisView.update(aabb: aabb, animated: true, duration: Configs.intervalChangeForDatesDuration)
-        hintView.setAABB(aabb: aabb)
+        let ui = ChartUIModel(viewModel: viewModel, fully: false, size: 2.0)
+        self.ui = ui
+        
+        columnsView.update(ui: ui, animated: true, duration: Configs.intervalChangeForLinesDuration)
+        verticalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForValuesDuration)
+        horizontalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForDatesDuration)
+        hintView.update(ui: ui, animated: true, duration: 0.0)
     }
 }

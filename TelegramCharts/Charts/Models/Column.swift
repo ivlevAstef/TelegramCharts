@@ -8,14 +8,7 @@
 
 public struct Column
 {
-    public typealias Date = Int64
     public typealias Value = Int
-
-    public struct Point
-    {
-        public let date: Date
-        public let value: Value
-    }
     
     public enum ColumnType {
         case line
@@ -24,7 +17,7 @@ public struct Column
     }
 
     public let name: String
-    public let points: [Point]
+    public let values: [Value]
     public let color: String
     
     public let type: ColumnType

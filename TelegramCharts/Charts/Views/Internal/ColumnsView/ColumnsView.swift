@@ -17,7 +17,6 @@ internal class ColumnsView
         }
     }
 
-    private var yScaled: Bool = false
     private var columnsViews: [UIView & ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
 
@@ -25,23 +24,16 @@ internal class ColumnsView
     private var frame: CGRect = .zero
     private var updateCacheBlock: DispatchWorkItem?
 
-    internal func setChart(margins: UIEdgeInsets, _ chartViewModel: ChartViewModel) {
-        self.yScaled = chartViewModel.yScaled
-        columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, margins: margins, size: 2.0, parent: parent)
+    internal func premake(margins: UIEdgeInsets, types: [ColumnViewModel.ColumnType]) {
+        columnsViews = ColumnsViewFabric.makeColumnViews(by: types, margins: margins, parent: parent)
         updateFrame(frame: self.frame)
         setCornerRadius(cornerRadius)
     }
 
-    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
-        if yScaled {
-            for columnView in columnsViews {
-                let columnAABB = aabb?.childs.first(where: { $0.id == columnView.id })
-                columnView.update(aabb: columnAABB, animated: animated, duration: duration)
-            }
-        } else {
-            for columnView in columnsViews {
-                columnView.update(aabb: aabb, animated: animated, duration: duration)
-            }
+    internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        assert(columnsViews.count == ui.columns.count)
+        for (columnUI, columnView) in zip(ui.columns, columnsViews) {
+            columnView.update(ui: columnUI, animated: animated, duration: duration)
         }
 
         cacheUpdate(animated: animated, duration: duration)

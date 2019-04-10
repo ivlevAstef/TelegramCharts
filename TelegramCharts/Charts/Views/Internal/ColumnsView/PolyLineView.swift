@@ -14,17 +14,12 @@ internal class PolyLineView: UIView, ColumnView
         didSet { updateFrame() }
     }
     
-    internal let id: UUID
-    
     private let contentView: UIView = UIView(frame: .zero)
     private let margins: UIEdgeInsets
-    private let columnLayer: PolyLineLayerWrapper
-    private var lastAABB: AABB?
+    private let columnLayer = PolyLineLayerWrapper()
     
-    required internal init(margins: UIEdgeInsets, _ columnViewModel: ColumnViewModel) {
-        self.id = columnViewModel.id
+    required internal init(margins: UIEdgeInsets) {
         self.margins = margins
-        self.columnLayer = PolyLineLayerWrapper(columnViewModel: columnViewModel)
         super.init(frame: .zero)
         addSubview(contentView)
         
@@ -32,22 +27,9 @@ internal class PolyLineView: UIView, ColumnView
         contentView.clipsToBounds = true
         contentView.layer.addSublayer(columnLayer.layer)
     }
-
-    internal func setSize(_ size: Double) {
-        columnLayer.lineWidth = CGFloat(size)
-    }
     
-    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
-        let animatedPath = animated && (nil != lastAABB)
-        let animatedOpacity = animated
-
-        let usedAABB = aabb ?? lastAABB ?? AABB.empty
-        lastAABB = aabb
-
-        columnLayer.update(aabb: usedAABB,
-                                animatedPath: animatedPath,
-                                animatedOpacity: animatedOpacity,
-                                duration: duration)
+    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        columnLayer.update(ui: ui, animated: animated, duration: duration)
     }
     
     private func updateFrame() {

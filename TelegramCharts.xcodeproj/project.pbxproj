@@ -14,6 +14,8 @@
 		ABA05B26225BB42E00A927D9 /* chart_data in Resources */ = {isa = PBXBuildFile; fileRef = ABA05B25225BB42E00A927D9 /* chart_data */; };
 		ABA05B28225C3F3100A927D9 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B27225C3F3100A927D9 /* Chart.swift */; };
 		ABA05B2B225C409900A927D9 /* ColumnsViewFabric.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */; };
+		ABA05B5E225DEDF000A927D9 /* ChartUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */; };
+		ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7942223DF1D40063B223 /* PolyLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolyLineView.swift */; };
@@ -55,6 +57,8 @@
 		ABA05B25225BB42E00A927D9 /* chart_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = chart_data; sourceTree = "<group>"; };
 		ABA05B27225C3F3100A927D9 /* Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsViewFabric.swift; sourceTree = "<group>"; };
+		ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartUIModel.swift; sourceTree = "<group>"; };
+		ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnUIModel.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7941223DF1D40063B223 /* PolyLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolyLineView.swift; sourceTree = "<group>"; };
@@ -178,6 +182,8 @@
 		BACE71412235FC1300068579 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */,
+				ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */,
 				ABAE793D223DECC60063B223 /* ChartViewModel.swift */,
 				BACE71422235FC3A00068579 /* ColumnViewModel.swift */,
 				BACE716E22363E1900068579 /* Column.swift */,
@@ -323,6 +329,7 @@
 				BACE717B2238DFCC00068579 /* ChartStyle.swift in Sources */,
 				BAAE9CF2225CADAF0085C86B /* ColumnsView.swift in Sources */,
 				BAAE9CF0225C8B2B0085C86B /* IActualizedCell.swift in Sources */,
+				ABA05B5E225DEDF000A927D9 /* ChartUIModel.swift in Sources */,
 				BACE714B2236020C00068579 /* Style.swift in Sources */,
 				BACE71772238D18300068579 /* WeakRef.swift in Sources */,
 				BACE7160223633D700068579 /* UIColor+Init.swift in Sources */,
@@ -346,6 +353,7 @@
 				BACE71432235FC3A00068579 /* ColumnViewModel.swift in Sources */,
 				ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */,
 				ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */,
+				ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */,
 				ABAE793C223DE8230063B223 /* AABB.swift in Sources */,
 				ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */,
 				ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */,

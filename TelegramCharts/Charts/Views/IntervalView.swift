@@ -28,14 +28,11 @@ public class IntervalView: UIView
     }
     
     private let margins: UIEdgeInsets
-    private var chartViewModel: ChartViewModel? = nil
+    private var viewModel: ChartViewModel? = nil
+    private var ui: ChartUIModel? = nil
     private var columnsView: ColumnsView = ColumnsView()
     private var columnsViewRect: CGRect = .zero
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
-    
-    private var visibleAABB: AABB? {
-        return chartViewModel?.visibleAABB?.copyWithIntellectualPadding(date: 0, value: Configs.padding)
-    }
 
     private var isBeganMovedLeftSlider: Bool = false
     private var isBeganMovedRightSlider: Bool = false
@@ -56,21 +53,23 @@ public class IntervalView: UIView
     }
 
     public func setChart(_ chartViewModel: ChartViewModel) {
-        self.chartViewModel = chartViewModel
         chartViewModel.registerUpdateListener(self)
 
-        columnsView.setChart(margins: .zero, chartViewModel)
+        columnsView.premake(margins: .zero, types: chartViewModel.columns.map { $0.type })
         addSubview(intervalDrawableView) // move to top
 
-        update(use: chartViewModel)
+        self.viewModel = chartViewModel
+        self.ui = ChartUIModel(viewModel: chartViewModel, fully: true, size: 1.0)
+        update()
     }
     
-    private func update(use chartViewModel: ChartViewModel) {
-        let aabb = visibleAABB
-
-        columnsView.update(aabb: aabb, animated: false, duration: 0.0)
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
-                                    animated: false, duration: 0.0)
+    private func update() {
+        guard let ui = self.ui else {
+            return
+        }
+        
+        columnsView.update(ui: ui, animated: false, duration: 0.0)
+        intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: false, duration: 0.0)
     }
 
     private func initialize() {
@@ -99,9 +98,8 @@ public class IntervalView: UIView
                                                  width: bounds.width - 2 * Consts.padding - margins.left - margins.right,
                                                  height: bounds.height - margins.top - margins.bottom)
         
-        if let vm = chartViewModel {
-            update(use: vm)
-        }
+        
+        update()
     }
 
     @objc
@@ -110,45 +108,45 @@ public class IntervalView: UIView
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
-        guard let chartViewModel = chartViewModel, let aabb = visibleAABB else {
+        guard let ui = self.ui, let viewModel = self.viewModel else {
             return
         }
 
-        let interval = chartViewModel.interval
+        let interval = ui.interval
         let rect = columnsViewRect
 
-        let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: rect).x
-        let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: rect).x
+        let leftX = ui.translate(date: interval.from, to: rect)
+        let rightX = ui.translate(date: interval.to, to: rect)
 
         func updateInterval() {
             let bWidth = Consts.minSliderIntervalWidth + 2 * Consts.sliderWidth
 
             if isBeganMovedLeftSlider {
                 let newLeftX = min(tapPosition.x - tapLeftOffset, rightX - bWidth)
-                let newFrom = max(aabb.minDate, aabb.calculateDate(x: newLeftX, rect: rect))
-                chartViewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: interval.to))
+                let newFrom = max(ui.aabb.minDate, ui.translate(x: newLeftX, from: rect))
+                viewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: interval.to))
             }
             if isBeganMovedRightSlider {
                 let newRightX = max(tapPosition.x - tapRightOffset, leftX + bWidth)
-                let newTo = min(aabb.maxDate, aabb.calculateDate(x: newRightX, rect: rect))
-                chartViewModel.updateInterval(ChartViewModel.Interval(from: interval.from, to: newTo))
+                let newTo = min(ui.aabb.maxDate, ui.translate(x: newRightX, from: rect))
+                viewModel.updateInterval(ChartViewModel.Interval(from: interval.from, to: newTo))
             }
             if isBeganMovedCenterSlider {
                 let newLeftX = tapPosition.x - tapLeftOffset
                 let newRightX = tapPosition.x - tapRightOffset
                 
                 let distance = interval.to - interval.from
-                var newFrom = aabb.calculateDate(x: newLeftX, rect: rect)
-                var newTo = aabb.calculateDate(x: newRightX, rect: rect)
-                if newFrom <= aabb.minDate {
-                    newTo = aabb.minDate + distance
-                    newFrom = aabb.minDate
+                var newFrom = ui.translate(x: newLeftX, from: rect)
+                var newTo = ui.translate(x: newRightX, from: rect)
+                if newFrom <= ui.aabb.minDate {
+                    newTo = ui.aabb.minDate + distance
+                    newFrom = ui.aabb.minDate
                 }
-                if newTo >= aabb.maxDate {
-                    newFrom = aabb.maxDate - distance
-                    newTo = aabb.maxDate
+                if newTo >= ui.aabb.maxDate {
+                    newFrom = ui.aabb.maxDate - distance
+                    newTo = ui.aabb.maxDate
                 }
-                chartViewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: newTo))
+                viewModel.updateInterval(ChartViewModel.Interval(from: newFrom, to: newTo))
             }
         }
 
@@ -189,16 +187,18 @@ public class IntervalView: UIView
 extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        let aabb = visibleAABB
-        columnsView.update(aabb: aabb, animated: true, duration: Configs.visibleChangeDuration)
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
-                                    animated: true, duration: Configs.visibleChangeDuration)
+        let ui = ChartUIModel(viewModel: viewModel, fully: true, size: 1.0)
+        self.ui = ui
+        
+        columnsView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
+        intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: true, duration: Configs.visibleChangeDuration)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        let aabb = visibleAABB
-        intervalDrawableView.update(chartViewModel: chartViewModel, aabb: aabb, polyRect: columnsViewRect,
-                                    animated: false, duration: 0)
+        let ui = ChartUIModel(viewModel: viewModel, fully: true, size: 1.0)
+        self.ui = ui
+        
+        intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: false, duration: 0)
     }
 }
 
@@ -232,20 +232,13 @@ private class IntervalDrawableView: UIView
         rightArrow.tintColor = style.intervalArrowColor
     }
 
-    internal func update(chartViewModel: ChartViewModel?, aabb: AABB?, polyRect: CGRect,
-                         animated: Bool, duration: TimeInterval)
+    internal func update(ui: ChartUIModel, polyRect: CGRect, animated: Bool, duration: TimeInterval)
     {
         let polyRect = CGRect(origin: .zero, size: polyRect.size)
-        guard let chartViewModel = chartViewModel, let aabb = aabb else {
-            hide(animated: animated, duration: duration)
-            return
-        }
 
-        show(animated: animated, duration: duration)
-
-        let interval = chartViewModel.interval
-        let leftX = aabb.calculateUIPoint(date: interval.from, value: aabb.minValue, rect: polyRect).x
-        let rightX = aabb.calculateUIPoint(date: interval.to, value: aabb.minValue, rect: polyRect).x
+        let interval = ui.interval
+        let leftX = ui.translate(date: interval.from, to: polyRect)
+        let rightX = ui.translate(date: interval.to, to: polyRect)
         
         let cornerRadii = CGSize(width: Consts.cornerRadius, height: Consts.cornerRadius)
 
@@ -297,18 +290,6 @@ private class IntervalDrawableView: UIView
         addSubview(rightArrow)
     }
     
-    private func show(animated: Bool, duration: TimeInterval) {
-        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
-            self?.alpha = 1.0
-        })
-    }
-
-    private func hide(animated: Bool, duration: TimeInterval) {
-        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
-            self?.alpha = 0.0
-        })
-    }
-
     private static func makeArrow(reverse: Bool) -> UIImage? {
         let centerArrowX: CGFloat = 4
         let edgeArrowX: CGFloat = Consts.sliderWidth - 4

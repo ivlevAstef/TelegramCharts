@@ -23,13 +23,12 @@ private enum Consts
 
 internal class HintAndOtherView: UIView
 {
-    private var aabb: AABB?
-    private var columnsViewModels: [ColumnViewModel] = []
-
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
+    private var ui: ChartUIModel?
+    
     private var lastTouchPosition: CGPoint? = nil
 
     private let lineView: LineView = LineView()
@@ -55,13 +54,9 @@ internal class HintAndOtherView: UIView
         hintView.textColor = style.hintTextColor
     }
 
-    internal func setColumns(_ columnsViewModels: [ColumnViewModel]) {
-        self.columnsViewModels = columnsViewModels
-    }
-
-    internal func setAABB(aabb: AABB?) {
-        self.aabb = aabb
-
+    internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        self.ui = ui
+        
         if let touchPosition = lastTouchPosition {
             touchProcessor(tapPosition: touchPosition, state: .changed)
         }
@@ -73,51 +68,51 @@ internal class HintAndOtherView: UIView
     }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
-        guard let aabb = self.aabb else {
-            hide(animated: true)
-            return
-        }
-
-        switch state {
-        case .began:
-            fallthrough
-        case .changed:
-            lastTouchPosition = tapPosition
-            let date = aabb.calculateDate(x: tapPosition.x, rect: bounds)
-            showHintAndOther(aroundDate: date)
-            break
-        default:
-            lastTouchPosition = nil
-            hide(animated: true)
-        }
+//        guard let aabb = self.aabb else {
+//            hide(animated: true)
+//            return
+//        }
+//
+//        switch state {
+//        case .began:
+//            fallthrough
+//        case .changed:
+//            lastTouchPosition = tapPosition
+//            let date = aabb.calculateDate(x: tapPosition.x, rect: bounds)
+//            showHintAndOther(aroundDate: date)
+//            break
+//        default:
+//            lastTouchPosition = nil
+//            hide(animated: true)
+//        }
     }
 
-    private func showHintAndOther(aroundDate: Column.Date) {
-        guard let aabb = self.aabb else {
-            hide(animated: true)
-            return
-        }
-
-        let polylineViewModels = columnsViewModels.filter { $0.isVisible }
-
-        let dates = polylineViewModels.map { $0.getPoint(by: aroundDate).date }
-        guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
-            hide(animated: true)
-            return
-        }
-        let position = aabb.calculateUIPoint(date: nearDate, value: 0, rect: bounds).x
-
-        show(animated: true)
-
-        let lines = polylineViewModels.map { ($0.color, $0.getPoint(by: nearDate).pair.to) }
-        hintView.setData(date: nearDate, lines: lines)
-        hintView.setPosition(position, limit: bounds)
-
-        let points = lines.map { ($0.0, aabb.calculateUIPoint(date: nearDate, value: $0.1, rect: bounds).y) }
-        lineView.setPoints(points)
-        lineView.setHeightAndOrigin(height: frame.height, origin: hintView.frame.maxY)
-        lineView.setPosition(position, limit: bounds)
-    }
+//    private func showHintAndOther(aroundDate: Column.Date) {
+//        guard let aabb = self.aabb else {
+//            hide(animated: true)
+//            return
+//        }
+//
+//        let polylineViewModels = columnsViewModels.filter { $0.isVisible }
+//
+//        let dates = polylineViewModels.map { $0.getPoint(by: aroundDate).date }
+//        guard let nearDate = dates.min(by: { abs($0 - aroundDate) <= abs($1 - aroundDate) }) else {
+//            hide(animated: true)
+//            return
+//        }
+//        let position = aabb.calculateUIPoint(date: nearDate, value: 0, rect: bounds).x
+//
+//        show(animated: true)
+//
+//        let lines = polylineViewModels.map { ($0.color, $0.getPoint(by: nearDate).pair.to) }
+//        hintView.setData(date: nearDate, lines: lines)
+//        hintView.setPosition(position, limit: bounds)
+//
+//        let points = lines.map { ($0.0, aabb.calculateUIPoint(date: nearDate, value: $0.1, rect: bounds).y) }
+//        lineView.setPoints(points)
+//        lineView.setHeightAndOrigin(height: frame.height, origin: hintView.frame.maxY)
+//        lineView.setPosition(position, limit: bounds)
+//    }
 
     private func hide(animated: Bool) {
         UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
@@ -224,7 +219,7 @@ private class HintView: UIView
         self.layer.cornerRadius = Consts.hintCornerRadius
     }
 
-    internal func setData(date: Column.Date, lines: [(UIColor, AABB.Value)]) {
+    internal func setData(date: Chart.Date, lines: [(UIColor, AABB.Value)]) {
         subviews.forEach { $0.removeFromSuperview() }
 
         // Date

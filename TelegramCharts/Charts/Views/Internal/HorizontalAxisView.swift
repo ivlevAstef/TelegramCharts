@@ -38,43 +38,30 @@ internal class HorizontalAxisView: UIView
         }
     }
     
-    internal func setFullInterval(_ interval: ChartViewModel.Interval) {
-        fullInterval = interval
-    }
-    
-    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
-        guard let aabb = aabb else {
-            UIView.animateIf(animated, duration: duration, animations: { [weak self] in
-                self?.subviews.forEach { $0.alpha = 0.0 }
-            }, completion: { [weak self] _ in
-                self?.subviews.forEach { $0.removeFromSuperview() }
-            })
-            dateLabels.removeAll()
-
-            return
+    internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        func calcPosition(date: Chart.Date) -> (position: CGFloat, t: Double) {
+            let t = Double(date - ui.fullInterval.from) / Double(ui.fullInterval.to - ui.fullInterval.from)
+            let position = ui.translate(date: date, to: bounds)
+            return (position, t)
         }
-
-        updateLabels(aabb: aabb, animated: animated, duration: duration)
-    }
-    
-    private func updateLabels(aabb: AABB, animated: Bool, duration: TimeInterval) {
+        
         var prevLabels = dateLabels
         var newLabels: [DateLabel] = []
-        
+
         dateLabels.removeAll()
 
         // stride not works... WTF?
-        let step: Column.Date = calculateStep(aabb: aabb)
+        let step: Chart.Date = calculateStep(ui: ui)
         // can optimization - calculate correct interval
-        var iter = fullInterval.from
-        while iter <= fullInterval.to {
+        var iter = ui.fullInterval.from
+        while iter <= ui.fullInterval.to {
             let date = iter
             iter += step
 
             let halfWidth = maxDateWidth * 0.5
-            let dateCenter = aabb.calculateUIPoint(date: date, value: 0, rect: bounds).x
-            if dateCenter + halfWidth <= self.bounds.minX - self.bounds.size.width * 0.5
-            || dateCenter - halfWidth >= self.bounds.maxX + self.bounds.size.width * 0.5 {
+            let dateCenter = ui.translate(date: date, to: bounds)
+            if dateCenter + halfWidth <= bounds.minX - bounds.size.width * 0.5
+            || dateCenter - halfWidth >= bounds.maxX + bounds.size.width * 0.5 {
                 continue
             }
 
@@ -86,19 +73,24 @@ internal class HorizontalAxisView: UIView
                 label = DateLabel(date: date, font: font, color: color)
                 addSubview(label)
                 newLabels.append(label)
+                
+                let (position, t) = calcPosition(date: date)
+                label.setPosition(position, t: t)
             }
 
             dateLabels.append(label)
         }
-        
+
         // update position for all labels
-        for label in subviews.compactMap({ $0 as? DateLabel }) {
-            let t = Double(label.date - fullInterval.from) / Double(fullInterval.to - fullInterval.from)
-            let position = aabb.calculateUIPoint(date: label.date, value: 0, rect: bounds).x
-            label.setPosition(position, t: t)
-        }
+        UIView.animateIf(animated, duration: duration * 0.5, animations: { [subviews] in
+            for label in subviews.compactMap({ $0 as? DateLabel }) {
+                let (position, t) = calcPosition(date: label.date)
+                label.setPosition(position, t: t)
+            }
+        })
 
         for label in newLabels {
+            // out screen
             if label.frame.minX <= self.bounds.minX || label.frame.maxX >= self.bounds.maxX {
                 label.alpha = 1.0
             } else {
@@ -117,13 +109,13 @@ internal class HorizontalAxisView: UIView
         })
     }
 
-    private func calculateStep(aabb: AABB) -> Column.Date {
-        let div = calculateNearPowerTwoAndReturnNumber(aabb: aabb)
-        return (fullInterval.to - fullInterval.from) / Column.Date(div * minScreenCount)
+    private func calculateStep(ui: ChartUIModel) -> Chart.Date {
+        let div = calculateNearPowerTwoAndReturnNumber(ui: ui)
+        return (ui.fullInterval.to - ui.fullInterval.from) / Chart.Date(div * minScreenCount)
     }
 
-    private func calculateNearPowerTwoAndReturnNumber(aabb: AABB) -> Int {
-        let div: Int = Int(calculateMaxFullIntervalCount(aabb: aabb) / minScreenCount)
+    private func calculateNearPowerTwoAndReturnNumber(ui: ChartUIModel) -> Int {
+        let div: Int = Int(calculateMaxFullIntervalCount(ui: ui) / minScreenCount)
         // optimization - no!
         var iter: Int = 1
         while iter * 2 < div {
@@ -132,8 +124,8 @@ internal class HorizontalAxisView: UIView
         return iter
     }
 
-    private func calculateMaxFullIntervalCount(aabb: AABB) -> Int {
-        let k = Double(fullInterval.to - fullInterval.from) / Double(aabb.maxDate - aabb.minDate)
+    private func calculateMaxFullIntervalCount(ui: ChartUIModel) -> Int {
+        let k = Double(ui.fullInterval.to - ui.fullInterval.from) / Double(ui.interval.to - ui.interval.from)
         return Int(Double(maxScreenCount) * k)
     }
 
@@ -169,9 +161,9 @@ private class DateLabel: UILabel
         return dateFormatter
     }()
     
-    internal let date: Column.Date
+    internal let date: Chart.Date
     
-    internal init(date: Column.Date, font: UIFont, color: UIColor) {
+    internal init(date: Chart.Date, font: UIFont, color: UIColor) {
         self.date = date
         super.init(frame: .zero)
         

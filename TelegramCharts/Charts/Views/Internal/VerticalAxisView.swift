@@ -23,12 +23,11 @@ internal class VerticalAxisView: UIView
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
-    private var chartViewModel: ChartViewModel?
 
     private let bottomLine: UIView = UIView(frame: .zero)
 
-    private var leftLastAABB: AABB?
-    private var rightLastAABB: AABB?
+    private var leftLastUI: ColumnUIModel?
+    private var rightLastUI: ColumnUIModel?
     private var leftValueViews: [ValueView<Left>] = []
     private var rightValueViews: [ValueView<Right>] = []
 
@@ -39,10 +38,6 @@ internal class VerticalAxisView: UIView
 
         bottomLine.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomLine)
-    }
-    
-    internal func setChart(_ chartViewModel: ChartViewModel) {
-        self.chartViewModel = chartViewModel
     }
 
     internal func setStyle(_ style: ChartStyle) {
@@ -55,49 +50,36 @@ internal class VerticalAxisView: UIView
         }
     }
 
-    internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
+    internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         func cleanLeft() {
-            leftLastAABB = nil
+            leftLastUI = nil
             leftValueViews.forEach { $0.removeFromSuperview() }
             leftValueViews.removeAll()
         }
         func cleanRight() {
-            rightLastAABB = nil
+            rightLastUI = nil
             rightValueViews.forEach { $0.removeFromSuperview() }
             rightValueViews.removeAll()
         }
         
-        guard let aabb = aabb else {
-            cleanLeft()
-            cleanRight()
-            return
-        }
-
-        guard let chartViewModel = chartViewModel, chartViewModel.yScaled else {
-            updateValues(aabb: aabb, lastAABB: leftLastAABB,
-                         columnColor: nil, valueViews: &leftValueViews,
-                         animated: animated, duration: duration)
-            leftLastAABB = aabb
-            return
-        }
+        let uniqueAABBs = Set(ui.columns.map { $0.aabb })
+        let visibleColumns = ui.columns.filter { $0.isVisible }
+        let useTwoY = uniqueAABBs.count > 1
         
-        // Support Y-Scaled...
-        if let leftColumn = chartViewModel.columns.first, leftColumn.isVisible,
-            let leftAABB = aabb.childs.first(where: { $0.id == leftColumn.id }) {
-            updateValues(aabb: leftAABB, lastAABB: leftLastAABB,
-                         columnColor: leftColumn.color, valueViews: &leftValueViews,
+        if let column = visibleColumns.first {
+            updateValues(ui: column, lastUI: leftLastUI,
+                         valueViews: &leftValueViews, columnColor: useTwoY ? column.color : nil,
                          animated: animated, duration: duration)
-            leftLastAABB = leftAABB
+            leftLastUI = column
         } else {
             cleanLeft()
         }
         
-        if let rightColumn = chartViewModel.columns.dropFirst().first, rightColumn.isVisible,
-           let rightAABB = aabb.childs.first(where: { $0.id == rightColumn.id }) {
-            updateValues(aabb: rightAABB, lastAABB: rightLastAABB,
-                         columnColor: rightColumn.color, valueViews: &rightValueViews,
+        if let column = visibleColumns.dropFirst().first, useTwoY {
+            updateValues(ui: column, lastUI: rightLastUI,
+                         valueViews: &rightValueViews, columnColor: useTwoY ? column.color : nil,
                          animated: animated, duration: duration)
-            rightLastAABB = rightAABB
+            rightLastUI = column
         } else {
             cleanRight()
         }
@@ -111,8 +93,11 @@ internal class VerticalAxisView: UIView
         }
     }
 
-    private func updateValues<T>(aabb: AABB, lastAABB: AABB?, columnColor: UIColor?, valueViews: inout [ValueView<T>], animated: Bool, duration: TimeInterval) {
-        let newValues = calculateNewValues(aabb: aabb)
+    private func updateValues<T>(ui: ColumnUIModel, lastUI: ColumnUIModel?,
+                                 valueViews: inout [ValueView<T>], columnColor: UIColor?,
+                                 animated: Bool, duration: TimeInterval) {
+        
+        let newValues = calculateNewValues(aabb: ui.aabb)
         var prevViews = valueViews
         var newViews: [ValueView<T>] = []
 
@@ -127,7 +112,7 @@ internal class VerticalAxisView: UIView
                 prevViews.remove(at: prevViewIndex)
             } else {
                 view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
-                let position = (lastAABB ?? aabb).calculateUIPoint(date: 0, value: value, rect: bounds).y
+                let position = (lastUI ?? ui).translate(value: value, to: bounds)
                 view.setPosition(position)
 
                 addSubview(view)
@@ -144,14 +129,14 @@ internal class VerticalAxisView: UIView
         }, completion: { _ in
             prevViews.forEach { $0.removeFromSuperview() }
         })
-        
+
         func updatePositionOnSubviews() {
             for view in subviews.compactMap({ $0 as? ValueView<T> }) {
-                let position = aabb.calculateUIPoint(date: 0, value: view.value, rect: bounds).y
+                let position = ui.translate(value: view.value, to: bounds)
                 view.setPosition(position)
             }
         }
-        
+
         UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
             updatePositionOnSubviews()
         })

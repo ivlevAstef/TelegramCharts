@@ -8,7 +8,10 @@
 
 public struct Chart
 {
+    public typealias Date = Int64
+    
     public let name: String
+    public let dates: [Date]
     public let columns: [Column]
     public let yScaled: Bool
     public let stacked: Bool

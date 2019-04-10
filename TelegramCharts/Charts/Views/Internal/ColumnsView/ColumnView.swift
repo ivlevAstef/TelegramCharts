@@ -10,9 +10,6 @@ import UIKit
 
 internal protocol ColumnView: class
 {
-    var id: UUID { get }
-    init(margins: UIEdgeInsets, _ columnViewModel: ColumnViewModel)
-    // 1 - for interval, 2 - for normal
-    func setSize(_ size: Double)
-    func update(aabb: AABB?, animated: Bool, duration: TimeInterval)
+    init(margins: UIEdgeInsets)
+    func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval)
 }
