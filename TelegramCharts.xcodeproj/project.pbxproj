@@ -16,9 +16,9 @@
 		ABA05B2B225C409900A927D9 /* ColumnsViewFabric.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */; };
 		ABA05B5E225DEDF000A927D9 /* ChartUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */; };
 		ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */; };
+		ABA05B64225E1C5200A927D9 /* BarLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
-		ABAE7942223DF1D40063B223 /* PolyLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7941223DF1D40063B223 /* PolyLineView.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
 		ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */; };
 		ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB87D3A223A393B00E31808 /* ChartView.swift */; };
@@ -59,9 +59,9 @@
 		ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsViewFabric.swift; sourceTree = "<group>"; };
 		ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartUIModel.swift; sourceTree = "<group>"; };
 		ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnUIModel.swift; sourceTree = "<group>"; };
+		ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarLayerWrapper.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
-		ABAE7941223DF1D40063B223 /* PolyLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolyLineView.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
 		ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolyLineLayerWrapper.swift; sourceTree = "<group>"; };
 		ABB87D3A223A393B00E31808 /* ChartView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
@@ -120,10 +120,10 @@
 			isa = PBXGroup;
 			children = (
 				ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */,
-				ABA05B23225B830E00A927D9 /* ColumnView.swift */,
-				ABAE7941223DF1D40063B223 /* PolyLineView.swift */,
-				ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */,
 				BAAE9CF1225CADAF0085C86B /* ColumnsView.swift */,
+				ABA05B23225B830E00A927D9 /* ColumnView.swift */,
+				ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */,
+				ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */,
 			);
 			path = ColumnsView;
 			sourceTree = "<group>";
@@ -334,7 +334,6 @@
 				BACE71772238D18300068579 /* WeakRef.swift in Sources */,
 				BACE7160223633D700068579 /* UIColor+Init.swift in Sources */,
 				ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */,
-				ABAE7942223DF1D40063B223 /* PolyLineView.swift in Sources */,
 				BACE71712238BB5E00068579 /* IntervalView.swift in Sources */,
 				BA41DFC7224269DA0021DC82 /* StyleController.swift in Sources */,
 				AB057E642242A1FD007A76E6 /* UIView+animate.swift in Sources */,
@@ -356,6 +355,7 @@
 				ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */,
 				ABAE793C223DE8230063B223 /* AABB.swift in Sources */,
 				ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */,
+				ABA05B64225E1C5200A927D9 /* BarLayerWrapper.swift in Sources */,
 				ABB87D3C223A393B00E31808 /* ChartView.swift in Sources */,
 				ABA05B2B225C409900A927D9 /* ColumnsViewFabric.swift in Sources */,
 			);

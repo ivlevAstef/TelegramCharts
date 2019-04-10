@@ -10,19 +10,19 @@ import UIKit
 
 internal final class ColumnsViewFabric
 {
-    internal static func makeColumnViews(by types: [ColumnViewModel.ColumnType], margins: UIEdgeInsets, parent: UIView) -> [UIView & ColumnView] {
-        let views: [UIView & ColumnView] = types.map { type in
+    internal static func makeColumnViews(by types: [ColumnViewModel.ColumnType], margins: UIEdgeInsets, parent: UIView) -> [ColumnView] {
+        let views: [ColumnView] = types.map { type in
             switch type {
             case .line:
-                return PolyLineView(margins: margins)
+                return ColumnView(margins: margins, columnLayer: PolyLineLayerWrapper())
             case .area:
-                return PolyLineView(margins: margins)
+                return ColumnView(margins: margins, columnLayer: PolyLineLayerWrapper())
             case .bar:
-                return PolyLineView(margins: margins)
+                return ColumnView(margins: margins, columnLayer: BarLayerWrapper())
             }
         }
         
-        for view in parent.subviews.compactMap({ $0 as? (UIView & ColumnView) }) {
+        for view in parent.subviews.compactMap({ $0 as? ColumnView }) {
             view.removeFromSuperview()
         }
         

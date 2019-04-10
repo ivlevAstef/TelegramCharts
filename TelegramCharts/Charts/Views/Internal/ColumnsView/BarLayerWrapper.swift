@@ -1,14 +1,15 @@
 //
-//  PolyLineLayerWrapper.swift
+//  BarLayerWrapper.swift
 //  TelegramCharts
 //
-//  Created by Alexander Ivlev on 14/03/2019.
-//  Copyright © 2019 SIA. All rights reserved.
+//  Created by Alexander Ivlev on 10/04/2019.
+//  Copyright © 2019 CFT. All rights reserved.
 //
+
 
 import UIKit
 
-internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
+internal final class BarLayerWrapper: ColumnViewLayerWrapper
 {
     internal let layer: CALayer = CALayer()
     
@@ -18,16 +19,16 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
     private var oldDuration: TimeInterval = 0.0
     
     private var pathLayer: CAShapeLayer?
-
+    
     internal init() {
     }
     
     internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
-        layer.lineWidth = CGFloat(ui.size)
-        layer.lineCap = .round
-        layer.lineJoin = .round
-        layer.strokeColor = ui.color.cgColor
-        layer.fillColor = nil
+        layer.lineWidth = 0
+        layer.lineCap = .butt
+        layer.lineJoin = .miter
+        layer.strokeColor = nil
+        layer.fillColor = ui.color.cgColor
         layer.opacity = 1.0
     }
     
@@ -89,9 +90,16 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
     
     private func calculatePoints(ui: ColumnUIModel) -> [CGPoint] {
         let datas = ui.translate(to: layer.bounds)
-        var result = [CGPoint](repeating: CGPoint.zero, count: datas.count)
+        let step = (datas[1].from.x - datas[0].from.x) / 2
+        
+        var result = [CGPoint](repeating: CGPoint.zero, count: 4 * datas.count)
         for i in 0..<datas.count {
-            result[i] = datas[i].to
+            result[2 * i] = CGPoint(x: datas[i].from.x - step, y: datas[i].from.y)
+            result[2 * i + 1] = CGPoint(x: datas[i].from.x + step, y: datas[i].from.y)
+        }
+        for i in 0..<datas.count {
+            result[result.count - 2 * i - 1] = CGPoint(x: datas[i].to.x - step, y: datas[i].to.y)
+            result[result.count - 2 * i - 2] = CGPoint(x: datas[i].to.x + step, y: datas[i].to.y)
         }
         return result
     }
@@ -112,7 +120,8 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         guard let firstPoint = points.first else {
             return path
         }
-
+        
+        
         path.move(to: firstPoint)
         for point in points.dropFirst() {
             path.addLine(to: point)
@@ -121,3 +130,4 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         return path
     }
 }
+

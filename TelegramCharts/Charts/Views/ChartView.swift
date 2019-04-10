@@ -32,8 +32,6 @@ public class ChartView: UIView
         self.margins = margins
         super.init(frame: .zero)
         columnsView.parent = self
-        
-        configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -46,6 +44,7 @@ public class ChartView: UIView
         chartViewModel.registerUpdateListener(self)
 
         columnsView.premake(margins: self.margins, types: chartViewModel.columns.map { $0.type })
+        configureSubviews()
 
         self.ui = ChartUIModel(viewModel: chartViewModel, fully: false, size: 2.0)
         update()

@@ -38,6 +38,13 @@ internal struct ColumnUIModel
         return yOffset - CGFloat(value) * yScale
     }
     
+    internal func translate(date: Chart.Date, to rect: CGRect) -> CGFloat {
+        let xScale = rect.width / CGFloat(aabb.dateInterval)
+        let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
+        
+        return xOffset + CGFloat(date) * xScale
+    }
+    
     internal func translate(data: Data, to rect: CGRect) -> (from: CGPoint, to: CGPoint) {
         let xScale = rect.width / CGFloat(aabb.dateInterval)
         let yScale = rect.height / CGFloat(aabb.valueInterval)

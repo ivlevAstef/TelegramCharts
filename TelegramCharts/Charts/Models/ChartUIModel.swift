@@ -25,7 +25,9 @@ internal struct ChartUIModel
         let fixedInterval = calcFixedInterval(by: fully ? fullInterval : interval, use: viewModel.dates)
         
         if viewModel.yScaled {
-            (self.columns, self.aabb) = Y2Calculator(viewModel: viewModel, interval: fixedInterval, size: size)
+            (self.columns, self.aabb) = y2Calculator(viewModel: viewModel, interval: fixedInterval, size: size)
+        } else if viewModel.stacked {
+            (self.columns, self.aabb) = stackedCalculator(viewModel: viewModel, interval: fixedInterval, size: size)
         } else {
             (self.columns, self.aabb) = simpleCalculator(viewModel: viewModel, interval: fixedInterval, size: size)
         }
@@ -59,6 +61,37 @@ internal struct ChartUIModel
 
 }
 
+private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, size: Double) -> ([ColumnUIModel], AABB)
+{
+    var minValue: AABB.Value = 0
+    var maxValue: AABB.Value = 0
+    
+    let visibleColumns = chartVM.columns.filter { $0.isVisible }
+    for i in 0..<chartVM.dates.count {
+        if interval.from <= chartVM.dates[i] && chartVM.dates[i] <= interval.to {
+            let value = AABB.Value(visibleColumns.map { $0.values[i] }.reduce(0, +))
+            
+            minValue = min(minValue, value)
+            maxValue = max(maxValue, value)
+        }
+    }
+    
+    let aabb = AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue)
+    
+    var prevData: [ColumnUIModel.Data]? = nil
+    let columns: [ColumnUIModel] = chartVM.columns.map { columnVM in
+        let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: prevData)
+        prevData = data
+        return ColumnUIModel(isVisible: columnVM.isVisible,
+                             aabb: aabb,
+                             data: data,
+                             color: columnVM.color,
+                             size: size)
+    }
+    
+    return (columns, aabb)
+}
+
 private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, size: Double) -> ([ColumnUIModel], AABB)
 {
     let aabbs: [AABB] = calculateAABBs(viewModel: chartVM, interval: interval)
@@ -70,13 +103,7 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
     let aabb = AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue)
     
     let columns: [ColumnUIModel] = chartVM.columns.map { columnVM in
-        var data: [ColumnUIModel.Data] = []
-        data.reserveCapacity(columnVM.values.count)
-        
-        for i in 0..<columnVM.values.count {
-            let value = AABB.Value(columnVM.values[i])
-            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: value, to: value))
-        }
+        let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: nil)
         return ColumnUIModel(isVisible: columnVM.isVisible,
                              aabb: aabb,
                              data: data,
@@ -87,7 +114,7 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
     return (columns, aabb)
 }
 
-private func Y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, size: Double) -> ([ColumnUIModel], AABB)
+private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, size: Double) -> ([ColumnUIModel], AABB)
 {
     let aabbs: [AABB] = calculateAABBs(viewModel: chartVM, interval: interval)
     
@@ -97,15 +124,10 @@ private func Y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
     
     let aabb = AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue)
     
+    var prevData: [ColumnUIModel.Data]? = nil
     let columns: [ColumnUIModel] = zip(chartVM.columns, aabbs).map { columnVM, aabb in
-        var data: [ColumnUIModel.Data] = []
-        data.reserveCapacity(columnVM.values.count)
-        
-        for i in 0..<columnVM.values.count {
-            let value = AABB.Value(columnVM.values[i])
-            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: value, to: value))
-        }
-        
+        let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: prevData)
+        prevData = data
         return ColumnUIModel(isVisible: columnVM.isVisible,
                              aabb: aabb,
                              data: data,
@@ -127,8 +149,7 @@ private func calcFixedInterval(by interval: ChartViewModel.Interval, use dates: 
     return ChartViewModel.Interval(from: minDate, to: maxDate)
 }
 
-private func calculateAABBs(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval) -> [AABB]
-{
+private func calculateAABBs(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval) -> [AABB] {
     return chartVM.columns.map { columnVM in
         assert(chartVM.dates.count == columnVM.values.count)
         
@@ -139,6 +160,11 @@ private func calculateAABBs(viewModel chartVM: ChartViewModel, interval: ChartVi
                 let value = AABB.Value(columnVM.values[i])
                 minValue = min(minValue, value)
                 maxValue = max(maxValue, value)
+                // bar always started from 0, or not?
+//                if columnVM.type == .bar {
+//                    minValue = min(minValue, 0)
+//                    maxValue = max(maxValue, 0)
+//                }
             }
         }
         
@@ -167,4 +193,30 @@ private func roundAABB(_ aabb: AABB) -> AABB {
     let maxValue = aabb.maxValue + Double(roundScale - Int64(aabb.maxValue) % roundScale)
     
     return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
+}
+
+private func makeData(by chartVM: ChartViewModel, columnVM: ColumnViewModel, aabb: AABB, prevData: [ColumnUIModel.Data]?) -> [ColumnUIModel.Data] {
+    var data: [ColumnUIModel.Data] = []
+    data.reserveCapacity(columnVM.values.count)
+    
+    if columnVM.type == .line {
+        for i in 0..<columnVM.values.count {
+            let value = AABB.Value(columnVM.values[i])
+            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: value, to: value))
+        }
+    } else if chartVM.stacked {
+        for i in 0..<columnVM.values.count {
+            let value = columnVM.isVisible ? AABB.Value(columnVM.values[i]) : 0
+            let from: AABB.Value = prevData?[i].to ?? aabb.minValue
+            let to: AABB.Value = from + value
+            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: from, to: to))
+        }
+    } else {
+        for i in 0..<columnVM.values.count {
+            let value = AABB.Value(columnVM.values[i])
+            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: aabb.minValue, to: value))
+        }
+    }   
+    
+    return data
 }

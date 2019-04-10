@@ -17,7 +17,7 @@ internal class ColumnsView
         }
     }
 
-    private var columnsViews: [UIView & ColumnView] = []
+    private var columnsViews: [ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
 
     private var cornerRadius: CGFloat = 0.0
