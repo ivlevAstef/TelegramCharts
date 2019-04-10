@@ -11,17 +11,7 @@ import UIKit
 
 internal final class BarLayerWrapper: ColumnViewLayerWrapper
 {
-    internal let layer: CALayer = CALayer()
-    
-    private var oldFromPoints: [CGPoint]?
-    private var oldToPoints: [CGPoint]?
-    private var oldTime: CFTimeInterval = CACurrentMediaTime()
-    private var oldDuration: TimeInterval = 0.0
-    
     private var pathLayer: CAShapeLayer?
-    
-    internal init() {
-    }
     
     internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
         layer.lineWidth = 0
@@ -32,28 +22,32 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         layer.opacity = 1.0
     }
     
-    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+    internal override func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         let oldKeys = Set(layer.animationKeys() ?? [])
         
-        let newPoints = calculatePoints(ui: ui)
+        let interval = calculateInterval(for: [ui, oldUI, prevOldUI].compactMap { $0 })
+        let t: CGFloat = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
+        
+        prevOldUI = t < 1 ? prevOldUI : nil // optimize
+        
+        let prevOldPoints = prevOldUI.flatMap { calculatePoints(ui: $0, interval: interval) }
+        let oldPoints = oldUI.flatMap { calculatePoints(ui: $0, interval: interval) }
+        let newPoints = calculatePoints(ui: ui, interval: interval)
         let newPath = makePath(by: newPoints).cgPath
         
-        let t: CGFloat = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
         let oldPath: CGPath?
-        if let fromPoints = oldFromPoints, let toPoints = oldToPoints, t < 1 {
+        if let fromPoints = prevOldPoints, let toPoints = oldPoints {
             let interpolatePoints = interpolate(fromPoints: fromPoints, toPoints: toPoints, t: t)
-            oldFromPoints = interpolatePoints
-            oldToPoints = newPoints
-            
             oldPath = makePath(by: interpolatePoints).cgPath
+        } else if let toPoints = oldPoints {
+            oldPath = makePath(by: toPoints).cgPath
         } else {
-            oldFromPoints = oldToPoints
-            oldToPoints = newPoints
-            
-            oldPath = pathLayer?.path
+            oldPath = nil
         }
         oldDuration = (animated && nil != oldPath) ? duration : 0.0
         oldTime = CACurrentMediaTime()
+        prevOldUI = oldUI
+        oldUI = ui
         
         pathLayer?.removeFromSuperlayer()
         
@@ -78,18 +72,11 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
             newLayer.add(animation, forKey: "path")
         }
         
-        let newOpacity: Float = ui.isVisible ? 1.0 : 0.0
-        if newOpacity != layer.opacity {
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(animated ? duration : 0.0)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-            layer.opacity = newOpacity
-            CATransaction.commit()
-        }
+        super.update(ui: ui, animated: animated, duration: duration)
     }
     
-    private func calculatePoints(ui: ColumnUIModel) -> [CGPoint] {
-        let datas = ui.translate(to: layer.bounds)
+    private func calculatePoints(ui: ColumnUIModel, interval: ChartViewModel.Interval) -> [CGPoint] {
+        let datas = ui.splitTranslate(to: layer.bounds, in: interval)
         let step = (datas[1].from.x - datas[0].from.x) / 2
         
         var result = [CGPoint](repeating: CGPoint.zero, count: 4 * datas.count)
@@ -100,16 +87,6 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         for i in 0..<datas.count {
             result[result.count - 2 * i - 1] = CGPoint(x: datas[i].to.x - step, y: datas[i].to.y)
             result[result.count - 2 * i - 2] = CGPoint(x: datas[i].to.x + step, y: datas[i].to.y)
-        }
-        return result
-    }
-    
-    private func interpolate(fromPoints: [CGPoint], toPoints: [CGPoint], t: CGFloat) -> [CGPoint] {
-        let length = min(fromPoints.count, toPoints.count)
-        var result = [CGPoint](repeating: CGPoint.zero, count: length)
-        for i in 0..<length {
-            result[i].x = toPoints[i].x * t + fromPoints[i].x * (1.0 - t)
-            result[i].y = toPoints[i].y * t + fromPoints[i].y * (1.0 - t)
         }
         return result
     }

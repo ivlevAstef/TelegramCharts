@@ -280,13 +280,21 @@ private class IntervalDrawableView: UIView
     }
 
     private func configureViews() {
+        unvisibleLeftView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(unvisibleLeftView)
+        unvisibleRightView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(unvisibleRightView)
+        leftSliderView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(leftSliderView)
+        rightSliderView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(rightSliderView)
+        topBorderView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(topBorderView)
+        bottomBorderView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(bottomBorderView)
+        leftArrow.translatesAutoresizingMaskIntoConstraints = false
         addSubview(leftArrow)
+        rightArrow.translatesAutoresizingMaskIntoConstraints = false
         addSubview(rightArrow)
     }
     

@@ -38,7 +38,9 @@ internal class HintAndOtherView: UIView
     internal init() {
         super.init(frame: .zero)
 
+        lineView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(lineView)
+        hintView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(hintView)
         hide(animated: false)
 
@@ -158,6 +160,7 @@ private class LineView: UIView
 
         lineView.frame.origin.x = Consts.pointSize * 0.5
         lineView.frame.size.width = 1
+        lineView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(lineView)
     }
 
@@ -174,8 +177,10 @@ private class LineView: UIView
             centerView.center = CGPoint(x: Consts.pointSize * 0.5, y: Consts.pointSize * 0.5)
             centerView.backgroundColor = centerPointColor
             centerView.layer.cornerRadius = Consts.centerPointSize * 0.5
+            centerView.translatesAutoresizingMaskIntoConstraints = false
             pointView.addSubview(centerView)
 
+            pointView.translatesAutoresizingMaskIntoConstraints = false
             addSubview(pointView)
         }
     }
@@ -234,6 +239,7 @@ private class HintView: UIView
         dateLabel.textColor = textColor
         dateLabel.frame.origin = CGPoint(x: Consts.innerHintPadding, y: Consts.innerHintPadding)
         dateLabel.sizeToFit()
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(dateLabel)
 
         // Year
@@ -244,6 +250,7 @@ private class HintView: UIView
         yearLabel.textColor = textColor
         yearLabel.frame.origin = CGPoint(x: Consts.innerHintPadding, y: dateLabel.frame.maxY + Consts.hintLabelsSpace)
         yearLabel.sizeToFit()
+        yearLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(yearLabel)
 
         // Values
@@ -263,6 +270,7 @@ private class HintView: UIView
             rightX = max(rightX, minLeftX + Consts.hintHorizontalSpace + valueLabel.frame.width)
 
             valueLabels.append(valueLabel)
+            valueLabel.translatesAutoresizingMaskIntoConstraints = false
             addSubview(valueLabel)
         }
 

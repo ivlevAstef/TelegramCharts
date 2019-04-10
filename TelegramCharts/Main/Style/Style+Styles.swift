@@ -43,10 +43,11 @@ extension Style
     internal static let dayChartStyle: ChartStyle = ChartStyle(
         hintTextColor: UIColor(r: 109, g: 109, b: 114),
         hintBackgroundColor: UIColor(r: 244, g: 244, b: 250),
-        textColor: UIColor(r: 152, g: 158, b: 163),
+        textColor: UIColor(r: 142, g: 142, b: 147),
+        textShadowColor: UIColor.white.withAlphaComponent(0.75),
         dotColor: .white,
-        linesColor: UIColor.black.withAlphaComponent(0.05),
-        focusLineColor: UIColor.black.withAlphaComponent(0.19),
+        linesColor: UIColor(r: 24, g: 45, b: 59).withAlphaComponent(0.1),
+        focusLineColor: UIColor(r: 24, g: 45, b: 59).withAlphaComponent(0.2),
         intervalUnvisibleColor: UIColor(r: 246, g: 248, b: 250, alpha: 0.7),
         intervalBorderColor: UIColor(r: 202, g: 212, b: 222, alpha: 0.88),
         intervalArrowColor: .white
@@ -55,10 +56,11 @@ extension Style
     internal static let darkChartStyle: ChartStyle = ChartStyle(
         hintTextColor: .white,
         hintBackgroundColor: UIColor(r: 26, g: 40, b: 55),
-        textColor: UIColor(r: 93, g: 109, b: 126),
+        textColor: UIColor(r: 142, g: 142, b: 147),
+        textShadowColor: UIColor(r: 33, g: 47, b: 63).withAlphaComponent(0.75),
         dotColor: UIColor(r: 33, g: 47, b: 63),
-        linesColor: UIColor.black.withAlphaComponent(0.19),
-        focusLineColor: UIColor.black.withAlphaComponent(0.42),
+        linesColor: UIColor(r: 133, g: 150, b: 171).withAlphaComponent(0.2),
+        focusLineColor: UIColor(r: 133, g: 150, b: 171).withAlphaComponent(0.4),
         intervalUnvisibleColor: UIColor(r: 29, g: 42, b: 58, alpha: 0.7),
         intervalBorderColor: UIColor(r: 53, g: 70, b: 89, alpha: 0.88),
         intervalArrowColor: .white

@@ -93,6 +93,7 @@ internal class MainViewController: UITableViewController, Stylizing
         label.text = chartViewModels[safe: section]?.name
         
         let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
+        label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
         
         return view

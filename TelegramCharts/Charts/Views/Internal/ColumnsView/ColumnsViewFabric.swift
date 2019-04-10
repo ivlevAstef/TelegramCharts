@@ -16,7 +16,7 @@ internal final class ColumnsViewFabric
             case .line:
                 return ColumnView(margins: margins, columnLayer: PolyLineLayerWrapper())
             case .area:
-                return ColumnView(margins: margins, columnLayer: PolyLineLayerWrapper())
+                return ColumnView(margins: margins, columnLayer: AreaLayerWrapper())
             case .bar:
                 return ColumnView(margins: margins, columnLayer: BarLayerWrapper())
             }

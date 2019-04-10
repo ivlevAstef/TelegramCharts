@@ -12,6 +12,7 @@ private enum Consts
 {
     internal static let maxValuesCount: Int = 6
     internal static let minValueSpacing: CGFloat = 8.0
+    internal static let labelPadding: CGFloat = 2.0
 }
 
 internal class VerticalAxisView: UIView
@@ -23,6 +24,7 @@ internal class VerticalAxisView: UIView
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
+    private var shadowColor: UIColor = .white
 
     private let bottomLine: UIView = UIView(frame: .zero)
 
@@ -43,10 +45,11 @@ internal class VerticalAxisView: UIView
     internal func setStyle(_ style: ChartStyle) {
         color = style.textColor
         lineColor = style.linesColor
+        shadowColor = style.textShadowColor
         bottomLine.backgroundColor = style.focusLineColor
 
         for subview in subviews.compactMap({ $0 as? ValueViewProtocol }) {
-            subview.setStyle(color: color, lineColor: lineColor)
+            subview.setStyle(color: color, lineColor: lineColor, shadowColor: shadowColor)
         }
     }
 
@@ -63,10 +66,11 @@ internal class VerticalAxisView: UIView
         }
         
         let uniqueAABBs = Set(ui.columns.map { $0.aabb })
-        let visibleColumns = ui.columns.filter { $0.isVisible }
         let useTwoY = uniqueAABBs.count > 1
+        let usedColumns = ui.columns.filter { $0.isVisible || useTwoY }
         
-        if let column = visibleColumns.first {
+        
+        if let column = usedColumns.first, column.isVisible {
             updateValues(ui: column, lastUI: leftLastUI,
                          valueViews: &leftValueViews, columnColor: useTwoY ? column.color : nil,
                          animated: animated, duration: duration)
@@ -75,7 +79,7 @@ internal class VerticalAxisView: UIView
             cleanLeft()
         }
         
-        if let column = visibleColumns.dropFirst().first, useTwoY {
+        if let column = usedColumns.dropFirst().first, column.isVisible, useTwoY {
             updateValues(ui: column, lastUI: rightLastUI,
                          valueViews: &rightValueViews, columnColor: useTwoY ? column.color : nil,
                          animated: animated, duration: duration)
@@ -111,10 +115,12 @@ internal class VerticalAxisView: UIView
                 view = prevViews[prevViewIndex]
                 prevViews.remove(at: prevViewIndex)
             } else {
-                view = ValueView(value: value, font: font, color: color, lineColor: lineColor, parentWidth: frame.width)
+                view = ValueView(value: value, font: font, parentWidth: frame.width)
+                view.setStyle(color: color, lineColor: lineColor, shadowColor: shadowColor)
                 let position = (lastUI ?? ui).translate(value: value, to: bounds)
                 view.setPosition(position)
 
+                view.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(view)
                 newViews.append(view)
             }
@@ -179,7 +185,7 @@ private class Left {}
 private class Right {}
 
 private protocol ValueViewProtocol {
-    func setStyle(color: UIColor, lineColor: UIColor)
+    func setStyle(color: UIColor, lineColor: UIColor, shadowColor: UIColor)
     func setWidth(_ width: CGFloat)
 }
 
@@ -196,37 +202,49 @@ private class ValueView<T>: UIView, ValueViewProtocol
     }
 
     private let label: UILabel = UILabel(frame: .zero)
+    private let shadow: UIView = UIView(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
 
-    internal init(value: AABB.Value, font: UIFont, color: UIColor, lineColor: UIColor, parentWidth: CGFloat) {
+    internal init(value: AABB.Value, font: UIFont, parentWidth: CGFloat) {
         self.value = value
         self.unique = ValueView.makeUnique(Int64(value))
 
         super.init(frame: CGRect(x: 0, y: 0, width: parentWidth, height: 0))
+        shadow.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(shadow)
+        label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
+        line.translatesAutoresizingMaskIntoConstraints = false
         addSubview(line)
-
+        
         label.text = ValueView.abbreviationNumber(Int64(value))
         label.font = font
-        label.textColor = color
         label.sizeToFit()
-        label.frame.size.width = parentWidth
+        let labelSize = label.frame.size
+        shadow.frame = label.frame.inset(by: UIEdgeInsets(top: 2, left: -2, bottom: 2, right: -2))
+        label.frame.origin.x = Consts.labelPadding
+        label.frame.size.width = parentWidth - 2 * Consts.labelPadding
         
+        let widthDiff = (shadow.frame.width - labelSize.width) * 0.5
         if T.self is Right.Type {
             label.textAlignment = .right
+            shadow.frame.origin.x = parentWidth - labelSize.width - Consts.labelPadding - widthDiff
         } else {
             label.textAlignment = .left
+            shadow.frame.origin.x = Consts.labelPadding - widthDiff
         }
 
         frame.size.height = label.frame.height + 1
 
         line.frame = CGRect(x: 0, y: frame.height - 1, width: frame.width, height: 1)
-        line.backgroundColor = lineColor
     }
 
-    internal func setStyle(color: UIColor, lineColor: UIColor) {
+    internal func setStyle(color: UIColor, lineColor: UIColor, shadowColor: UIColor) {
         label.textColor = columnColor ?? color
         line.backgroundColor = lineColor
+        
+        shadow.layer.cornerRadius = 5.0
+        shadow.backgroundColor = shadowColor
     }
     
     internal func setWidth(_ width: CGFloat) {

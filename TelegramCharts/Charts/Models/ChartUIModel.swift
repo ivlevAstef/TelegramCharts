@@ -76,13 +76,14 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
         }
     }
     
-    let aabb = AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue)
+    let aabb = modifyAABB(AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue))
     
     var prevData: [ColumnUIModel.Data]? = nil
     let columns: [ColumnUIModel] = chartVM.columns.map { columnVM in
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: prevData)
         prevData = data
         return ColumnUIModel(isVisible: columnVM.isVisible,
+                             isOpacity: false,
                              aabb: aabb,
                              data: data,
                              color: columnVM.color,
@@ -105,6 +106,7 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
     let columns: [ColumnUIModel] = chartVM.columns.map { columnVM in
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: nil)
         return ColumnUIModel(isVisible: columnVM.isVisible,
+                             isOpacity: true,
                              aabb: aabb,
                              data: data,
                              color: columnVM.color,
@@ -129,6 +131,7 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, prevData: prevData)
         prevData = data
         return ColumnUIModel(isVisible: columnVM.isVisible,
+                             isOpacity: true,
                              aabb: aabb,
                              data: data,
                              color: columnVM.color,
@@ -168,8 +171,19 @@ private func calculateAABBs(viewModel chartVM: ChartViewModel, interval: ChartVi
             }
         }
         
-        return roundAABB(AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue))
+        return modifyAABB(AABB(minDate: interval.from, maxDate: interval.to, minValue: minValue, maxValue: maxValue))
     }
+}
+
+private func modifyAABB(_ aabb: AABB) -> AABB {
+    return roundAABB(increaseAABB(aabb))
+}
+
+private func increaseAABB(_ aabb: AABB, increaseProcent: Double = 0.02) -> AABB {
+    let minValue = aabb.minValue - aabb.valueInterval * increaseProcent
+    let maxValue = aabb.maxValue - aabb.valueInterval * increaseProcent
+    
+    return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
 }
 
 private func roundAABB(_ aabb: AABB) -> AABB {
@@ -216,7 +230,7 @@ private func makeData(by chartVM: ChartViewModel, columnVM: ColumnViewModel, aab
             let value = AABB.Value(columnVM.values[i])
             data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: aabb.minValue, to: value))
         }
-    }   
+    }
     
     return data
 }

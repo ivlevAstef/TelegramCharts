@@ -1,23 +1,23 @@
 //
-//  PolyLineLayerWrapper.swift
+//  AreaViewLayerWrapper.swift
 //  TelegramCharts
 //
-//  Created by Alexander Ivlev on 14/03/2019.
-//  Copyright © 2019 SIA. All rights reserved.
+//  Created by Alexander Ivlev on 10/04/2019.
+//  Copyright © 2019 CFT. All rights reserved.
 //
 
 import UIKit
 
-internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
+internal final class AreaLayerWrapper: ColumnViewLayerWrapper
 {
     private var pathLayer: CAShapeLayer?
-
+    
     internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
-        layer.lineWidth = CGFloat(ui.size)
-        layer.lineCap = .round
-        layer.lineJoin = .round
-        layer.strokeColor = ui.color.cgColor
-        layer.fillColor = nil
+        layer.lineWidth = 0
+        layer.lineCap = .butt
+        layer.lineJoin = .miter
+        layer.strokeColor = nil
+        layer.fillColor = ui.color.cgColor
         layer.opacity = 1.0
     }
     
@@ -27,7 +27,7 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         let interval = calculateInterval(for: [ui, oldUI, prevOldUI].compactMap { $0 })
         let t: CGFloat = CGFloat((CACurrentMediaTime() - oldTime) / oldDuration)
         
-        prevOldUI = t < 1 ? prevOldUI : nil  // optimize
+        prevOldUI = t < 1 ? prevOldUI : nil // optimize
         
         let prevOldPoints = prevOldUI.flatMap { calculatePoints(ui: $0, interval: interval) }
         let oldPoints = oldUI.flatMap { calculatePoints(ui: $0, interval: interval) }
@@ -76,9 +76,13 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
     
     private func calculatePoints(ui: ColumnUIModel, interval: ChartViewModel.Interval) -> [CGPoint] {
         let datas = ui.splitTranslate(to: layer.bounds, in: interval)
-        var result = [CGPoint](repeating: CGPoint.zero, count: datas.count)
+        
+        var result = [CGPoint](repeating: CGPoint.zero, count: 2 * datas.count)
         for i in 0..<datas.count {
-            result[i] = datas[i].to
+            result[i] = CGPoint(x: datas[i].from.x, y: datas[i].from.y)
+        }
+        for i in 0..<datas.count {
+            result[result.count - i - 1] = CGPoint(x: datas[i].to.x, y: datas[i].to.y)
         }
         return result
     }
@@ -89,7 +93,8 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         guard let firstPoint = points.first else {
             return path
         }
-
+        
+        
         path.move(to: firstPoint)
         for point in points.dropFirst() {
             path.addLine(to: point)
@@ -98,3 +103,5 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         return path
     }
 }
+
+

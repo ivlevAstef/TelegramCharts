@@ -13,6 +13,7 @@ internal class ColumnsView
 {
     internal var parent: UIView! {
         didSet {
+            cacheImageView.translatesAutoresizingMaskIntoConstraints = false
             parent.addSubview(cacheImageView)
         }
     }

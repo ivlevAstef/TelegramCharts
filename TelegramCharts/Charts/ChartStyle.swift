@@ -13,6 +13,7 @@ public struct ChartStyle {
     public let hintBackgroundColor: UIColor
 
     public let textColor: UIColor
+    public let textShadowColor: UIColor
 
     public let dotColor: UIColor
     public let linesColor: UIColor
@@ -25,6 +26,7 @@ public struct ChartStyle {
     public init(hintTextColor: UIColor,
                 hintBackgroundColor: UIColor,
                 textColor: UIColor,
+                textShadowColor: UIColor,
                 dotColor: UIColor,
                 linesColor: UIColor,
                 focusLineColor: UIColor,
@@ -35,6 +37,7 @@ public struct ChartStyle {
         self.hintTextColor = hintTextColor
         self.hintBackgroundColor = hintBackgroundColor
         self.textColor = textColor
+        self.textShadowColor = textShadowColor
         self.dotColor = dotColor
         self.linesColor = linesColor
         self.focusLineColor = focusLineColor

@@ -17,6 +17,8 @@
 		ABA05B5E225DEDF000A927D9 /* ChartUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */; };
 		ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */; };
 		ABA05B64225E1C5200A927D9 /* BarLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */; };
+		ABA05B66225E433A00A927D9 /* ColumnViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */; };
+		ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
@@ -60,6 +62,8 @@
 		ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartUIModel.swift; sourceTree = "<group>"; };
 		ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnUIModel.swift; sourceTree = "<group>"; };
 		ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarLayerWrapper.swift; sourceTree = "<group>"; };
+		ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnViewLayerWrapper.swift; sourceTree = "<group>"; };
+		ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaViewLayerWrapper.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
@@ -122,8 +126,10 @@
 				ABA05B2A225C409900A927D9 /* ColumnsViewFabric.swift */,
 				BAAE9CF1225CADAF0085C86B /* ColumnsView.swift */,
 				ABA05B23225B830E00A927D9 /* ColumnView.swift */,
+				ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */,
 				ABB87D39223A393B00E31808 /* PolyLineLayerWrapper.swift */,
 				ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */,
+				ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */,
 			);
 			path = ColumnsView;
 			sourceTree = "<group>";
@@ -323,6 +329,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BACE71482236010E00068579 /* ChartProvider.swift in Sources */,
+				ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */,
 				BA41DFC02240DF0B0021DC82 /* HintAndOtherView.swift in Sources */,
 				BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */,
 				ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */,
@@ -342,6 +349,7 @@
 				BACE7156223613DF00068579 /* ChartTableViewCell.swift in Sources */,
 				BA41DFCF2244D3D50021DC82 /* MainNavigationController.swift in Sources */,
 				BACE714F223612DC00068579 /* ChartWithIntervalView.swift in Sources */,
+				ABA05B66225E433A00A927D9 /* ColumnViewLayerWrapper.swift in Sources */,
 				ABA05B24225B830E00A927D9 /* ColumnView.swift in Sources */,
 				BACE71312235FBEA00068579 /* MainViewController.swift in Sources */,
 				BACE716F22363E1900068579 /* Column.swift in Sources */,

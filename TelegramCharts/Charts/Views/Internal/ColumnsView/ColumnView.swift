@@ -8,11 +8,6 @@
 
 import UIKit
 
-internal protocol ColumnViewLayerWrapper: class {
-    var layer: CALayer { get }
-    func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval)
-}
-
 internal class ColumnView: UIView
 {
     override public var frame: CGRect {
@@ -27,6 +22,7 @@ internal class ColumnView: UIView
         self.margins = margins
         self.columnLayer = columnLayer
         super.init(frame: .zero)
+        contentView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(contentView)
         
         // without contentView clipsToBounds unwork... WTF?
@@ -46,6 +42,8 @@ internal class ColumnView: UIView
                           width: bounds.width - margins.left - margins.right,
                           height: bounds.height - margins.top - margins.bottom)
         columnLayer.layer.frame = rect
+        columnLayer.minX = -margins.left - 2 // reserve
+        columnLayer.maxX = bounds.width + 2 // reserve
     }
     
     internal required init?(coder aDecoder: NSCoder) {

@@ -26,8 +26,6 @@ internal class HorizontalAxisView: UIView
     
     internal init() {
         super.init(frame: .zero)
-        
-        self.clipsToBounds = true
     }
     
     internal func setStyle(_ style: ChartStyle) {
@@ -71,6 +69,7 @@ internal class HorizontalAxisView: UIView
                 prevLabels.remove(at: index)
             } else {
                 label = DateLabel(date: date, font: font, color: color)
+                label.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(label)
                 newLabels.append(label)
                 
