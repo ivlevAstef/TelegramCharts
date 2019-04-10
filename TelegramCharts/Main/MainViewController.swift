@@ -153,7 +153,7 @@ internal class MainViewController: UITableViewController, Stylizing
                 color: columnVM.color,
                 isVisible: columnVM.isVisible,
                 clickHandler: { [weak chartViewModel] in
-                    chartViewModel?.toogleVisibleColumn(columnVM)
+                    return chartViewModel?.toogleVisibleColumn(columnVM) ?? false
             })
         }
 

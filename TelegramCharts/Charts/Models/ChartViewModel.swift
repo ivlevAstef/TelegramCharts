@@ -85,25 +85,17 @@ public class ChartViewModel
         updateListeners.removeAll(where: { $0.value == nil })
     }
 
-    public func toogleVisibleColumn(_ column: ColumnViewModel) {
+    public func toogleVisibleColumn(_ column: ColumnViewModel) -> Bool {
         assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
+        if column.isVisible && columns.filter({ $0.isVisible }).count <= 1 {
+            return false
+        }
+        
         column.isVisible.toggle()
         update()
         updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
-    }
-
-    public func enableColumn(_ column: ColumnViewModel) {
-        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
-        column.isVisible = true
-        update()
-        updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
-    }
-
-    public func disableColumn(_ column: ColumnViewModel) {
-        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
-        column.isVisible = false
-        update()
-        updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
+        
+        return true
     }
 
     public func updateInterval(_ interval: Interval) {
@@ -129,15 +121,16 @@ public class ChartViewModel
     }
 
     private func calculateAABB(for columns: [ColumnViewModel]) -> AABB? {
-        let minDate = columns.map { $0.aabb.minDate }.min()
-        let maxDate = columns.map { $0.aabb.maxDate }.max()
-        let minValue = columns.map { $0.aabb.minValue }.min()
-        let maxValue = columns.map { $0.aabb.maxValue }.max()
+        let aabbs = columns.map { $0.aabb }
+        let minDate = aabbs.map { $0.minDate }.min()
+        let maxDate = aabbs.map { $0.maxDate }.max()
+        let minValue = aabbs.map { $0.minValue }.min()
+        let maxValue = aabbs.map { $0.maxValue }.max()
 
         if let minDate = minDate, let maxDate = maxDate,
             let minValue = minValue, let maxValue = maxValue
         {
-            return AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
+            return AABB(id: nil, minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue, childs: aabbs)
         }
 
         return nil
@@ -151,7 +144,7 @@ public class ChartViewModel
 
         if let minValue = minValue, let maxValue = maxValue
         {
-            return AABB(minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue)
+            return AABB(id: nil, minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue, childs: aabbs)
         }
 
         return nil

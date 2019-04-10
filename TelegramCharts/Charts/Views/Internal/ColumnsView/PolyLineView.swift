@@ -14,11 +14,14 @@ internal class PolyLineView: UIView, ColumnView
         didSet { updateFrame() }
     }
     
+    internal let id: UUID
+    
     private let margins: UIEdgeInsets
     private let columnLayer: PolyLineLayerWrapper
     private var lastAABB: AABB?
     
     required internal init(margins: UIEdgeInsets, _ columnViewModel: ColumnViewModel) {
+        self.id = columnViewModel.id
         self.margins = margins
         self.columnLayer = PolyLineLayerWrapper(columnViewModel: columnViewModel)
         super.init(frame: .zero)

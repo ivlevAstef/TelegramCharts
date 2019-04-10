@@ -13,7 +13,8 @@ internal struct AABB
     internal typealias Date = Column.Date
     internal typealias Value = Double
     
-    internal static let empty: AABB = AABB(minDate: 0, maxDate: 0, minValue: 0, maxValue: 0)
+    internal static let empty: AABB = AABB(id: nil, minDate: 0, maxDate: 0, minValue: 0, maxValue: 0, childs: [])
+    internal let id: UUID?
     internal let minDate: Date
     internal let maxDate: Date
     internal let minValue: Value
@@ -22,7 +23,10 @@ internal struct AABB
     internal let dateInterval: Date
     internal let valueInterval: Value
     
-    internal init(minDate: Date, maxDate: Date, minValue: Value, maxValue: Value) {
+    internal let childs: [AABB]
+    
+    internal init(id: UUID?, minDate: Date, maxDate: Date, minValue: Value, maxValue: Value, childs: [AABB]) {
+        self.id = id
         self.minDate = minDate
         self.maxDate = maxDate
         self.minValue = minValue
@@ -30,13 +34,16 @@ internal struct AABB
         
         self.dateInterval = maxDate - minDate
         self.valueInterval = maxValue - minValue
+        
+        self.childs = childs
     }
 
     internal func copyWithIntellectualPadding(date datePadding: Double, value valuePadding: Double) -> AABB {
         let aabb = copyWithPadding(date: datePadding, value: valuePadding)
         let minValue = aabb.calculateValueBegin()
         let maxValue = aabb.calculateValueEnd()
-        return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
+        let childs = self.childs.map { $0.copyWithIntellectualPadding(date: datePadding, value: valuePadding) }
+        return AABB(id: aabb.id, minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue, childs: childs)
     }
     
     internal func copyWithPadding(date datePadding: Double, value valuePadding: Double) -> AABB {
@@ -44,7 +51,8 @@ internal struct AABB
         let maxDate = self.maxDate + Date(Double(self.dateInterval) * datePadding)
         let minValue = self.minValue - Value(Double(self.valueInterval) * valuePadding)
         let maxValue = self.maxValue + Value(Double(self.valueInterval) * valuePadding)
-        return AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
+        let childs = self.childs.map { $0.copyWithPadding(date: datePadding, value: valuePadding) }
+        return AABB(id: self.id, minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue, childs: childs)
     }
     
     internal func calculateUIPoint(date: Date, value: Value, rect: CGRect) -> CGPoint {

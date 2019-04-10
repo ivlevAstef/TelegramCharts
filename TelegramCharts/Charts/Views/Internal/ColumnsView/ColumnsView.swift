@@ -18,6 +18,7 @@ internal class ColumnsView
         }
     }
 
+    private var yScaled: Bool = false
     private var columnsViews: [UIView & ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
 
@@ -26,14 +27,22 @@ internal class ColumnsView
     private var updateCacheBlock: DispatchWorkItem?
 
     internal func setChart(margins: UIEdgeInsets, _ chartViewModel: ChartViewModel) {
+        self.yScaled = chartViewModel.yScaled
         columnsViews = ColumnsViewFabric.makeColumnViews(by: chartViewModel.columns, margins: margins, size: 2.0, parent: parent)
         updateFrame(frame: self.frame)
         setCornerRadius(cornerRadius)
     }
 
     internal func update(aabb: AABB?, animated: Bool, duration: TimeInterval) {
-        for columnView in columnsViews {
-            columnView.update(aabb: aabb, animated: animated, duration: duration)
+        if yScaled {
+            for columnView in columnsViews {
+                let columnAABB = aabb?.childs.first(where: { $0.id == columnView.id })
+                columnView.update(aabb: columnAABB, animated: animated, duration: duration)
+            }
+        } else {
+            for columnView in columnsViews {
+                columnView.update(aabb: aabb, animated: animated, duration: duration)
+            }
         }
 
         cacheUpdate(animated: animated, duration: duration)

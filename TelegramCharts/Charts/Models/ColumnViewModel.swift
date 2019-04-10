@@ -40,6 +40,7 @@ public class ColumnViewModel
     
     public internal(set) var isVisible: Bool = true
 
+    internal let id: UUID = UUID()
     internal private(set) var aabb: AABB = AABB.empty
     internal private(set) var pairs: [Pair] = []
 
@@ -68,7 +69,7 @@ public class ColumnViewModel
             maxValue = max(maxValue, max(value.from, value.to))
         }
         
-        self.aabb = AABB(minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue)
+        self.aabb = AABB(id: id, minDate: minDate, maxDate: maxDate, minValue: minValue, maxValue: maxValue, childs: [])
     }
 
     internal func getPoint(by date: Date) -> (date: Date, pair: Pair) {
@@ -114,7 +115,7 @@ public class ColumnViewModel
         }
 
         if hasPoints {
-            return AABB(minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue)
+            return AABB(id: id, minDate: from, maxDate: to, minValue: minValue, maxValue: maxValue, childs: [])
         }
         
         return nil
