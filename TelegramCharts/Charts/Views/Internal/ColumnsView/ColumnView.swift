@@ -30,8 +30,12 @@ internal class ColumnView: UIView
         contentView.layer.addSublayer(columnLayer.layer)
     }
     
-    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
-        columnLayer.update(ui: ui, animated: animated, duration: duration)
+    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
+        columnLayer.update(ui: ui, animated: animated, duration: duration, t: t)
+    }
+
+    internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        columnLayer.confirm(ui: ui, animated: animated, duration: duration)
     }
     
     private func updateFrame() {

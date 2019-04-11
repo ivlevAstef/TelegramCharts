@@ -86,6 +86,7 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
                              isOpacity: false,
                              aabb: aabb,
                              data: data,
+                             verticalValues: [],
                              color: columnVM.color,
                              size: size)
     }
@@ -109,6 +110,7 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
                              isOpacity: true,
                              aabb: aabb,
                              data: data,
+                             verticalValues: [],
                              color: columnVM.color,
                              size: size)
     }
@@ -134,6 +136,7 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
                              isOpacity: true,
                              aabb: aabb,
                              data: data,
+                             verticalValues: [],
                              color: columnVM.color,
                              size: size)
     }

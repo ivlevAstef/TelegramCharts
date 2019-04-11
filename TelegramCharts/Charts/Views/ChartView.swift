@@ -31,7 +31,8 @@ public class ChartView: UIView
     public init(margins: UIEdgeInsets) {
         self.margins = margins
         super.init(frame: .zero)
-        columnsView.parent = self
+
+        configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
@@ -44,7 +45,7 @@ public class ChartView: UIView
         chartViewModel.registerUpdateListener(self)
 
         columnsView.premake(margins: self.margins, types: chartViewModel.columns.map { $0.type })
-        configureSubviews()
+
 
         self.ui = ChartUIModel(viewModel: chartViewModel, fully: false, size: 2.0)
         update()
@@ -62,6 +63,9 @@ public class ChartView: UIView
     }
 
     private func configureSubviews() {
+        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(columnsView)
+
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
 
@@ -75,7 +79,7 @@ public class ChartView: UIView
     private func updateFrame() {
         let fullFrame = CGRect(x: 0, y: Consts.spacing,
                                width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
-        columnsView.updateFrame(frame: fullFrame)
+        columnsView.frame = fullFrame
         
         let marginsFrame = CGRect(x: fullFrame.origin.x + margins.left,
                                   y: fullFrame.origin.y + margins.top,

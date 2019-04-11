@@ -9,12 +9,12 @@
 import UIKit
 
 
-internal class ColumnsView
+internal final class ColumnsView: UIView
 {
-    internal var parent: UIView! {
+    private typealias DT = Double
+    internal override var frame: CGRect {
         didSet {
-            cacheImageView.translatesAutoresizingMaskIntoConstraints = false
-            parent.addSubview(cacheImageView)
+            updateFrame()
         }
     }
 
@@ -22,30 +22,63 @@ internal class ColumnsView
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
 
     private var cornerRadius: CGFloat = 0.0
-    private var frame: CGRect = .zero
     private var updateCacheBlock: DispatchWorkItem?
 
+    private var updateDiagramBlock: DispatchWorkItem?
+    private var deadline: DispatchTime = .now()
+
+    private var oldTime: DT = currentTime()
+    private var oldDuration: TimeInterval = 0.0
+
+    internal init() {
+        super.init(frame: .zero)
+
+        cacheImageView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(cacheImageView)
+    }
+
     internal func premake(margins: UIEdgeInsets, types: [ColumnViewModel.ColumnType]) {
-        columnsViews = ColumnsViewFabric.makeColumnViews(by: types, margins: margins, parent: parent)
-        updateFrame(frame: self.frame)
+        columnsViews = ColumnsViewFabric.makeColumnViews(by: types, margins: margins, parent: self)
+        updateFrame()
         setCornerRadius(cornerRadius)
     }
 
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         assert(columnsViews.count == ui.columns.count)
-        for (columnUI, columnView) in zip(ui.columns, columnsViews) {
-            columnView.update(ui: columnUI, animated: animated, duration: duration)
-        }
+        updateDiagramBlock?.cancel()
+        let updateBlock = DispatchWorkItem { [weak self] in
+            guard let `self` = self else {
+                return
+            }
 
-        cacheUpdate(animated: animated, duration: duration)
+            let start = DispatchTime.now()
+            self.recalculate(ui: ui, animated: animated, duration: duration)
+            self.cacheUpdate(animated: animated, duration: duration)
+
+            let end = DispatchTime.now()
+            self.deadline = .now() + .nanoseconds(Int(end.uptimeNanoseconds &- start.uptimeNanoseconds))
+        }
+        updateDiagramBlock = updateBlock
+        if DispatchTime.now() >= deadline {
+            updateBlock.perform()
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: deadline, execute: updateBlock)
+        }
     }
 
-    internal func updateFrame(frame: CGRect) {
-        self.frame = frame
-        for columnView in columnsViews {
-            columnView.frame = frame
+    internal func recalculate(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        let t: CGFloat = CGFloat((ColumnsView.currentTime() - oldTime) / (ColumnsView.multForSlowDevices() * oldDuration))
+
+        let zipColumns = zip(ui.columns, columnsViews)
+        for (columnUI, columnView) in zipColumns {
+            columnView.update(ui: columnUI, animated: animated, duration: duration, t: t)
         }
-        cacheImageView.frame = frame
+        self.oldTime = ColumnsView.currentTime()
+
+        for (columnUI, columnView) in zipColumns {
+            columnView.confirm(ui: columnUI, animated: animated, duration: duration)
+        }
+        self.oldDuration = animated ? duration : 0.0
     }
 
     internal func setCornerRadius(_ cornerRadius: CGFloat) {
@@ -54,6 +87,28 @@ internal class ColumnsView
             columnView.layer.cornerRadius = cornerRadius
             columnView.layer.masksToBounds = cornerRadius > 0
         }
+    }
+
+    private static func multForSlowDevices() -> Double {
+        if cpuIsFast {
+            return 1.0
+        }
+        // Not critical, but on old devices graphics draw is very slow
+        // animation time not equals dt time. need correct :(
+        return 0.6
+    }
+
+    private static func currentTime() -> Double {
+        //return Date().timeIntervalSinceReferenceDate
+        //return Double(DispatchTime.now().uptimeNanoseconds) / Double(NSEC_PER_SEC)
+        return CACurrentMediaTime()
+    }
+
+    private func updateFrame() {
+        for columnView in columnsViews {
+            columnView.frame = bounds
+        }
+        cacheImageView.frame = bounds
     }
 
     private func cacheUpdate(animated: Bool, duration: TimeInterval) {
@@ -66,7 +121,7 @@ internal class ColumnsView
         }
         updateCacheBlock = block
 
-        let duration = animated ? duration : 0.0
+        let duration = animated ? 1.2/*as a precaution*/ * duration : 0.0
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: block)
     }
 
@@ -89,5 +144,9 @@ internal class ColumnsView
             columnsViews.forEach { $0.isHidden = true }
             cacheImageView.isHidden = false
         }
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

@@ -43,7 +43,6 @@ public class IntervalView: UIView
     public init(margins: UIEdgeInsets) {
         self.margins = margins
         super.init(frame: .zero)
-        columnsView.parent = self
 
         initialize()
     }
@@ -56,7 +55,6 @@ public class IntervalView: UIView
         chartViewModel.registerUpdateListener(self)
 
         columnsView.premake(margins: .zero, types: chartViewModel.columns.map { $0.type })
-        addSubview(intervalDrawableView) // move to top
 
         self.viewModel = chartViewModel
         self.ui = ChartUIModel(viewModel: chartViewModel, fully: true, size: 1.0)
@@ -80,6 +78,9 @@ public class IntervalView: UIView
         gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
 
+        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(columnsView)
+
         intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(intervalDrawableView)
     }
@@ -90,7 +91,7 @@ public class IntervalView: UIView
                                  width: bounds.width - 2 * Consts.padding - margins.left - margins.right,
                                  height: bounds.height - 2 * Consts.verticalPadding - margins.top - margins.bottom)
 
-        columnsView.updateFrame(frame: columnsViewRect)
+        columnsView.frame = columnsViewRect
         columnsView.setCornerRadius(Consts.cornerRadius)
         
         self.intervalDrawableView.frame = CGRect(x: Consts.padding + margins.left,

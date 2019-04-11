@@ -10,6 +10,12 @@ import UIKit
 
 internal struct ColumnUIModel
 {
+    internal struct UIData
+    {
+        internal let from: CGPoint
+        internal let to: CGPoint
+    }
+
     internal struct Data
     {
         internal let date: AABB.Date
@@ -21,14 +27,16 @@ internal struct ColumnUIModel
     internal let isOpacity: Bool
     internal let aabb: AABB
     internal let data: [Data]
+    internal let verticalValues: [AABB.Value]
     internal let color: UIColor
     internal let size: Double
     
-    internal init(isVisible: Bool, isOpacity: Bool, aabb: AABB, data: [Data], color: UIColor, size: Double) {
+    internal init(isVisible: Bool, isOpacity: Bool, aabb: AABB, data: [Data], verticalValues: [AABB.Value], color: UIColor, size: Double) {
         self.isVisible = isVisible
         self.isOpacity = isOpacity
         self.aabb = aabb
         self.data = data
+        self.verticalValues = verticalValues
         self.color = color
         self.size = size
     }
@@ -63,61 +71,51 @@ internal struct ColumnUIModel
         return xOffset + CGFloat(date) * xScale
     }
     
-    internal func translate(data: Data, to rect: CGRect) -> (from: CGPoint, to: CGPoint) {
+    internal func translate(data: Data, to rect: CGRect) -> UIData {
         let xScale = rect.width / CGFloat(aabb.dateInterval)
         let yScale = rect.height / CGFloat(aabb.valueInterval)
         let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
         let yOffset = rect.maxY + CGFloat(aabb.minValue) * yScale
-        
-        var result: (from: CGPoint, to: CGPoint) = (.zero, .zero)
-        
+
         let x = xOffset + CGFloat(data.date) * xScale
-        result.from.y = yOffset - CGFloat(data.from) * yScale
-        result.to.y = yOffset - CGFloat(data.to) * yScale
-        result.from.x = x
-        result.to.x = x
-        
-        return result
+        return UIData(from: CGPoint(x: x, y: yOffset - CGFloat(data.from) * yScale),
+                      to: CGPoint(x: x, y: yOffset - CGFloat(data.to) * yScale))
     }
 
-    internal func translate(to rect: CGRect) -> [(from: CGPoint, to: CGPoint)] {
+    internal func translate(to rect: CGRect) -> [UIData] {
         let xScale = rect.width / CGFloat(aabb.dateInterval)
         let yScale = rect.height / CGFloat(aabb.valueInterval)
         let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
         let yOffset = rect.maxY + CGFloat(aabb.minValue) * yScale
 
-        var result: [(from: CGPoint, to: CGPoint)] = .init(repeating: (.zero, .zero), count: data.count)
+        var result: [UIData] = []
         for i in 0..<data.count {
             let x = xOffset + CGFloat(data[i].date) * xScale
-            result[i].from.y = yOffset - CGFloat(data[i].from) * yScale
-            result[i].to.y = yOffset - CGFloat(data[i].to) * yScale
-            result[i].from.x = x
-            result[i].to.x = x
+            result.append(UIData(
+                from: CGPoint(x: x, y: yOffset - CGFloat(data[i].from) * yScale),
+                to: CGPoint(x: x, y: yOffset - CGFloat(data[i].to) * yScale)
+            ))
         }
 
         return result
     }
-    
-    internal func splitTranslate(to rect: CGRect, in interval: ChartViewModel.Interval) -> [(from: CGPoint, to: CGPoint)] {
-        let xScale = rect.width / CGFloat(aabb.dateInterval)
-        let yScale = rect.height / CGFloat(aabb.valueInterval)
-        let xOffset = rect.minX - CGFloat(aabb.minDate) * xScale
-        let yOffset = rect.maxY + CGFloat(aabb.minValue) * yScale
-        
-        var result: [(from: CGPoint, to: CGPoint)] = []
+
+    internal func split(uiDatas: [UIData], in interval: ChartViewModel.Interval) -> [UIData] {
+        var firstIndex = 0
+        var lastIndex = 0
         for i in 0..<data.count {
-            if interval.from <= data[i].date && data[i].date <= interval.to {
-                let x = xOffset + CGFloat(data[i].date) * xScale
-                result.append((
-                    CGPoint(x: x, y: yOffset - CGFloat(data[i].from) * yScale),
-                    CGPoint(x: x, y: yOffset - CGFloat(data[i].to) * yScale)
-                ))
+            if data[i].date < interval.from {
+                firstIndex = i
+            }
+            lastIndex = i
+
+            if interval.to < data[i].date {
+                break
             }
         }
-        
-        return result
+
+        return Array(uiDatas.dropFirst(firstIndex).dropLast(data.count - lastIndex - 1))
     }
-    
     
     internal func find(by date: Chart.Date) -> Data? {
         for iter in data {

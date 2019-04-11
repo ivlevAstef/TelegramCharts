@@ -68,8 +68,8 @@ internal class VerticalAxisView: UIView
         let uniqueAABBs = Set(ui.columns.map { $0.aabb })
         let useTwoY = uniqueAABBs.count > 1
         let usedColumns = ui.columns.filter { $0.isVisible || useTwoY }
-        
-        
+
+
         if let column = usedColumns.first, column.isVisible {
             updateValues(ui: column, lastUI: leftLastUI,
                          valueViews: &leftValueViews, columnColor: useTwoY ? column.color : nil,
@@ -78,7 +78,7 @@ internal class VerticalAxisView: UIView
         } else {
             cleanLeft()
         }
-        
+
         if let column = usedColumns.dropFirst().first, column.isVisible, useTwoY {
             updateValues(ui: column, lastUI: rightLastUI,
                          valueViews: &rightValueViews, columnColor: useTwoY ? column.color : nil,

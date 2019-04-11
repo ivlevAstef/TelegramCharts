@@ -13,30 +13,116 @@ internal class ColumnViewLayerWrapper
     internal let layer: CALayer = CALayer()
     internal var minX: CGFloat = 0
     internal var maxX: CGFloat = 0
-    
-    internal var prevOldUI: ColumnUIModel?
-    internal var oldUI: ColumnUIModel?
-    internal var oldTime: CFTimeInterval = CACurrentMediaTime()
-    internal var oldDuration: TimeInterval = 0.0
-    
+
+    private var fromPointsData: [ColumnUIModel.UIData] = []
+    private var toPointsData: [ColumnUIModel.UIData] = []
+    private var fromInterval: ChartViewModel.Interval?
+    private var toInterval: ChartViewModel.Interval?
+    private var oldTime: CFTimeInterval = CACurrentMediaTime()
+    private var oldDuration: TimeInterval = 0.0
+
+    private var pathLayer: CAShapeLayer
     private var oldIsVisible: Bool = true
+
+    private var saveOldPath: CGPath?
+    private var saveNewPath: CGPath?
     
     internal init() {
+        pathLayer = CAShapeLayer()
+        layer.addSublayer(pathLayer)
     }
-    
-    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+
+    internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
+        fatalError("override")
+    }
+
+    internal func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath
+    {
+        fatalError("override")
+    }
+
+    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
+        let interval = updateInterval(ui: ui, t: t)
+        updatePoints(ui: ui, t: t, interval: interval, animated: animated, duration: duration)
+    }
+
+    internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        confirmOpacity(ui: ui, animated: animated, duration: duration)
+        confirmPoints(ui: ui, animated: animated, duration: duration)
+    }
+
+    private func updateInterval(ui: ColumnUIModel, t: CGFloat) -> ChartViewModel.Interval {
+        let newInterval = ui.interval(by: layer.bounds, minX: minX, maxX: maxX)
+
+        if let fromInterval = fromInterval, let toInterval = toInterval, t < 1 {
+            let interpolateInterval = interpolate(from: fromInterval, to: toInterval, t: t)
+            self.fromInterval = interpolateInterval
+            self.toInterval = newInterval
+
+            return expand(from: interpolateInterval, to: newInterval)
+        } else if let toInterval = toInterval {
+            self.fromInterval = toInterval
+            self.toInterval = newInterval
+
+            return expand(from: toInterval, to: newInterval)
+        }
+
+        fromInterval = nil
+        toInterval = newInterval
+
+        return newInterval
+    }
+
+    private func updatePoints(ui: ColumnUIModel, t: CGFloat, interval: ChartViewModel.Interval,
+                              animated: Bool, duration: TimeInterval)
+    {
+        let newPointsData = ui.translate(to: layer.bounds)
+
+        if fromPointsData.count > 0 && toPointsData.count > 0 && t < 1 {
+            let interpolatePoints = interpolate(from: fromPointsData, to: toPointsData, t: t)
+            saveOldPath = makePath(ui: ui, points: interpolatePoints, interval: interval).cgPath
+            fromPointsData = interpolatePoints
+        } else if toPointsData.count > 0 {
+            saveOldPath = makePath(ui: ui, points: toPointsData, interval: interval).cgPath
+            fromPointsData = toPointsData
+        } else {
+            saveOldPath = nil
+            fromPointsData = []
+        }
+        toPointsData = newPointsData
+        saveNewPath = makePath(ui: ui, points: newPointsData, interval: interval).cgPath
+
+        fillLayer(pathLayer, ui: ui)
+        pathLayer.removeAllAnimations()
+    }
+
+    private func confirmPoints(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        pathLayer.path = saveNewPath
+
+        if animated && nil != saveOldPath && nil != saveNewPath {
+            let animation = CABasicAnimation(keyPath: "path")
+            animation.duration = duration
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+            animation.fromValue = saveOldPath
+            animation.toValue = saveNewPath
+            animation.isRemovedOnCompletion = true
+            pathLayer.add(animation, forKey: "path")
+        }
+    }
+
+    private func confirmOpacity(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         if oldIsVisible != ui.isVisible && ui.isOpacity {
             CATransaction.begin()
             CATransaction.setAnimationDuration(animated ? duration : 0.0)
             CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-            
+
             layer.opacity = ui.isVisible ? 1.0 : 0.0
             CATransaction.commit()
         }
         oldIsVisible = ui.isVisible
     }
     
-    internal func calculateInterval(for uis: [ColumnUIModel]) -> ChartViewModel.Interval {
+    private func calculateInterval(for uis: [ColumnUIModel]) -> ChartViewModel.Interval {
         var minDate = Chart.Date.max
         var maxDate = Chart.Date.min
         
@@ -48,14 +134,29 @@ internal class ColumnViewLayerWrapper
         
         return ChartViewModel.Interval(from: minDate, to: maxDate)
     }
+
+    private func expand(from: ChartViewModel.Interval, to: ChartViewModel.Interval) ->  ChartViewModel.Interval {
+        return ChartViewModel.Interval(from: min(from.from, to.from), to: max(from.to, to.to))
+    }
+
+    private func interpolate(from: ChartViewModel.Interval, to: ChartViewModel.Interval, t: CGFloat) ->  ChartViewModel.Interval
+    {
+        // :D
+        return ChartViewModel.Interval(from: AABB.Date(CGFloat(to.from) * t + CGFloat(from.from) * (1.0 - t)),
+                                       to: AABB.Date(CGFloat(to.to) * t + CGFloat(from.to) * (1.0 - t)))
+    }
     
-    
-    internal func interpolate(fromPoints: [CGPoint], toPoints: [CGPoint], t: CGFloat) -> [CGPoint] {
-        let length = min(fromPoints.count, toPoints.count)
-        var result = [CGPoint](repeating: CGPoint.zero, count: length)
+    private func interpolate(from: [ColumnUIModel.UIData], to: [ColumnUIModel.UIData], t: CGFloat) -> [ColumnUIModel.UIData] {
+        let length = min(from.count, to.count)
+
+        var result: [ColumnUIModel.UIData] = []
         for i in 0..<length {
-            result[i].x = toPoints[i].x * t + fromPoints[i].x * (1.0 - t)
-            result[i].y = toPoints[i].y * t + fromPoints[i].y * (1.0 - t)
+            let vfrom = CGPoint(x: to[i].from.x * t + from[i].from.x * (1.0 - t),
+                                y: to[i].from.y * t + from[i].from.y * (1.0 - t))
+            let vto   = CGPoint(x: to[i].to.x * t + from[i].to.x * (1.0 - t),
+                                y: to[i].to.y * t + from[i].to.y * (1.0 - t))
+
+            result.append(ColumnUIModel.UIData(from: vfrom,to: vto))
         }
         return result
     }
