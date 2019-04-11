@@ -24,6 +24,8 @@ internal class HorizontalAxisView: UIView
     
     private var dateLabels: [DateLabel] = []
     
+    private var callFrequenceLimiter = CallFrequenceLimiter()
+    
     internal init() {
         super.init(frame: .zero)
     }
@@ -37,6 +39,13 @@ internal class HorizontalAxisView: UIView
     }
     
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        callFrequenceLimiter.update { [weak self] in
+            self?.updateLogic(ui: ui, animated: animated, duration: duration)
+            return DispatchTimeInterval.milliseconds(33)
+        }
+    }
+    
+    private func updateLogic(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         func calcPosition(date: Chart.Date) -> (position: CGFloat, t: Double) {
             let t = Double(date - ui.fullInterval.from) / Double(ui.fullInterval.to - ui.fullInterval.from)
             let position = ui.translate(date: date, to: bounds)
@@ -81,7 +90,7 @@ internal class HorizontalAxisView: UIView
         }
 
         // update position for all labels
-        UIView.animateIf(animated, duration: duration * 0.5, animations: { [subviews] in
+        UIView.animateIf(animated, duration: duration, animations: { [subviews] in
             for label in subviews.compactMap({ $0 as? DateLabel }) {
                 let (position, t) = calcPosition(date: label.date)
                 label.setPosition(position, t: t)
@@ -97,15 +106,19 @@ internal class HorizontalAxisView: UIView
             }
         }
 
-        UIView.animateIf(animated, duration: duration * 0.5, animations: {
-            prevLabels.forEach { $0.alpha = 0.0 }
-        }, completion: { _ in
-            prevLabels.forEach { $0.removeFromSuperview() }
-        })
+        if prevLabels.count > 0 {
+            UIView.animateIf(animated, duration: duration * 0.5, animations: {
+                prevLabels.forEach { $0.alpha = 0.0 }
+            }, completion: { _ in
+                prevLabels.forEach { $0.removeFromSuperview() }
+            })
+        }
 
-        UIView.animateIf(animated, duration: duration, animations: {
-            newLabels.forEach { $0.alpha = 1.0 }
-        })
+        if newLabels.count > 0 {
+            UIView.animateIf(animated, duration: duration, animations: {
+                newLabels.forEach { $0.alpha = 1.0 }
+            })
+        }
     }
 
     private func calculateStep(ui: ChartUIModel) -> Chart.Date {

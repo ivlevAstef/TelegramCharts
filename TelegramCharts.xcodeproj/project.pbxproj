@@ -19,6 +19,7 @@
 		ABA05B64225E1C5200A927D9 /* BarLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */; };
 		ABA05B66225E433A00A927D9 /* ColumnViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */; };
 		ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */; };
+		ABA05B6A225FB91200A927D9 /* CallFrequenceLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
@@ -31,7 +32,6 @@
 		BA41DFCF2244D3D50021DC82 /* MainNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA41DFCE2244D3D50021DC82 /* MainNavigationController.swift */; };
 		BAAE9CF0225C8B2B0085C86B /* IActualizedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAE9CEF225C8B2B0085C86B /* IActualizedCell.swift */; };
 		BAAE9CF2225CADAF0085C86B /* ColumnsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAE9CF1225CADAF0085C86B /* ColumnsView.swift */; };
-		BABBCB13225F9A2600CC3593 /* CPUInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BABBCB12225F9A2600CC3593 /* CPUInformation.swift */; };
 		BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE712E2235FBEA00068579 /* AppDelegate.swift */; };
 		BACE71312235FBEA00068579 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71302235FBEA00068579 /* MainViewController.swift */; };
 		BACE71432235FC3A00068579 /* ColumnViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACE71422235FC3A00068579 /* ColumnViewModel.swift */; };
@@ -65,6 +65,7 @@
 		ABA05B63225E1C5200A927D9 /* BarLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarLayerWrapper.swift; sourceTree = "<group>"; };
 		ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnViewLayerWrapper.swift; sourceTree = "<group>"; };
 		ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaViewLayerWrapper.swift; sourceTree = "<group>"; };
+		ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrequenceLimiter.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
@@ -77,7 +78,6 @@
 		BA41DFCE2244D3D50021DC82 /* MainNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainNavigationController.swift; sourceTree = "<group>"; };
 		BAAE9CEF225C8B2B0085C86B /* IActualizedCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IActualizedCell.swift; sourceTree = "<group>"; };
 		BAAE9CF1225CADAF0085C86B /* ColumnsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnsView.swift; sourceTree = "<group>"; };
-		BABBCB12225F9A2600CC3593 /* CPUInformation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPUInformation.swift; sourceTree = "<group>"; };
 		BACE712B2235FBEA00068579 /* TelegramCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BACE712E2235FBEA00068579 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BACE71302235FBEA00068579 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -183,6 +183,7 @@
 				BACE71472236010E00068579 /* ChartProvider.swift */,
 				BACE717A2238DFCC00068579 /* ChartStyle.swift */,
 				BA41DFC1224126DB0021DC82 /* Configs.swift */,
+				ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -190,7 +191,6 @@
 		BACE71412235FC1300068579 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				BABBCB12225F9A2600CC3593 /* CPUInformation.swift */,
 				ABA05B5D225DEDF000A927D9 /* ChartUIModel.swift */,
 				ABA05B5F225DEFBF00A927D9 /* ColumnUIModel.swift */,
 				ABAE793D223DECC60063B223 /* ChartViewModel.swift */,
@@ -334,6 +334,7 @@
 				BACE71482236010E00068579 /* ChartProvider.swift in Sources */,
 				ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */,
 				BA41DFC02240DF0B0021DC82 /* HintAndOtherView.swift in Sources */,
+				ABA05B6A225FB91200A927D9 /* CallFrequenceLimiter.swift in Sources */,
 				BA41DF8C223F82490021DC82 /* VerticalAxisView.swift in Sources */,
 				ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */,
 				BACE717B2238DFCC00068579 /* ChartStyle.swift in Sources */,
@@ -363,7 +364,6 @@
 				BACE71432235FC3A00068579 /* ColumnViewModel.swift in Sources */,
 				ABA05B22225A6F3800A927D9 /* LayoutMargins.swift in Sources */,
 				ABA05B20225A4CE800A927D9 /* SwitchColumnVisibleTableViewCell.swift in Sources */,
-				BABBCB13225F9A2600CC3593 /* CPUInformation.swift in Sources */,
 				ABA05B60225DEFBF00A927D9 /* ColumnUIModel.swift in Sources */,
 				ABAE793C223DE8230063B223 /* AABB.swift in Sources */,
 				ABB87D3B223A393B00E31808 /* PolyLineLayerWrapper.swift in Sources */,

@@ -10,8 +10,6 @@ import UIKit
 
 private enum Consts
 {
-    internal static let maxValuesCount: Int = 6
-    internal static let minValueSpacing: CGFloat = 8.0
     internal static let labelPadding: CGFloat = 2.0
 }
 
@@ -32,6 +30,8 @@ internal class VerticalAxisView: UIView
     private var rightLastUI: ColumnUIModel?
     private var leftValueViews: [ValueView<Left>] = []
     private var rightValueViews: [ValueView<Right>] = []
+    
+    private var callFrequenceLimiter = CallFrequenceLimiter()
 
     internal init() {
         super.init(frame: .zero)
@@ -54,6 +54,17 @@ internal class VerticalAxisView: UIView
     }
 
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        callFrequenceLimiter.update { [weak self] in
+            guard let `self` = self else {
+                return DispatchTimeInterval.never
+            }
+            
+            let isUpdated = self.updateLogic(ui: ui, animated: animated, duration: duration)
+            return isUpdated ? DispatchTimeInterval.milliseconds(150) : DispatchTimeInterval.milliseconds(33)
+        }
+    }
+    
+    private func updateLogic(ui: ChartUIModel, animated: Bool, duration: TimeInterval) -> Bool {
         func cleanLeft() {
             leftLastUI = nil
             leftValueViews.forEach { $0.removeFromSuperview() }
@@ -68,25 +79,31 @@ internal class VerticalAxisView: UIView
         let uniqueAABBs = Set(ui.columns.map { $0.aabb })
         let useTwoY = uniqueAABBs.count > 1
         let usedColumns = ui.columns.filter { $0.isVisible || useTwoY }
-
-
+        
+        var finalIsUpdated = false
         if let column = usedColumns.first, column.isVisible {
-            updateValues(ui: column, lastUI: leftLastUI,
-                         valueViews: &leftValueViews, columnColor: useTwoY ? column.color : nil,
-                         animated: animated, duration: duration)
+            let isUpdated = updateValues(ui: column, lastUI: leftLastUI,
+                                         valueViews: &leftValueViews,
+                                         columnColor: useTwoY ? column.color : nil,
+                                         animated: animated, duration: duration)
+            finalIsUpdated = finalIsUpdated || isUpdated
             leftLastUI = column
         } else {
             cleanLeft()
         }
-
+        
         if let column = usedColumns.dropFirst().first, column.isVisible, useTwoY {
-            updateValues(ui: column, lastUI: rightLastUI,
-                         valueViews: &rightValueViews, columnColor: useTwoY ? column.color : nil,
-                         animated: animated, duration: duration)
+            let isUpdated = updateValues(ui: column, lastUI: rightLastUI,
+                                         valueViews: &rightValueViews,
+                                         columnColor: useTwoY ? column.color : nil,
+                                         animated: animated, duration: duration)
+            finalIsUpdated = finalIsUpdated || isUpdated
             rightLastUI = column
         } else {
             cleanRight()
         }
+        
+        return finalIsUpdated
     }
     
     private func updateFrame() {
@@ -99,26 +116,27 @@ internal class VerticalAxisView: UIView
 
     private func updateValues<T>(ui: ColumnUIModel, lastUI: ColumnUIModel?,
                                  valueViews: inout [ValueView<T>], columnColor: UIColor?,
-                                 animated: Bool, duration: TimeInterval) {
-        
-        let newValues = calculateNewValues(aabb: ui.aabb)
-        var prevViews = valueViews
+                                 animated: Bool, duration: TimeInterval) -> Bool {
+        let prevViews = valueViews
+        var oldViews = valueViews
+        var equalViews: [ValueView<T>] = []
         var newViews: [ValueView<T>] = []
 
         valueViews.removeAll()
 
-        for value in newValues {
+        for value in ui.verticalValues {
             let view: ValueView<T>
             let unique = ValueView<T>.makeUnique(Int64(value))
 
-            if let prevViewIndex = prevViews.firstIndex(where: { $0.unique == unique }) {
-                view = prevViews[prevViewIndex]
-                prevViews.remove(at: prevViewIndex)
+            if let oldViewIndex = oldViews.firstIndex(where: { $0.unique == unique }) {
+                view = oldViews[oldViewIndex]
+                view.updateValue(value)
+                equalViews.append(view)
+                oldViews.remove(at: oldViewIndex)
             } else {
                 view = ValueView(value: value, font: font, parentWidth: frame.width)
                 view.setStyle(color: color, lineColor: lineColor, shadowColor: shadowColor)
-                let position = (lastUI ?? ui).translate(value: value, to: bounds)
-                view.setPosition(position)
+                view.position = ui.translate(value: value, to: bounds)
 
                 view.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(view)
@@ -127,53 +145,49 @@ internal class VerticalAxisView: UIView
             view.columnColor = columnColor
             valueViews.append(view)
         }
+        
+        let prevSum = prevViews.map { $0.value }.reduce(0, +)
+        let newSum = valueViews.map { $0.value }.reduce(0, +)
+        
+        var translateY = frame.height / CGFloat(2 * ui.verticalValues.count)
+        translateY = newSum > prevSum ? translateY : -translateY
 
-        newViews.forEach { $0.alpha = 0.0 }
-        UIView.animateIf(animated, duration: duration, animations: {
-            prevViews.forEach { $0.alpha = 0.0 }
-            newViews.forEach { $0.alpha = 1.0 }
-        }, completion: { _ in
-            prevViews.forEach { $0.removeFromSuperview() }
-        })
-
-        func updatePositionOnSubviews() {
-            for view in subviews.compactMap({ $0 as? ValueView<T> }) {
-                let position = ui.translate(value: view.value, to: bounds)
-                view.setPosition(position)
+        let translateAnimatedViews = equalViews.filter { abs($0.position - ui.translate(value: $0.value, to: bounds)) > 0.1 }
+        if translateAnimatedViews.count > 0 {
+            let rect = bounds
+            UIView.animateIf(animated, duration: duration, animations: {
+                for view in translateAnimatedViews {
+                    view.position = ui.translate(value: view.value, to: rect)
+                }
+            })
+        }
+        
+        if oldViews.count > 0 {
+            UIView.animateIf(animated, duration: duration, animations: {
+                for view in oldViews {
+                    view.alpha = 0.0
+                    view.position = view.position + translateY
+                }
+            }, completion: { _ in
+                oldViews.forEach { $0.removeFromSuperview() }
+            })
+        }
+        
+        if newViews.count > 0 {
+            for view in newViews {
+                view.alpha = 0.0
+                view.position = view.position - translateY
             }
+            UIView.animateIf(animated, duration: duration, animations: {
+                for view in newViews {
+                    view.alpha = 1.0
+                    view.position = view.position + translateY
+                }
+            })
         }
-
-        UIView.animateIf(animated, duration: duration, options: .curveLinear, animations: {
-            updatePositionOnSubviews()
-        })
+        
+        return !newViews.isEmpty || !oldViews.isEmpty || !translateAnimatedViews.isEmpty
     }
-
-    private func calculateNewValues(aabb: AABB) -> [AABB.Value] {
-        let begin = aabb.minValue
-        let step = (aabb.maxValue - aabb.minValue) / Double(valuesCount)
-
-        var result: [AABB.Value] = []
-
-        var value = begin
-        for _ in 0..<valuesCount {
-            result.append(value)
-            value += step
-        }
-
-        return result
-    }
-
-    private var valuesCount: Int {
-        return min(Consts.maxValuesCount, Int(frame.height / (valueHeight + Consts.minValueSpacing)))
-    }
-
-    private lazy var valueHeight: CGFloat = {
-        let attributes = [
-            NSAttributedString.Key.font: font
-        ]
-
-        return ("1" as NSString).size(withAttributes: attributes).height
-    }()
 
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -191,8 +205,14 @@ private protocol ValueViewProtocol {
 
 private class ValueView<T>: UIView, ValueViewProtocol
 {
-    internal let value: AABB.Value
-    internal let unique: Int64
+    internal private(set) var value: AABB.Value = 0
+    internal private(set) var unique: Int64 = 0
+    
+    internal var position: CGFloat = 0 {
+        didSet {
+            frame.origin = CGPoint(x: 0, y: position - frame.height)
+        }
+    }
     
     internal var columnColor: UIColor? {
         didSet {
@@ -206,10 +226,9 @@ private class ValueView<T>: UIView, ValueViewProtocol
     private let line: UIView = UIView(frame: .zero)
 
     internal init(value: AABB.Value, font: UIFont, parentWidth: CGFloat) {
-        self.value = value
-        self.unique = ValueView.makeUnique(Int64(value))
-
         super.init(frame: CGRect(x: 0, y: 0, width: parentWidth, height: 0))
+        updateValue(value)
+        
         shadow.translatesAutoresizingMaskIntoConstraints = false
         addSubview(shadow)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -238,6 +257,11 @@ private class ValueView<T>: UIView, ValueViewProtocol
 
         line.frame = CGRect(x: 0, y: frame.height - 1, width: frame.width, height: 1)
     }
+    
+    internal func updateValue(_ value: AABB.Value) {
+        self.value = value
+        self.unique = ValueView.makeUnique(Int64(value))
+    }
 
     internal func setStyle(color: UIColor, lineColor: UIColor, shadowColor: UIColor) {
         label.textColor = columnColor ?? color
@@ -250,10 +274,6 @@ private class ValueView<T>: UIView, ValueViewProtocol
     internal func setWidth(_ width: CGFloat) {
         frame.size.width = width
         line.frame.size.width = width
-    }
-
-    internal func setPosition(_ position: CGFloat) {
-        frame.origin = CGPoint(x: 0, y: position - frame.height)
     }
 
     internal static func makeUnique(_ number: Int64) -> Int64 {

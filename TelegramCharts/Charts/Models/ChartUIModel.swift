@@ -8,6 +8,12 @@
 
 import UIKit
 
+private enum Consts
+{
+    internal static let yValuesCount: Int = 6
+
+}
+
 internal struct ChartUIModel
 {
     internal let dates: [Chart.Date]
@@ -86,7 +92,7 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
                              isOpacity: false,
                              aabb: aabb,
                              data: data,
-                             verticalValues: [],
+                             verticalValues: makeYValues(aabb: aabb),
                              color: columnVM.color,
                              size: size)
     }
@@ -110,7 +116,7 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
                              isOpacity: true,
                              aabb: aabb,
                              data: data,
-                             verticalValues: [],
+                             verticalValues: makeYValues(aabb: aabb),
                              color: columnVM.color,
                              size: size)
     }
@@ -136,7 +142,7 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
                              isOpacity: true,
                              aabb: aabb,
                              data: data,
-                             verticalValues: [],
+                             verticalValues: makeYValues(aabb: aabb),
                              color: columnVM.color,
                              size: size)
     }
@@ -210,6 +216,21 @@ private func roundAABB(_ aabb: AABB) -> AABB {
     let maxValue = aabb.maxValue + Double(roundScale - Int64(aabb.maxValue) % roundScale)
     
     return AABB(minDate: aabb.minDate, maxDate: aabb.maxDate, minValue: minValue, maxValue: maxValue)
+}
+
+private func makeYValues(aabb: AABB) -> [AABB.Value] {
+    let begin = aabb.minValue
+    let step = (aabb.maxValue - aabb.minValue) / Double(Consts.yValuesCount)
+    
+    var result: [AABB.Value] = []
+    
+    var value = begin
+    for _ in 0..<Consts.yValuesCount {
+        result.append(value)
+        value += step
+    }
+    
+    return result
 }
 
 private func makeData(by chartVM: ChartViewModel, columnVM: ColumnViewModel, aabb: AABB, prevData: [ColumnUIModel.Data]?) -> [ColumnUIModel.Data] {

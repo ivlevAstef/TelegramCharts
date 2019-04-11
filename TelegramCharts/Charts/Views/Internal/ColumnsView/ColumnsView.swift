@@ -24,11 +24,11 @@ internal final class ColumnsView: UIView
     private var cornerRadius: CGFloat = 0.0
     private var updateCacheBlock: DispatchWorkItem?
 
-    private var updateDiagramBlock: DispatchWorkItem?
-    private var deadline: DispatchTime = .now()
+    private var callFrequenceLimiter = CallFrequenceLimiter()
 
     private var oldTime: DT = currentTime()
     private var oldDuration: TimeInterval = 0.0
+    private var delayOfSec: Double = 1.0 / 60.0
 
     internal init() {
         super.init(frame: .zero)
@@ -45,29 +45,27 @@ internal final class ColumnsView: UIView
 
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         assert(columnsViews.count == ui.columns.count)
-        updateDiagramBlock?.cancel()
-        let updateBlock = DispatchWorkItem { [weak self] in
+        
+        callFrequenceLimiter.update { [weak self] in
             guard let `self` = self else {
-                return
+                return DispatchTimeInterval.never
             }
-
+            
             let start = DispatchTime.now()
             self.recalculate(ui: ui, animated: animated, duration: duration)
             self.cacheUpdate(animated: animated, duration: duration)
-
+            
             let end = DispatchTime.now()
-            self.deadline = .now() + .nanoseconds(Int(end.uptimeNanoseconds &- start.uptimeNanoseconds))
-        }
-        updateDiagramBlock = updateBlock
-        if DispatchTime.now() >= deadline {
-            updateBlock.perform()
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: deadline, execute: updateBlock)
+            let delayInNSec = (end.uptimeNanoseconds &- start.uptimeNanoseconds)
+            let p = 2.0 / (10.0 + 1.0)
+            self.delayOfSec = p * self.delayOfSec + (1.0 - p) * Double(delayInNSec) / Double(NSEC_PER_SEC)
+            return DispatchTimeInterval.nanoseconds(max(Int(delayInNSec), 33333333))
         }
     }
 
     internal func recalculate(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
-        let t: CGFloat = CGFloat((ColumnsView.currentTime() - oldTime) / (ColumnsView.multForSlowDevices() * oldDuration))
+        let defaultOffset = 1.0 / 120.0
+        let t: CGFloat = CGFloat((defaultOffset + delayOfSec + ColumnsView.currentTime() - oldTime) / oldDuration)
 
         let zipColumns = zip(ui.columns, columnsViews)
         for (columnUI, columnView) in zipColumns {
@@ -87,15 +85,6 @@ internal final class ColumnsView: UIView
             columnView.layer.cornerRadius = cornerRadius
             columnView.layer.masksToBounds = cornerRadius > 0
         }
-    }
-
-    private static func multForSlowDevices() -> Double {
-        if cpuIsFast {
-            return 1.0
-        }
-        // Not critical, but on old devices graphics draw is very slow
-        // animation time not equals dt time. need correct :(
-        return 0.6
     }
 
     private static func currentTime() -> Double {
@@ -121,7 +110,7 @@ internal final class ColumnsView: UIView
         }
         updateCacheBlock = block
 
-        let duration = animated ? 1.2/*as a precaution*/ * duration : 0.0
+        let duration = animated ? (delayOfSec + duration) : delayOfSec
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: block)
     }
 
