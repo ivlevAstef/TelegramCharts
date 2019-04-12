@@ -160,7 +160,7 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, modifier: modifier, prevData: prevData)
         prevData = data
         return ColumnUIModel(isVisible: columnVM.isVisible,
-                             isOpacity: false,
+                             isOpacity: columnVM.type == .line,
                              aabb: aabb,
                              data: data,
                              verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
@@ -307,12 +307,7 @@ private func makeData(by chartVM: ChartViewModel,
     var data: [ColumnUIModel.Data] = []
     data.reserveCapacity(columnVM.values.count)
     
-    if columnVM.type == .line {
-        for i in 0..<columnVM.values.count {
-            let value = modifier(i, columnVM)
-            data.append(ColumnUIModel.Data(date: chartVM.dates[i], from: value, to: value, original: columnVM.values[i]))
-        }
-    } else if chartVM.stacked {
+    if chartVM.stacked {
         for i in 0..<columnVM.values.count {
             let value = columnVM.isVisible ? modifier(i, columnVM) : 0
             let from: AABB.Value = prevData?[i].to ?? aabb.minValue

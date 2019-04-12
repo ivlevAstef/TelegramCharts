@@ -61,7 +61,7 @@ internal class ColumnViewLayerWrapper
     }
 
     internal func drawCurrentState(to context: CGContext) {
-        if let path = saveNewPath {
+        if let path = saveNewPath, oldIsVisible {
             context.saveGState()
             context.addPath(path)
             fillContext(context)
