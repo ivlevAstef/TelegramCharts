@@ -10,13 +10,21 @@ import UIKit
 
 internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
 {
-    internal override func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
-        layer.lineWidth = CGFloat(ui.size)
+    internal override func fillLayer(_ layer: CAShapeLayer) {
+        layer.lineWidth = CGFloat(size)
         layer.lineCap = .round
         layer.lineJoin = .round
-        layer.strokeColor = ui.color.cgColor
+        layer.strokeColor = color?.cgColor
         layer.fillColor = nil
         layer.opacity = 1.0
+    }
+
+    internal override func fillContext(_ context: CGContext) {
+        context.setLineWidth(CGFloat(size))
+        context.setLineCap(.round)
+        context.setLineJoin(.round)
+        context.setStrokeColor((color ?? UIColor.clear).cgColor)
+        context.strokePath()
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {

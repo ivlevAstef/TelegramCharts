@@ -14,6 +14,9 @@ internal class ColumnViewLayerWrapper
     internal var minX: CGFloat = 0
     internal var maxX: CGFloat = 0
 
+    internal private(set) var color: UIColor?
+    internal private(set) var size: Double = 1.0
+
     private var fromPointsData: [ColumnUIModel.UIData] = []
     private var toPointsData: [ColumnUIModel.UIData] = []
     private var fromInterval: ChartViewModel.Interval?
@@ -32,7 +35,11 @@ internal class ColumnViewLayerWrapper
         layer.addSublayer(pathLayer)
     }
 
-    internal func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
+    internal func fillLayer(_ layer: CAShapeLayer) {
+        fatalError("override")
+    }
+
+    internal func fillContext(_ context: CGContext) {
         fatalError("override")
     }
 
@@ -42,6 +49,8 @@ internal class ColumnViewLayerWrapper
     }
 
     internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
+        self.color = ui.color
+        self.size = ui.size
         let interval = updateInterval(ui: ui, t: t)
         updatePoints(ui: ui, t: t, interval: interval, animated: animated, duration: duration)
     }
@@ -49,6 +58,15 @@ internal class ColumnViewLayerWrapper
     internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         confirmOpacity(ui: ui, animated: animated, duration: duration)
         confirmPoints(ui: ui, animated: animated, duration: duration)
+    }
+
+    internal func drawCurrentState(to context: CGContext) {
+        if let path = saveNewPath {
+            context.saveGState()
+            context.addPath(path)
+            fillContext(context)
+            context.restoreGState()
+        }
     }
 
     private func updateInterval(ui: ColumnUIModel, t: CGFloat) -> ChartViewModel.Interval {
@@ -92,7 +110,7 @@ internal class ColumnViewLayerWrapper
         toPointsData = newPointsData
         saveNewPath = makePath(ui: ui, points: newPointsData, interval: interval).cgPath
 
-        fillLayer(pathLayer, ui: ui)
+        fillLayer(pathLayer)
         pathLayer.removeAllAnimations()
     }
 

@@ -10,7 +10,7 @@ import UIKit
 
 internal class ColumnView: UIView
 {
-    override public var frame: CGRect {
+    override internal var frame: CGRect {
         didSet { updateFrame() }
     }
     
@@ -36,6 +36,15 @@ internal class ColumnView: UIView
 
     internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         columnLayer.confirm(ui: ui, animated: animated, duration: duration)
+    }
+
+    internal func drawCurrentState(to context: CGContext) {
+        columnLayer.drawCurrentState(to: context)
+    }
+
+    internal func setCornerRadius(_ cornerRadius: CGFloat) {
+        layer.cornerRadius = cornerRadius
+        layer.masksToBounds = cornerRadius > 0
     }
     
     private func updateFrame() {

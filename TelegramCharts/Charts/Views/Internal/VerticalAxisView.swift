@@ -154,13 +154,13 @@ internal final class VerticalAxisView: UIView
         let prevSum = prevViews.map { $0.value }.reduce(0, +)
         let newSum = valueViews.map { $0.value }.reduce(0, +)
         
-        var translateY = frame.height / CGFloat(2 * ui.verticalValues.count)
+        var translateY = frame.height / (1.5 * CGFloat(ui.verticalValues.count))
         translateY = newSum > prevSum ? translateY : -translateY
 
         let translateAnimatedViews = equalViews.filter { abs($0.position - ui.translate(value: $0.value, to: rect)) > 0.1 }
         if translateAnimatedViews.count > 0 {
             let rect = self.rect
-            UIView.animateIf(animated, duration: duration, animations: {
+            UIView.animateIf(animated, duration: duration * 0.5, animations: {
                 for view in translateAnimatedViews {
                     view.position = ui.translate(value: view.value, to: rect)
                 }

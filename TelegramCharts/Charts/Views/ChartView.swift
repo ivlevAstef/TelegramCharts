@@ -61,13 +61,15 @@ public class ChartView: UIView
         columnsView.update(ui: ui, animated: false, duration: 0.0)
         verticalAxisView.update(ui: ui, animated: false, duration: 0.0)
         horizontalAxisView.update(ui: ui, animated: false, duration: 0.0)
-        hintView.update(ui: ui, animated: false, duration: 0.0)
+        hintView.update(ui: ui)
         intervalLabel.update(ui: ui, animated: false, duration: 0.0)
     }
 
     private func configureSubviews() {
         columnsView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(columnsView)
+
+        hintView.setParent(columnsView)
 
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(horizontalAxisView)
@@ -111,7 +113,8 @@ public class ChartView: UIView
                                           y: marginsFrame.origin.y,
                                           width: marginsFrame.width,
                                           height: Consts.topOffset)
-        
+
+        self.hintView.updateParentFrame(columnsView.bounds)
         update()
     }
 
@@ -129,7 +132,7 @@ extension ChartView: ChartUpdateListener
         columnsView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
         verticalAxisView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
         horizontalAxisView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
-        hintView.update(ui: ui, animated: true, duration: 0.0)
+        hintView.update(ui: ui)
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
@@ -139,7 +142,7 @@ extension ChartView: ChartUpdateListener
         columnsView.update(ui: ui, animated: true, duration: Configs.intervalChangeForLinesDuration)
         verticalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForValuesDuration)
         horizontalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForDatesDuration)
-        hintView.update(ui: ui, animated: true, duration: Configs.intervalChangeForHintDuration)
+        hintView.update(ui: ui)
         intervalLabel.update(ui: ui, animated: true, duration: Configs.intervalChangeForLabelDuration)
     }
 }

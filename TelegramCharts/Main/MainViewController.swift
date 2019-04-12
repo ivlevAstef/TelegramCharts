@@ -31,9 +31,16 @@ internal class MainViewController: UITableViewController, Stylizing
         applyStyle(StyleController.currentStyle)
 
         title = "Statistics"
-        
+
         chartProvider.getCharts { [weak self] result in
             self?.processChartsResult(result)
+        }
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        for cell in cellCache.values {
+            cell.actualizeFrame(width: size.width)
         }
     }
 
@@ -112,7 +119,9 @@ internal class MainViewController: UITableViewController, Stylizing
     }
 
     internal override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return makeCellWithUseCache(indexPath: indexPath)
+        let cell = makeCellWithUseCache(indexPath: indexPath)
+        cell.actualizeFrame(width: tableView.bounds.width)
+        return cell
     }
 
     private func cellHeight(for indexPath: IndexPath) -> CGFloat {
@@ -120,9 +129,8 @@ internal class MainViewController: UITableViewController, Stylizing
         return cell.frame.height
     }
 
-    private func makeCellWithUseCache(indexPath: IndexPath) -> UITableViewCell {
+    private func makeCellWithUseCache(indexPath: IndexPath) -> UITableViewCell & IActualizedCell {
         if let cell = cellCache[indexPath] {
-            cell.actualizeFrame(width: tableView.bounds.width)
             return cell
         }
 

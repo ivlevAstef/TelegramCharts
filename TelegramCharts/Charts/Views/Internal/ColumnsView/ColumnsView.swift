@@ -20,6 +20,7 @@ internal final class ColumnsView: UIView
 
     private var columnsViews: [ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
+    private var margins: UIEdgeInsets = .zero
 
     private var cornerRadius: CGFloat = 0.0
     private var updateCacheBlock: DispatchWorkItem?
@@ -38,6 +39,7 @@ internal final class ColumnsView: UIView
     }
 
     internal func premake(margins: UIEdgeInsets, types: [ColumnViewModel.ColumnType]) {
+        self.margins = margins
         columnsViews = ColumnsViewFabric.makeColumnViews(by: types, margins: margins, parent: self)
         updateFrame()
         setCornerRadius(cornerRadius)
@@ -82,9 +84,10 @@ internal final class ColumnsView: UIView
     internal func setCornerRadius(_ cornerRadius: CGFloat) {
         self.cornerRadius = cornerRadius
         for columnView in columnsViews {
-            columnView.layer.cornerRadius = cornerRadius
-            columnView.layer.masksToBounds = cornerRadius > 0
+            columnView.setCornerRadius(cornerRadius)
         }
+        cacheImageView.layer.cornerRadius = cornerRadius
+        cacheImageView.layer.masksToBounds = cornerRadius > 0
     }
 
     private static func currentTime() -> Double {
@@ -104,22 +107,41 @@ internal final class ColumnsView: UIView
         self.updateCacheBlock?.cancel()
         hideCacheState()
 
+        let fullDuration = animated ? (delayOfSec + duration) : delayOfSec
+        let deadline: DispatchTime = .now() + fullDuration
+
+        let size = frame.size
+        var capturedBlock: DispatchWorkItem!
         let block = DispatchWorkItem { [weak self] in
-            self?.cacheImageView.image = self?.cacheLayerState()
-            self?.showCacheState()
+            guard let `self` = self else {
+                return
+            }
+            let image = self.cacheLayerState(size: size)
+            DispatchQueue.main.asyncAfter(deadline: deadline) { [weak self] in
+                if !capturedBlock.isCancelled {
+                    self?.cacheImageView.image = image
+                    self?.showCacheState()
+                }
+            }
         }
+        capturedBlock = block
         updateCacheBlock = block
 
-        let duration = animated ? (delayOfSec + duration) : delayOfSec
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: block)
+        let fastDuration = animated ? duration : 0.0
+        DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + fastDuration, execute: block)
     }
 
-    private func cacheLayerState() -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(frame.size, false, UIScreen.main.scale)
+    private func cacheLayerState(size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, UIScreen.main.scale)
         defer { UIGraphicsEndImageContext() }
-        
-        columnsViews.forEach { $0.drawHierarchy(in: CGRect(origin: .zero, size: frame.size), afterScreenUpdates: true) }
-        
+
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+
+        context.translateBy(x: margins.left, y: margins.top)
+        columnsViews.forEach { $0.drawCurrentState(to: context) }
+
         return UIGraphicsGetImageFromCurrentImageContext()
     }
 

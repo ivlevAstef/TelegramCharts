@@ -13,7 +13,7 @@ private enum Consts
     internal static let sliderWidth: CGFloat = 12.0
 
     internal static let sliderTouchWidth: CGFloat = 32.0
-    internal static let minSliderIntervalWidth: CGFloat = 32.0
+    internal static let minSliderIntervalWidth: CGFloat = 20.0
     
     internal static let cornerRadius: CGFloat = 6.0
 

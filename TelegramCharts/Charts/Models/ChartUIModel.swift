@@ -165,7 +165,8 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
                              data: data,
                              verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
                              color: columnVM.color,
-                             size: size)
+                             size: size,
+                             type: columnVM.type)
     }
 }
 
@@ -181,7 +182,8 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
                              data: data,
                              verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
                              color: columnVM.color,
-                             size: size)
+                             size: size,
+                             type: columnVM.type)
     }
 }
 
@@ -211,7 +213,8 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
                              data: data,
                              verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
                              color: columnVM.color,
-                             size: size)
+                             size: size,
+                             type: columnVM.type)
     }
 }
 

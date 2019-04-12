@@ -31,8 +31,11 @@ internal struct ColumnUIModel
     internal let verticalValues: [AABB.Value]
     internal let color: UIColor
     internal let size: Double
+    internal let type: ColumnViewModel.ColumnType
     
-    internal init(isVisible: Bool, isOpacity: Bool, aabb: AABB, data: [Data], verticalValues: [AABB.Value], color: UIColor, size: Double) {
+    internal init(isVisible: Bool, isOpacity: Bool,
+                  aabb: AABB, data: [Data], verticalValues: [AABB.Value],
+                  color: UIColor, size: Double, type: ColumnViewModel.ColumnType) {
         self.isVisible = isVisible
         self.isOpacity = isOpacity
         self.aabb = aabb
@@ -40,6 +43,7 @@ internal struct ColumnUIModel
         self.verticalValues = verticalValues
         self.color = color
         self.size = size
+        self.type = type
     }
     
     internal func interval(by rect: CGRect, minX: CGFloat, maxX: CGFloat) -> ChartViewModel.Interval {
@@ -122,6 +126,15 @@ internal struct ColumnUIModel
         for iter in data {
             if iter.date == date {
                 return iter
+            }
+        }
+        return nil
+    }
+
+    internal func index(by date: Chart.Date) -> Int? {
+        for i in 0..<data.count {
+            if data[i].date == date {
+                return i
             }
         }
         return nil

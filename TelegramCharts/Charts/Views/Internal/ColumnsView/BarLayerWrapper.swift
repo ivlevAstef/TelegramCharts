@@ -13,13 +13,21 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
 {
     private var pathLayer: CAShapeLayer?
     
-    internal override func fillLayer(_ layer: CAShapeLayer, ui: ColumnUIModel) {
+    internal override func fillLayer(_ layer: CAShapeLayer) {
         layer.lineWidth = 0
         layer.lineCap = .butt
         layer.lineJoin = .miter
         layer.strokeColor = nil
-        layer.fillColor = ui.color.cgColor
+        layer.fillColor = color?.cgColor
         layer.opacity = 1.0
+    }
+
+    internal override func fillContext(_ context: CGContext) {
+        context.setLineWidth(0)
+        context.setLineCap(.butt)
+        context.setLineJoin(.miter)
+        context.setFillColor((color ?? UIColor.clear).cgColor)
+        context.fillPath()
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {
@@ -48,7 +56,6 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         guard let firstPoint = points.first else {
             return path
         }
-        
         
         path.move(to: firstPoint)
         for point in points.dropFirst() {
