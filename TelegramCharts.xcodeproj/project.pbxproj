@@ -20,6 +20,7 @@
 		ABA05B66225E433A00A927D9 /* ColumnViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */; };
 		ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */; };
 		ABA05B6A225FB91200A927D9 /* CallFrequenceLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */; };
+		ABA05B6C2260485000A927D9 /* IntervalLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B6B2260485000A927D9 /* IntervalLabel.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
@@ -66,6 +67,7 @@
 		ABA05B65225E433A00A927D9 /* ColumnViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnViewLayerWrapper.swift; sourceTree = "<group>"; };
 		ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaViewLayerWrapper.swift; sourceTree = "<group>"; };
 		ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrequenceLimiter.swift; sourceTree = "<group>"; };
+		ABA05B6B2260485000A927D9 /* IntervalLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalLabel.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				ABAE7943223E17560063B223 /* HorizontalAxisView.swift */,
 				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 				BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */,
+				ABA05B6B2260485000A927D9 /* IntervalLabel.swift */,
 			);
 			path = Internal;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				BACE71312235FBEA00068579 /* MainViewController.swift in Sources */,
 				BACE716F22363E1900068579 /* Column.swift in Sources */,
 				BACE712F2235FBEA00068579 /* AppDelegate.swift in Sources */,
+				ABA05B6C2260485000A927D9 /* IntervalLabel.swift in Sources */,
 				BACE715E22362E4B00068579 /* Array+SafeGet.swift in Sources */,
 				ABA05B28225C3F3100A927D9 /* Chart.swift in Sources */,
 				BACE714D223602E400068579 /* Style+Styles.swift in Sources */,

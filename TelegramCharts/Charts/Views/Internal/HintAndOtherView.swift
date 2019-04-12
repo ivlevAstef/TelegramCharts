@@ -106,7 +106,7 @@ internal class HintAndOtherView: UIView
             return columnUI.find(by: nearDate).flatMap { (columnUI, $0) }
         }
         
-        let lines = columnInfo.map { ($0.color, $1.to) }
+        let lines = columnInfo.map { ($0.color, $1.original) }
         
         hintView.setData(date: nearDate, lines: lines)
         hintView.setPosition(position, limit: bounds)
@@ -227,7 +227,7 @@ private class HintView: UIView
         self.layer.cornerRadius = Consts.hintCornerRadius
     }
 
-    internal func setData(date: Chart.Date, lines: [(UIColor, AABB.Value)]) {
+    internal func setData(date: Chart.Date, lines: [(UIColor, ColumnViewModel.Value)]) {
         subviews.forEach { $0.removeFromSuperview() }
 
         // Date

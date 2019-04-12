@@ -21,6 +21,7 @@ internal struct ColumnUIModel
         internal let date: AABB.Date
         internal let from: AABB.Value
         internal let to: AABB.Value
+        internal let original: ColumnViewModel.Value
     }
     
     internal let isVisible: Bool

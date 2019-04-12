@@ -12,6 +12,7 @@ private enum Consts
 {
     internal static let horizontalAxisHeight: CGFloat = 20.0
     internal static let spacing: CGFloat = 10.0
+    internal static let topOffset: CGFloat = 15.0
 }
 
 public class ChartView: UIView
@@ -24,7 +25,7 @@ public class ChartView: UIView
     private var ui: ChartUIModel? = nil
     
     private var columnsView: ColumnsView = ColumnsView()
-    private let verticalAxisView: VerticalAxisView = VerticalAxisView()
+    private let verticalAxisView: VerticalAxisView = VerticalAxisView(topOffset: Consts.topOffset)
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
 
@@ -45,7 +46,6 @@ public class ChartView: UIView
         chartViewModel.registerUpdateListener(self)
 
         columnsView.premake(margins: self.margins, types: chartViewModel.columns.map { $0.type })
-
 
         self.ui = ChartUIModel(viewModel: chartViewModel, fully: false, size: 2.0)
         update()
@@ -79,18 +79,27 @@ public class ChartView: UIView
     private func updateFrame() {
         let fullFrame = CGRect(x: 0, y: Consts.spacing,
                                width: bounds.width, height: bounds.height - Consts.horizontalAxisHeight - Consts.spacing)
-        columnsView.frame = fullFrame
+        
+        let columnsFrame = CGRect(x: fullFrame.origin.x,
+                                  y: fullFrame.origin.y + Consts.topOffset,
+                                  width: fullFrame.width,
+                                  height: fullFrame.height - Consts.topOffset)
+        columnsView.frame = columnsFrame
         
         let marginsFrame = CGRect(x: fullFrame.origin.x + margins.left,
                                   y: fullFrame.origin.y + margins.top,
                                   width: fullFrame.width - margins.left - margins.right,
                                   height: fullFrame.height - margins.top - margins.bottom)
-        
         self.horizontalAxisView.frame = CGRect(x: marginsFrame.minX, y: marginsFrame.maxY,
                                                width: marginsFrame.width, height: Consts.horizontalAxisHeight)
         
         self.verticalAxisView.frame = marginsFrame
-        self.hintView.frame = marginsFrame
+        
+        let hintFrame = CGRect(x: columnsFrame.origin.x + margins.left,
+                                  y: columnsFrame.origin.y + margins.top,
+                                  width: columnsFrame.width - margins.left - margins.right,
+                                  height: columnsFrame.height - margins.top - margins.bottom)
+        self.hintView.frame = hintFrame
         
         update()
     }

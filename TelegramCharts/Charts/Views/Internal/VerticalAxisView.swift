@@ -23,6 +23,9 @@ internal class VerticalAxisView: UIView
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
     private var shadowColor: UIColor = .white
+    
+    private let topOffset: CGFloat
+    private var rect: CGRect = .zero
 
     private let bottomLine: UIView = UIView(frame: .zero)
 
@@ -33,7 +36,8 @@ internal class VerticalAxisView: UIView
     
     private var callFrequenceLimiter = CallFrequenceLimiter()
 
-    internal init() {
+    internal init(topOffset: CGFloat) {
+        self.topOffset = topOffset
         super.init(frame: .zero)
 
         clipsToBounds = true
@@ -60,7 +64,7 @@ internal class VerticalAxisView: UIView
             }
             
             let isUpdated = self.updateLogic(ui: ui, animated: animated, duration: duration)
-            return isUpdated ? DispatchTimeInterval.milliseconds(150) : DispatchTimeInterval.milliseconds(33)
+            return isUpdated ? DispatchTimeInterval.milliseconds(200) : DispatchTimeInterval.milliseconds(33)
         }
     }
     
@@ -108,6 +112,7 @@ internal class VerticalAxisView: UIView
     
     private func updateFrame() {
         self.bottomLine.frame = CGRect(x: 0, y: bounds.height - 1.0, width: bounds.width, height: 1.0)
+        self.rect = CGRect(x: 0, y: topOffset, width: bounds.width, height: bounds.height - topOffset)
         
         for subview in subviews.compactMap({ $0 as? ValueViewProtocol }) {
             subview.setWidth(bounds.width)
@@ -134,9 +139,9 @@ internal class VerticalAxisView: UIView
                 equalViews.append(view)
                 oldViews.remove(at: oldViewIndex)
             } else {
-                view = ValueView(value: value, font: font, parentWidth: frame.width)
+                view = ValueView(value: value, font: font, parentWidth: rect.width)
                 view.setStyle(color: color, lineColor: lineColor, shadowColor: shadowColor)
-                view.position = ui.translate(value: value, to: bounds)
+                view.position = ui.translate(value: value, to: rect)
 
                 view.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(view)
@@ -152,9 +157,9 @@ internal class VerticalAxisView: UIView
         var translateY = frame.height / CGFloat(2 * ui.verticalValues.count)
         translateY = newSum > prevSum ? translateY : -translateY
 
-        let translateAnimatedViews = equalViews.filter { abs($0.position - ui.translate(value: $0.value, to: bounds)) > 0.1 }
+        let translateAnimatedViews = equalViews.filter { abs($0.position - ui.translate(value: $0.value, to: rect)) > 0.1 }
         if translateAnimatedViews.count > 0 {
-            let rect = bounds
+            let rect = self.rect
             UIView.animateIf(animated, duration: duration, animations: {
                 for view in translateAnimatedViews {
                     view.position = ui.translate(value: view.value, to: rect)
