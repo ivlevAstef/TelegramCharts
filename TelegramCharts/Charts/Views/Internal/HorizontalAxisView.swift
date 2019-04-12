@@ -15,7 +15,7 @@ private enum Consts
 }
 
 
-internal class HorizontalAxisView: UIView
+internal final class HorizontalAxisView: UIView
 {
     private var fullInterval: ChartViewModel.Interval = ChartViewModel.Interval.empty
     
@@ -24,7 +24,7 @@ internal class HorizontalAxisView: UIView
     
     private var dateLabels: [DateLabel] = []
     
-    private var callFrequenceLimiter = CallFrequenceLimiter()
+    private let callFrequenceLimiter = CallFrequenceLimiter()
     
     internal init() {
         super.init(frame: .zero)

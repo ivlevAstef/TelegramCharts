@@ -62,7 +62,8 @@ internal struct ChartUIModel
         return aabb.minDate + Chart.Date(round(Double(x - rect.minX) * xScale))
     }
     
-    internal func find(around date: Chart.Date) -> Chart.Date {
+    internal func find(around date: Chart.Date, in interval: ChartViewModel.Interval) -> Chart.Date {
+        let date = max(interval.from, min(date, interval.to))
         for i in 1..<dates.count {
             if date <= dates[i] {
                 if (date - dates[i - 1]) < (dates[i] - date) {

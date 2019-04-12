@@ -17,11 +17,11 @@ private enum Consts
     internal static let hintLabelsSpace: CGFloat = 2
     internal static let hintHorizontalSpace: CGFloat = 8
 
-    internal static let hintYOffset: CGFloat = -16
+    internal static let hintYOffset: CGFloat = 4
     internal static let hintCornerRadius: CGFloat = 5
 }
 
-internal class HintAndOtherView: UIView
+internal final class HintAndOtherView: UIView
 {
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
@@ -97,7 +97,7 @@ internal class HintAndOtherView: UIView
 
         let columnUIs = ui.columns.filter { $0.isVisible }
 
-        let nearDate = ui.find(around: aroundDate)
+        let nearDate = ui.find(around: aroundDate, in: ui.interval)
         let position = ui.translate(date: nearDate, to: bounds)
 
         show(animated: true)

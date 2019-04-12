@@ -24,7 +24,7 @@ internal final class ColumnsView: UIView
     private var cornerRadius: CGFloat = 0.0
     private var updateCacheBlock: DispatchWorkItem?
 
-    private var callFrequenceLimiter = CallFrequenceLimiter()
+    private let callFrequenceLimiter = CallFrequenceLimiter()
 
     private var oldTime: DT = currentTime()
     private var oldDuration: TimeInterval = 0.0

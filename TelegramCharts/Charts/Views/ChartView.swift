@@ -12,7 +12,7 @@ private enum Consts
 {
     internal static let horizontalAxisHeight: CGFloat = 20.0
     internal static let spacing: CGFloat = 10.0
-    internal static let topOffset: CGFloat = 15.0
+    internal static let topOffset: CGFloat = 25.0
 }
 
 public class ChartView: UIView
@@ -28,6 +28,7 @@ public class ChartView: UIView
     private let verticalAxisView: VerticalAxisView = VerticalAxisView(topOffset: Consts.topOffset)
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()
+    private let intervalLabel: IntervalLabel = IntervalLabel()
 
     public init(margins: UIEdgeInsets) {
         self.margins = margins
@@ -40,6 +41,7 @@ public class ChartView: UIView
         horizontalAxisView.setStyle(style)
         verticalAxisView.setStyle(style)
         hintView.setStyle(style)
+        intervalLabel.setStyle(style)
     }
     
     public func setChart(_ chartViewModel: ChartViewModel) {
@@ -60,6 +62,7 @@ public class ChartView: UIView
         verticalAxisView.update(ui: ui, animated: false, duration: 0.0)
         horizontalAxisView.update(ui: ui, animated: false, duration: 0.0)
         hintView.update(ui: ui, animated: false, duration: 0.0)
+        intervalLabel.update(ui: ui, animated: false, duration: 0.0)
     }
 
     private func configureSubviews() {
@@ -74,6 +77,9 @@ public class ChartView: UIView
 
         hintView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(hintView)
+        
+        intervalLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(intervalLabel)
     }
     
     private func updateFrame() {
@@ -96,10 +102,15 @@ public class ChartView: UIView
         self.verticalAxisView.frame = marginsFrame
         
         let hintFrame = CGRect(x: columnsFrame.origin.x + margins.left,
-                                  y: columnsFrame.origin.y + margins.top,
-                                  width: columnsFrame.width - margins.left - margins.right,
-                                  height: columnsFrame.height - margins.top - margins.bottom)
+                               y: columnsFrame.origin.y + margins.top,
+                               width: columnsFrame.width - margins.left - margins.right,
+                               height: columnsFrame.height - margins.top - margins.bottom)
         self.hintView.frame = hintFrame
+        
+        self.intervalLabel.frame = CGRect(x: marginsFrame.origin.x,
+                                          y: marginsFrame.origin.y,
+                                          width: marginsFrame.width,
+                                          height: Consts.topOffset)
         
         update()
     }
@@ -128,6 +139,7 @@ extension ChartView: ChartUpdateListener
         columnsView.update(ui: ui, animated: true, duration: Configs.intervalChangeForLinesDuration)
         verticalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForValuesDuration)
         horizontalAxisView.update(ui: ui, animated: true, duration: Configs.intervalChangeForDatesDuration)
-        hintView.update(ui: ui, animated: true, duration: 0.0)
+        hintView.update(ui: ui, animated: true, duration: Configs.intervalChangeForHintDuration)
+        intervalLabel.update(ui: ui, animated: true, duration: Configs.intervalChangeForLabelDuration)
     }
 }

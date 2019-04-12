@@ -122,6 +122,7 @@ internal class MainViewController: UITableViewController, Stylizing
 
     private func makeCellWithUseCache(indexPath: IndexPath) -> UITableViewCell {
         if let cell = cellCache[indexPath] {
+            cell.actualizeFrame(width: tableView.bounds.width)
             return cell
         }
 

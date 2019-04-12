@@ -13,7 +13,7 @@ private enum Consts
     internal static let labelPadding: CGFloat = 2.0
 }
 
-internal class VerticalAxisView: UIView
+internal final class VerticalAxisView: UIView
 {
     override public var frame: CGRect {
         didSet { updateFrame() }
@@ -34,7 +34,7 @@ internal class VerticalAxisView: UIView
     private var leftValueViews: [ValueView<Left>] = []
     private var rightValueViews: [ValueView<Right>] = []
     
-    private var callFrequenceLimiter = CallFrequenceLimiter()
+    private let callFrequenceLimiter = CallFrequenceLimiter()
 
     internal init(topOffset: CGFloat) {
         self.topOffset = topOffset
@@ -226,6 +226,7 @@ private class ValueView<T>: UIView, ValueViewProtocol
         }
     }
 
+    private var labelSize: CGSize = .zero
     private let label: UILabel = UILabel(frame: .zero)
     private let shadow: UIView = UIView(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
@@ -244,7 +245,7 @@ private class ValueView<T>: UIView, ValueViewProtocol
         label.text = ValueView.abbreviationNumber(Int64(value))
         label.font = font
         label.sizeToFit()
-        let labelSize = label.frame.size
+        labelSize = label.frame.size
         shadow.frame = label.frame.inset(by: UIEdgeInsets(top: 2, left: -2, bottom: 2, right: -2))
         label.frame.origin.x = Consts.labelPadding
         label.frame.size.width = parentWidth - 2 * Consts.labelPadding
@@ -279,6 +280,12 @@ private class ValueView<T>: UIView, ValueViewProtocol
     internal func setWidth(_ width: CGFloat) {
         frame.size.width = width
         line.frame.size.width = width
+        label.frame.size.width = width
+        
+        if T.self is Right.Type {
+            let widthDiff = (shadow.frame.width - labelSize.width) * 0.5
+            shadow.frame.origin.x = width - labelSize.width - Consts.labelPadding - widthDiff
+        }
     }
 
     internal static func makeUnique(_ number: Int64) -> Int64 {

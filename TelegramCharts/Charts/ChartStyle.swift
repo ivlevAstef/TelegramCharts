@@ -9,6 +9,8 @@
 import UIKit
 
 public struct ChartStyle {
+    public let intervalTextColor: UIColor
+    
     public let hintTextColor: UIColor
     public let hintBackgroundColor: UIColor
 
@@ -23,7 +25,8 @@ public struct ChartStyle {
     public let intervalBorderColor: UIColor
     public let intervalArrowColor: UIColor
 
-    public init(hintTextColor: UIColor,
+    public init(intervalTextColor: UIColor,
+                hintTextColor: UIColor,
                 hintBackgroundColor: UIColor,
                 textColor: UIColor,
                 textShadowColor: UIColor,
@@ -34,6 +37,7 @@ public struct ChartStyle {
                 intervalBorderColor: UIColor,
                 intervalArrowColor: UIColor)
     {
+        self.intervalTextColor = intervalTextColor
         self.hintTextColor = hintTextColor
         self.hintBackgroundColor = hintBackgroundColor
         self.textColor = textColor

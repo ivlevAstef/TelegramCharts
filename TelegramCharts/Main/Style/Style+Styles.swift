@@ -41,6 +41,7 @@ extension Style
     )
 
     internal static let dayChartStyle: ChartStyle = ChartStyle(
+        intervalTextColor: .black,
         hintTextColor: UIColor(r: 109, g: 109, b: 114),
         hintBackgroundColor: UIColor(r: 244, g: 244, b: 250),
         textColor: UIColor(r: 142, g: 142, b: 147),
@@ -54,6 +55,7 @@ extension Style
     )    
 
     internal static let darkChartStyle: ChartStyle = ChartStyle(
+        intervalTextColor: .white,
         hintTextColor: .white,
         hintBackgroundColor: UIColor(r: 26, g: 40, b: 55),
         textColor: UIColor(r: 142, g: 142, b: 147),
