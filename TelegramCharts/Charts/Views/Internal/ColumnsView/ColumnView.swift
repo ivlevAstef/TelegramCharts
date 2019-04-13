@@ -28,6 +28,7 @@ internal final class ColumnView: UIView
         // without contentView clipsToBounds unwork... WTF?
         contentView.clipsToBounds = true
         contentView.layer.addSublayer(columnLayer.layer)
+        contentView.layer.addSublayer(columnLayer.selectorLayer)
     }
     
     @inline(__always)
@@ -36,8 +37,8 @@ internal final class ColumnView: UIView
     }
     
     @inline(__always)
-    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
-        columnLayer.updateSelector(to: date, animated: animated, duration: duration)
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
+        columnLayer.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
     }
     
     @inline(__always)
@@ -68,6 +69,8 @@ internal final class ColumnView: UIView
                           width: bounds.width - margins.left - margins.right,
                           height: bounds.height - margins.top - margins.bottom)
         columnLayer.layer.frame = rect
+        columnLayer.selectorLayer.frame = rect
+        
         columnLayer.minX = -margins.left - 2 // reserve
         columnLayer.maxX = bounds.width + 2 // reserve
     }

@@ -40,6 +40,7 @@ public class ChartView: UIView
     }
 
     public func setStyle(_ style: ChartStyle) {
+        columnsView.setStyle(style)
         horizontalAxisView.setStyle(style)
         verticalAxisView.setStyle(style)
         hintView.setStyle(style)
@@ -71,8 +72,6 @@ public class ChartView: UIView
         columnsView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(columnsView)
 
-        hintView.setParent(columnsView)
-
         horizontalAxisView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(horizontalAxisView)
 
@@ -90,7 +89,7 @@ public class ChartView: UIView
         }
         
         hintView.dateIsChangedHandler = { [weak self] date in
-            self?.columnsView.updateSelector(to: date, animated: true, duration: Configs.hintPositionDuration)
+            self?.columnsView.updateSelector(to: date, animated: true, duration: Configs.hintDuration)
         }
     }
     
@@ -123,8 +122,6 @@ public class ChartView: UIView
                                           y: marginsFrame.origin.y,
                                           width: marginsFrame.width,
                                           height: Consts.topOffset)
-
-        self.hintView.updateParentFrame(columnsView.bounds)
         update()
     }
 

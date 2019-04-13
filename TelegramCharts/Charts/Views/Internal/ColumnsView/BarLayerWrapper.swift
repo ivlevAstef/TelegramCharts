@@ -11,23 +11,65 @@ import UIKit
 
 internal final class BarLayerWrapper: ColumnViewLayerWrapper
 {
-    private var pathLayer: CAShapeLayer?
+    private var barColor: UIColor?
+    private var lastStep: CGFloat = 0.0
+    
+    internal init() {
+        super.init(countSelectorLayers: 1)
+    }
+    
+    internal override func setStyle(_ style: ChartStyle) {
+        super.setStyle(style)
+        barColor = style.hintBarColor
+    }
     
     internal override func fillLayer(_ layer: CAShapeLayer) {
         layer.lineWidth = 0
         layer.strokeColor = nil
-        layer.fillColor = ui?.color.cgColor
-        layer.opacity = 1.0
+        layer.fillColor = fillColor.cgColor
     }
 
     internal override func fillContext(_ context: CGContext) {
         context.setLineWidth(0)
-        context.setFillColor((ui?.color ?? UIColor.clear).cgColor)
+        context.setFillColor(fillColor.cgColor)
         context.fillPath()
     }
     
-    internal override func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+    private var fillColor: UIColor {
+        let mainColor = ui?.color ?? UIColor.clear
+        if let barColor = self.barColor, nil != selectedDate {
+            var (r1, g1, b1, a1) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))
+            var (r2, g2, b2, a2) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))
+            
+            mainColor.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+            barColor.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+            
+            let (r, g, b, a) = (r1 * a2 + r2 * (1 - a2), g1 * a2 + g2 * (1 - a2), b1 * a2 + b2 * (1 - a2), CGFloat(1.0))
+            return UIColor(red: r, green: g, blue: b, alpha: a)
+        }
         
+        return mainColor
+    }
+    
+    internal override func updateSelector(to position: ColumnUIModel.UIData) {
+        guard let ui = self.ui else {
+            return
+        }
+        
+        selectorLayers[0].fillColor = ui.color.cgColor
+        
+        let path = UIBezierPath(rect: CGRect(x: position.from.x - lastStep,
+                                             y: position.to.y,
+                                             width: 2 * lastStep,
+                                             height: position.from.y - position.to.y))
+        
+        selectorLayers[0].path = path.cgPath
+    }
+    
+    internal override func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
+        needUpdateAny = needUpdateAny || (nil == selectedDate && nil != date) || (nil != selectedDate && nil == date)
+        
+        super.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {
@@ -37,6 +79,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
     private func calculatePoints(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> [CGPoint] {
         let datas = ui.split(uiDatas: points, in: interval)
         let step = (datas[1].from.x - datas[0].from.x) / 2
+        self.lastStep = step
         
         var result = [CGPoint](repeating: CGPoint.zero, count: 4 * datas.count)
         for i in 0..<datas.count {

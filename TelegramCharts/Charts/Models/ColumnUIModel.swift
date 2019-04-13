@@ -88,6 +88,14 @@ internal struct ColumnUIModel
         return UIData(from: CGPoint(x: x, y: yOffset - CGFloat(data.from) * yScale),
                       to: CGPoint(x: x, y: yOffset - CGFloat(data.to) * yScale))
     }
+    
+    internal func dataTranslate(date: Chart.Date, to rect: CGRect) -> UIData? {
+        guard let data = find(by: date) else {
+            return nil
+        }
+        
+        return translate(data: data, to: rect)
+    }
 
     internal func translate(to rect: CGRect) -> [UIData] {
         let xScale = rect.width / CGFloat(aabb.dateInterval)

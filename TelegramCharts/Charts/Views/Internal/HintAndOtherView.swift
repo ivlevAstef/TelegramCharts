@@ -11,7 +11,6 @@ import UIKit
 private enum Consts
 {
     internal static let pointSize: CGFloat = 10
-    internal static let centerPointSize: CGFloat = 5
 
     internal static let innerHintPadding: CGFloat = 8
     internal static let hintLabelsSpace: CGFloat = 2
@@ -44,23 +43,16 @@ internal final class HintAndOtherView: UIView
     private var ui: ChartUIModel?
     
     private var hideHintBlock: DispatchWorkItem?
-
-    private let barsView: BarsView = BarsView()
-    private let lineView: LineView = LineView()
     private let hintView: HintView = HintView(font: UIFont.systemFont(ofSize: 12.0),
                                               accentFont: UIFont.systemFont(ofSize: 12.0, weight: UIFont.Weight.medium))
 
     internal init() {
         super.init(frame: .zero)
 
-        barsView.translatesAutoresizingMaskIntoConstraints = true
-        // addSubview(barsView) -> setParent
-        lineView.translatesAutoresizingMaskIntoConstraints = true
-        addSubview(lineView)
         hintView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(hintView)
 
-        hide(hintView: true, lineView: true, barsView: true, animated: false)
+        hide(animated: false)
 
         let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
         longGesture.minimumPressDuration = Configs.minimumPressDuration
@@ -71,28 +63,17 @@ internal final class HintAndOtherView: UIView
         hintView.addGestureRecognizer(tapHintGesture)
     }
 
-    internal func setParent(_ parent: UIView) {
-        barsView.layer.zPosition = 111
-        parent.addSubview(barsView)
-    }
-    internal func updateParentFrame(_ frame: CGRect) {
-        barsView.frame = frame
-    }
-
     internal func setStyle(_ style: ChartStyle) {
-        lineView.lineColor = style.focusLineColor
-        lineView.centerPointColor = style.dotColor
         hintView.backgroundColor = style.hintBackgroundColor
         hintView.arrowColor = style.hintArrowColor
         hintView.textColor = style.hintTextColor
-        barsView.barColor = style.hintBarColor
     }
 
     internal func update(ui: ChartUIModel) {
         self.ui = ui
         
         if let date = currentDate {
-            showHintAndOther(date: date, use: ui)
+            showHint(in: date, use: ui)
             hideAfter()
         }
     }
@@ -112,7 +93,7 @@ internal final class HintAndOtherView: UIView
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
         guard let ui = self.ui else {
-            hide(hintView: true, lineView: true, barsView: true)
+            hide()
             return
         }
         
@@ -124,7 +105,7 @@ internal final class HintAndOtherView: UIView
             let aroundDate = ui.translate(x: tapPosition.x, from: bounds)
             let date = ui.find(around: aroundDate, in: ui.interval)
             currentDate = date
-            showHintAndOther(date: date, use: ui)
+            showHint(in: date, use: ui)
         default:
             hideAfter()
         }
@@ -133,17 +114,11 @@ internal final class HintAndOtherView: UIView
     private func hideAfter() {
         self.hideHintBlock?.cancel()
         let hideHintBlock = DispatchWorkItem { [weak self] in
-            self?.hide(hintView: true, lineView: true, barsView: true)
+            self?.hide()
             self?.currentDate = nil
         }
         self.hideHintBlock = hideHintBlock
         DispatchQueue.main.asyncAfter(deadline: .now() + Configs.hintAutoHideDelay, execute: hideHintBlock)
-    }
-
-    private func showHintAndOther(date: Chart.Date, use ui: ChartUIModel) {
-        showHint(in: date, use: ui)
-        showLineIfNeeded(in: date, use: ui)
-        showBarsIfNeeded(in: date, use: ui)
     }
 
     private func showHint(in date: Chart.Date, use ui: ChartUIModel) {
@@ -161,7 +136,7 @@ internal final class HintAndOtherView: UIView
         let percentage = ui.percentage
         
         hintView.preRows(rows, percentage: percentage)
-        UIView.animateIf(animated, duration: Configs.hintDuration * 0.5, animations: { [weak self] in
+        UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
             self?.hintView.setDate(date)
             self?.hintView.setRows(rows, percentage: percentage)
         })
@@ -182,7 +157,8 @@ internal final class HintAndOtherView: UIView
         let date1Pos = ui.translate(date: ui.dates[0], to: bounds)
         let date2Pos = ui.translate(date: ui.dates[1], to: bounds)
         let width = max(Consts.pointSize, (date2Pos - date1Pos))
-        let rect = CGRect(x: position - width * 0.5, y: minY, width: width, height: bounds.height - minY)
+        var rect = CGRect(x: position - width * 0.5, y: minY, width: width, height: bounds.height - minY)
+        rect = rect.insetBy(dx: -6, dy: 0)
         
         let limit = bounds
         UIView.animateIf(animated, duration: Configs.hintPositionDuration, animations: { [weak self] in
@@ -191,242 +167,21 @@ internal final class HintAndOtherView: UIView
 
     }
 
-    private func showLineIfNeeded(in date: Chart.Date, use ui: ChartUIModel){
-        let position = ui.translate(date: date, to: bounds)
-        let points = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, CGFloat, Int)? in
-            if let value = column.find(by: date)?.to, column.isVisible, column.type != .bar {
-                return (column.color, column.translate(value: value, to: bounds), index)
-            }
-            return nil
-        }
-
-        if 0 == points.count {
-            hide(lineView: true)
-            return
-        }
-
-        //let animated = needAnimated(lineView)
-        self.lineView.isHidden = false
-
-        if lineView.alpha < 1.0 {
-            UIView.animateIf(true, duration: Configs.hintDuration, animations: { [weak self] in
-                self?.lineView.alpha = 1.0
-            })
-        }
-
-        let limit = bounds
-        let yStart = self.hintView.frame.minY
-        // points animation need animate by path, or, not animate...
-        self.lineView.setPoints(points)
-        self.lineView.setPosition(position, limit: bounds)
-        self.lineView.setHeightAndYStart(height: limit.height, yStart: yStart)
-    }
-
-    private func showBarsIfNeeded(in date: Chart.Date, use ui: ChartUIModel) {
-        let position = ui.translate(date: date, to: bounds)
-
-        let bars = ui.columns.filter { column in
-            return column.isVisible && column.type == .bar
-        }
-
-        if 0 == bars.count {
-            hide(barsView: true)
-            return
-        }
-
-        let minY = bars.compactMap { column -> CGFloat? in
-            if let barData = column.find(by: date).flatMap({ column.translate(data: $0, to: bounds) }) {
-                return min(barData.to.y, barData.from.y)
-            }
-            return nil
-        }.min() ?? CGFloat(0)
-
-        //let animated = needAnimated(barsView)
-        self.barsView.isHidden = false
-
-        if barsView.alpha < 1.0 {
-            UIView.animateIf(true, duration: Configs.hintDuration, animations: { [weak self] in
-                self?.barsView.alpha = 1.0
-            })
-        }
-
-        let date1Pos = ui.translate(date: ui.dates[0], to: bounds)
-        let date2Pos = ui.translate(date: ui.dates[1], to: bounds)
-        let width = (date2Pos - date1Pos)
-
-        let limit = bounds
-        UIView.animateIf(false, duration: Configs.hintPositionDuration, animations: { [weak self] in
-            self?.barsView.setBars(minY: minY, width: width)
-            self?.barsView.setPosition(position, limit: limit)
-        })
-    }
-
     private func needAnimated(_ view: UIView) -> Bool {
         return false == view.isHidden && view.alpha > 0.01
     }
 
-    private func hide(hintView: Bool = false, lineView: Bool = false, barsView: Bool = false, animated: Bool = true) {
+    private func hide(animated: Bool = true) {
         UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
             guard let `self` = self else {
                 return
             }
-            if hintView && 0.0 != self.hintView.alpha {
+            if 0.0 != self.hintView.alpha {
                 self.hintView.alpha = 0.0
             }
-            if lineView && 0.0 != self.lineView.alpha {
-                self.lineView.alpha = 0.0
-            }
-            if barsView && 0.0 != self.barsView.alpha {
-                self.barsView.alpha = 0.0
-            }
         }, completion: { [weak self] _ in
-            if hintView {
-                self?.hintView.isHidden = true
-            }
-            if lineView {
-                self?.lineView.isHidden = true
-            }
-            if barsView {
-                self?.barsView.isHidden = true
-            }
+            self?.hintView.isHidden = true
         })
-    }
-
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-private class LineView: UIView
-{
-    private class Point: UIView {
-        internal let id: Int
-        internal init(id: Int, parent: UIView, centerColor: UIColor) {
-            self.id = id
-
-            super.init(frame: CGRect(x: 0, y: 0, width: Consts.pointSize, height: Consts.pointSize))
-            layer.cornerRadius = Consts.pointSize * 0.5
-
-            let centerView = UIView(frame: CGRect(x: 0, y: 0, width: Consts.centerPointSize, height: Consts.centerPointSize))
-            centerView.center = CGPoint(x: Consts.pointSize * 0.5, y: Consts.pointSize * 0.5)
-            centerView.backgroundColor = centerColor
-            centerView.layer.cornerRadius = Consts.centerPointSize * 0.5
-            centerView.translatesAutoresizingMaskIntoConstraints = true
-            addSubview(centerView)
-
-            translatesAutoresizingMaskIntoConstraints = true
-            parent.addSubview(self)
-        }
-
-        internal required init?(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-    }
-
-    internal var lineColor: UIColor = .black {
-        didSet {
-            lineView.backgroundColor = lineColor
-        }
-    }
-    internal var centerPointColor: UIColor = .white
-
-    private let lineView: UIView = UIView(frame: .zero)
-    private var pointViews: [Point] = []
-
-    internal init() {
-        super.init(frame: CGRect(x: 0, y: 0, width: Consts.pointSize, height: 0))
-
-        lineView.frame.origin.x = Consts.pointSize * 0.5
-        lineView.frame.size.width = 1
-        lineView.translatesAutoresizingMaskIntoConstraints = true
-        addSubview(lineView)
-    }
-
-    internal func setPoints(_ points: [(color: UIColor, position: CGFloat, id: Int)]) {
-        let oldPointViews = pointViews
-        pointViews.removeAll()
-        for (color, position, id) in points {
-            let foundPointView = oldPointViews.first(where: { $0.id == id })
-            let pointView = foundPointView ?? Point(id: id, parent: self, centerColor: centerPointColor)
-
-            pointView.center = CGPoint(x: frame.width * 0.5, y: position)
-            pointView.backgroundColor = color
-
-            pointViews.append(pointView)
-        }
-
-        for view in oldPointViews {
-            if !pointViews.contains(where: { $0.id == view.id }) {
-                view.removeFromSuperview()
-            }
-        }
-    }
-
-    internal func setHeightAndYStart(height: CGFloat, yStart: CGFloat) {
-        var minY: CGFloat = yStart
-        for view in pointViews {
-            minY = min(minY, view.frame.minY)
-        }
-
-        frame.size.height = height
-        lineView.frame.origin.y = minY
-        lineView.frame.size.height = height - minY
-    }
-
-    internal func setPosition(_ position: CGFloat, limit: CGRect) {
-        //let position = max(limit.minX, min(position, limit.maxX - 1))
-        center = CGPoint(x: position, y: frame.height / 2.0)
-    }
-
-    internal required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-private class BarsView: UIView
-{
-    internal var barColor: UIColor = .black {
-        didSet {
-            leftView.backgroundColor = barColor
-            rightView.backgroundColor = barColor
-        }
-    }
-    private var leftView: UIView = UIView(frame: .zero)
-    private var rightView: UIView = UIView(frame: .zero)
-    private var width: CGFloat = 0.0
-    private var minY: CGFloat = 0.0
-
-    internal init() {
-        super.init(frame: .zero)
-
-        leftView.translatesAutoresizingMaskIntoConstraints = true
-        addSubview(leftView)
-        rightView.translatesAutoresizingMaskIntoConstraints = true
-        addSubview(rightView)
-    }
-
-    internal func setBars(minY: CGFloat, width: CGFloat) {
-        self.width = width
-        self.minY = minY
-    }
-
-    internal func setPosition(_ position: CGFloat, limit: CGRect) {
-        var position = position
-        //var position = max(limit.minX, min(position, limit.maxX))
-        position += (frame.width - limit.width) * 0.5
-
-        let leftWidth = position - width * 0.5 - 0.1
-        let leftRect = CGRect(x: 0, y: 0, width: leftWidth, height: frame.height)
-        if !leftView.frame.equalTo(leftRect) {
-            leftView.frame = leftRect
-        }
-
-        let rightX = position + width * 0.5 + 0.1
-        let rightWidth = frame.width - rightX
-        let rightRect = CGRect(x: rightX, y: 0, width: rightWidth, height: frame.height)
-        if !rightView.frame.equalTo(rightRect) {
-            rightView.frame = rightRect
-        }
     }
 
     internal required init?(coder aDecoder: NSCoder) {

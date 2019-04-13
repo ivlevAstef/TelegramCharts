@@ -13,10 +13,15 @@ internal class ColumnViewLayerWrapper
     internal let layer: CALayer = CALayer()
     internal var minX: CGFloat = 0
     internal var maxX: CGFloat = 0
-
+    
     internal private(set) var selectedDate: Chart.Date?
     internal private(set) var ui: ColumnUIModel?
+    
+    internal let selectorLayer: CALayer = CALayer()
+    internal let selectorLayers: [CAShapeLayer]
 
+    private var fromSelectorPointData: ColumnUIModel.UIData?
+    private var toSelectorPointData: ColumnUIModel.UIData?
     private var fromPointsData: [ColumnUIModel.UIData] = []
     private var toPointsData: [ColumnUIModel.UIData] = []
     private var fromInterval: ChartViewModel.Interval?
@@ -24,18 +29,26 @@ internal class ColumnViewLayerWrapper
     private var oldTime: CFTimeInterval = CACurrentMediaTime()
     private var oldDuration: TimeInterval = 0.0
 
-    private var pathLayer: CAShapeLayer
+    private let pathLayer: CAShapeLayer
     private var oldIsVisible: Bool = true
 
     private var saveOldPath: CGPath?
     private var saveNewPath: CGPath?
     
-    internal init() {
+    internal init(countSelectorLayers: Int) {
         pathLayer = CAShapeLayer()
         layer.addSublayer(pathLayer)
+        
+        selectorLayers = (0..<countSelectorLayers).map { _ in CAShapeLayer() }
+        selectorLayers.forEach { selectorLayer.addSublayer($0) }
     }
     
     internal func setStyle(_ style: ChartStyle) {
+        for layer in selectorLayers {
+            layer.strokeColor = nil
+            layer.fillColor = nil
+            layer.lineWidth = 0
+        }
     }
 
     internal func fillLayer(_ layer: CAShapeLayer) {
@@ -51,25 +64,6 @@ internal class ColumnViewLayerWrapper
         fatalError("override")
     }
     
-    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
-        fatalError("override")
-    }
-
-    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
-        self.ui = ui
-        let interval = updateInterval(ui: ui, t: t)
-        updatePoints(ui: ui, t: t, interval: interval, animated: animated, duration: duration)
-        
-        if let date = selectedDate {
-            updateSelector(to: date, animated: false, duration: 0)
-        }
-    }
-
-    internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
-        confirmOpacity(ui: ui, animated: animated, duration: duration)
-        confirmPoints(ui: ui, animated: animated, duration: duration)
-    }
-
     internal func drawCurrentState(to context: CGContext) {
         if let path = saveNewPath, oldIsVisible {
             context.saveGState()
@@ -77,6 +71,71 @@ internal class ColumnViewLayerWrapper
             fillContext(context)
             context.restoreGState()
         }
+        
+        if nil != selectedDate {
+            context.saveGState()
+            drawSelectorContext(to: context)
+            context.restoreGState()
+        }
+    }
+    
+    internal func updateSelector(to position: ColumnUIModel.UIData) {
+        fatalError("override")
+    }
+    
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
+        if let ui = self.ui, let date = date, let position = ui.dataTranslate(date: date, to: layer.bounds) {
+            fromSelectorPointData = nil
+            toSelectorPointData = position
+            updateSelector(to: position)
+        }
+        
+        if (nil == selectedDate && nil != date) || (nil != selectedDate && nil == date) {
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(animated ? duration : 0.0)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
+
+            selectorLayer.opacity = nil != date ? 1.0 : 0.0
+            CATransaction.commit()
+        }
+
+        self.selectedDate = date
+    }
+
+    internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
+        self.ui = ui
+        let interval = updateInterval(ui: ui, t: t)
+        updatePoints(ui: ui, t: t, interval: interval, animated: animated, duration: duration)
+        updateSelector(ui: ui, t: t)
+    }
+
+    internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        confirmOpacity(ui: ui, animated: animated, duration: duration)
+        confirmPoints(ui: ui, animated: animated, duration: duration)
+        confirmSelector(ui: ui, animated: animated, duration: duration)
+    }
+    
+    private func updateSelector(ui: ColumnUIModel, t: CGFloat) {
+        guard let date = selectedDate else {
+            return
+        }
+        
+        guard let newPointData = ui.dataTranslate(date: date, to: layer.bounds) else {
+            assert(false)
+            return
+        }
+        
+        if let fromPoint = fromSelectorPointData, let toPoint = toSelectorPointData, t < 1 {
+            let interpolatePoint = interpolate(from: fromPoint, to: toPoint, t: t)
+            fromSelectorPointData = interpolatePoint
+        } else if let toPoint = toSelectorPointData {
+            fromSelectorPointData = toPoint
+        } else {
+            fromSelectorPointData = nil
+        }
+        toSelectorPointData = newPointData
+        
+        selectorLayers.forEach { $0.removeAllAnimations() }
     }
 
     private func updateInterval(ui: ColumnUIModel, t: CGFloat) -> ChartViewModel.Interval {
@@ -120,11 +179,38 @@ internal class ColumnViewLayerWrapper
         toPointsData = newPointsData
         saveNewPath = makePath(ui: ui, points: newPointsData, interval: interval).cgPath
 
-        fillLayer(pathLayer)
         pathLayer.removeAllAnimations()
+    }
+    
+    private func confirmSelector(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        guard let toPositionData = toSelectorPointData else {
+            return
+        }
+        
+        
+        for layer in selectorLayers {
+            var oldPath: CGPath? = nil
+            if let fromPositionData = fromSelectorPointData {
+                updateSelector(to: fromPositionData) // update path
+                oldPath = layer.path
+            }
+            
+            updateSelector(to: toPositionData) // update path
+            
+            if animated && nil != oldPath && nil != layer.path {
+                let animation = CABasicAnimation(keyPath: "path")
+                animation.duration = duration
+                animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+                animation.fromValue = oldPath
+                animation.toValue = layer.path
+                animation.isRemovedOnCompletion = true
+                layer.add(animation, forKey: "path")
+            }
+        }
     }
 
     private func confirmPoints(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
+        fillLayer(pathLayer)
         pathLayer.path = saveNewPath
 
         if animated && nil != saveOldPath && nil != saveNewPath {
@@ -150,6 +236,28 @@ internal class ColumnViewLayerWrapper
         oldIsVisible = ui.isVisible
     }
     
+    private func drawSelectorContext(to context: CGContext) {
+        for layer in selectorLayers {
+            guard let path = layer.path else {
+                continue
+            }
+            context.saveGState()
+            context.addPath(path)
+            
+            context.setFillColor(layer.fillColor ?? UIColor.clear.cgColor)
+            context.setStrokeColor(layer.strokeColor ?? UIColor.clear.cgColor)
+            context.setLineWidth(layer.lineWidth)
+            if nil != layer.fillColor {
+                context.fillPath()
+            }
+            if nil != layer.strokeColor {
+                context.strokePath()
+            }
+            
+            context.restoreGState()
+        }
+    }
+    
     private func calculateInterval(for uis: [ColumnUIModel]) -> ChartViewModel.Interval {
         var minDate = Chart.Date.max
         var maxDate = Chart.Date.min
@@ -167,6 +275,15 @@ internal class ColumnViewLayerWrapper
         return ChartViewModel.Interval(from: min(from.from, to.from), to: max(from.to, to.to))
     }
 
+    private func interpolate(from: ColumnUIModel.UIData, to: ColumnUIModel.UIData, t: CGFloat) -> ColumnUIModel.UIData {
+        let vfrom = CGPoint(x: to.from.x * t + from.from.x * (1.0 - t),
+                            y: to.from.y * t + from.from.y * (1.0 - t))
+        let vto   = CGPoint(x: to.to.x * t + from.to.x * (1.0 - t),
+                            y: to.to.y * t + from.to.y * (1.0 - t))
+        
+        return ColumnUIModel.UIData(from: vfrom,to: vto)
+    }
+    
     private func interpolate(from: ChartViewModel.Interval, to: ChartViewModel.Interval, t: CGFloat) ->  ChartViewModel.Interval
     {
         // :D

@@ -18,6 +18,7 @@ internal final class ColumnsView: UIView
         }
     }
 
+    private var ui: ChartUIModel?
     private var columnsViews: [ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
     private var margins: UIEdgeInsets = .zero
@@ -47,9 +48,17 @@ internal final class ColumnsView: UIView
     }
     
     internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        var needUpdateAny: Bool = false
         for columnView in columnsViews {
-            columnView.updateSelector(to: date, animated: animated, duration: duration)
+            columnView.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
         }
+        
+        if let ui = self.ui, needUpdateAny {
+            // in indeally need update part - only who is return needUpdateAny :)
+            recalculate(ui: ui, animated: animated, duration: duration)
+        }
+        
+        cacheUpdate(animated: animated, duration: duration)
     }
 
     internal func premake(margins: UIEdgeInsets, types: [ColumnViewModel.ColumnType]) {
@@ -63,6 +72,7 @@ internal final class ColumnsView: UIView
     }
 
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        self.ui = ui
         assert(columnsViews.count == ui.columns.count)
         
         callFrequenceLimiter.update { [weak self] in

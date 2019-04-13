@@ -18,7 +18,7 @@ internal enum Configs
     internal static let intervalChangeForLabelDuration: Double = 0.2
 
     internal static let hintDuration: Double = 0.2
-    internal static let hintPositionDuration: Double = 0.2
+    internal static let hintPositionDuration: Double = 0.15
     
     internal static let hintAutoHideDelay: Double = 5.0
     
