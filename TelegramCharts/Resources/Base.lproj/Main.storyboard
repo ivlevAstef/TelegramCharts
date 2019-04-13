@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="tsu-BP-aNn">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" colorMatched="YES" initialViewController="tsu-BP-aNn">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -12,7 +12,7 @@
         <!--Main View Controller-->
         <scene sceneID="vLL-H4-xGF">
             <objects>
-                <tableViewController id="MI2-34-3T1" customClass="MainViewController" customModule="TelegramCharts" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController modalPresentationStyle="overFullScreen" id="MI2-34-3T1" customClass="MainViewController" customModule="TelegramCharts" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="grouped" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="30" sectionFooterHeight="1" id="Qdq-Lb-jth">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -61,7 +61,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2ja-GA-duU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="120.8" y="-99.400299850074973"/>
+            <point key="canvasLocation" x="225" y="-110"/>
         </scene>
         <!--Main Navigation Controller-->
         <scene sceneID="XaX-gR-Eod">
@@ -78,7 +78,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Lqk-Aj-L8e" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-817" y="-99"/>
+            <point key="canvasLocation" x="-510.625" y="-110.05499999999999"/>
         </scene>
     </scenes>
 </document>

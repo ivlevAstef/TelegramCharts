@@ -42,7 +42,7 @@ internal final class VerticalAxisView: UIView
 
         clipsToBounds = true
 
-        bottomLine.translatesAutoresizingMaskIntoConstraints = false
+        bottomLine.translatesAutoresizingMaskIntoConstraints = true
         addSubview(bottomLine)
     }
 
@@ -143,7 +143,7 @@ internal final class VerticalAxisView: UIView
                 view.setStyle(color: color, lineColor: lineColor, shadowColor: shadowColor)
                 view.position = ui.translate(value: value, to: rect)
 
-                view.translatesAutoresizingMaskIntoConstraints = false
+                view.translatesAutoresizingMaskIntoConstraints = true
                 addSubview(view)
                 newViews.append(view)
             }
@@ -235,11 +235,11 @@ private class ValueView<T>: UIView, ValueViewProtocol
         super.init(frame: CGRect(x: 0, y: 0, width: parentWidth, height: 0))
         updateValue(value)
         
-        shadow.translatesAutoresizingMaskIntoConstraints = false
+        shadow.translatesAutoresizingMaskIntoConstraints = true
         addSubview(shadow)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.translatesAutoresizingMaskIntoConstraints = true
         addSubview(label)
-        line.translatesAutoresizingMaskIntoConstraints = false
+        line.translatesAutoresizingMaskIntoConstraints = true
         addSubview(line)
         
         label.text = ValueView.abbreviationNumber(Int64(value))

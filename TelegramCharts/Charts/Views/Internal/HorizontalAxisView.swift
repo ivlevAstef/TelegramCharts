@@ -78,7 +78,7 @@ internal final class HorizontalAxisView: UIView
                 prevLabels.remove(at: index)
             } else {
                 label = DateLabel(date: date, font: font, color: color)
-                label.translatesAutoresizingMaskIntoConstraints = false
+                label.translatesAutoresizingMaskIntoConstraints = true
                 addSubview(label)
                 newLabels.append(label)
                 
@@ -127,7 +127,7 @@ internal final class HorizontalAxisView: UIView
     }
 
     private func calculateNearPowerTwoAndReturnNumber(ui: ChartUIModel) -> Int {
-        let div: Int = Int(calculateMaxFullIntervalCount(ui: ui) / minScreenCount)
+        let div: Int = Int(calculateMaxFullIntervalCount(ui: ui) / max(1, minScreenCount))
         // optimization - no!
         var iter: Int = 1
         while iter * 2 < div {

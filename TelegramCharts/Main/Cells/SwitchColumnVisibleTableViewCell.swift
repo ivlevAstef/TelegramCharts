@@ -59,16 +59,15 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
         backgroundColor = style.mainColor
     }
     
-    internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping () -> Bool) {
+    internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping (_ long: Bool) -> Void) {
         let columnToggler = ColumnToggler(name: name, color: color)
         
         columnToggler.isVisible = isVisible
-        columnToggler.tapHandler = { [weak columnToggler] in
-            if clickHandler() {
-                UIView.animate(withDuration: 0.1, animations: {
-                    columnToggler?.isVisible.toggle()
-                })
-            }
+        columnToggler.tapHandler = {
+            clickHandler(false)
+        }
+        columnToggler.longHandler = {
+            clickHandler(true)
         }
         
         SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: bounds.width)
@@ -77,6 +76,13 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
         togglers.append(columnToggler)
 
         self.frame.size.height = columnToggler.frame.maxY + Consts.margins.bottom
+    }
+    
+    internal func setIsVisibleOnTogglers(_ isVisibles: [Bool]) {
+        assert(isVisibles.count == togglers.count)
+        for (toggler, isVisible) in zip(togglers, isVisibles) {
+            toggler.isVisible = isVisible
+        }
     }
 
     private func updateFrame() {
@@ -108,6 +114,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
 private class ColumnToggler: UIView
 {
     internal var tapHandler: (() -> Void)?
+    internal var longHandler: (() -> Void)?
     internal var isVisible: Bool = false {
         didSet {
             changeUIVisible()
@@ -132,9 +139,9 @@ private class ColumnToggler: UIView
         checkmark.color = elementColor
         checkmark.backgroundColor = .clear
         
-        translatesAutoresizingMaskIntoConstraints = false
-        checkmark.translatesAutoresizingMaskIntoConstraints = false
-        label.translatesAutoresizingMaskIntoConstraints = false
+        translatesAutoresizingMaskIntoConstraints = true
+        checkmark.translatesAutoresizingMaskIntoConstraints = true
+        label.translatesAutoresizingMaskIntoConstraints = true
         
         addSubview(checkmark)
         addSubview(label)
@@ -148,15 +155,24 @@ private class ColumnToggler: UIView
         
         layer.borderColor = color.cgColor
         
-        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapOnSelf)))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnSelf))
+        let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(longOnSelf))
+        tapGesture.delegate = self
+        longGesture.delegate = self
+        tapGesture.require(toFail: longGesture)
+        
+        addGestureRecognizer(tapGesture)
+        addGestureRecognizer(longGesture)
     }
     
     private func changeUIVisible() {
         if isVisible {
+            label.frame.origin.x = checkmark.frame.maxX + Consts.spacing
             label.textColor = elementColor
             backgroundColor = color
             checkmark.isHidden = false
         } else {
+            label.frame.origin.x = 0.5 * (bounds.width - label.frame.width)
             label.textColor = color
             backgroundColor = .clear
             checkmark.isHidden = true
@@ -171,6 +187,10 @@ private class ColumnToggler: UIView
         tapHandler?()
     }
     
+    @objc private func longOnSelf() {
+        longHandler?()
+    }
+    
     private static func makeAndResizeLabel(name: String) -> UILabel {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: Consts.contentHeight))
         label.text = name
@@ -181,6 +201,14 @@ private class ColumnToggler: UIView
     
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension ColumnToggler: UIGestureRecognizerDelegate
+{
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    {
+        return true
     }
 }
 

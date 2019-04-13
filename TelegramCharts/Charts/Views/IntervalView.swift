@@ -19,6 +19,9 @@ private enum Consts
 
     internal static let verticalPadding: CGFloat = 2.0
     internal static let padding: CGFloat = 0.0
+    
+    internal static let arrowSize: CGSize = CGSize(width: sliderWidth, height: 13)
+    internal static let arrowOffset: CGSize = CGSize(width: 4, height: 1)
 }
 
 public class IntervalView: UIView
@@ -78,10 +81,10 @@ public class IntervalView: UIView
         gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
         self.addGestureRecognizer(gestureRecognizer)
 
-        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        columnsView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(columnsView)
 
-        intervalDrawableView.translatesAutoresizingMaskIntoConstraints = false
+        intervalDrawableView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(intervalDrawableView)
     }
     
@@ -213,8 +216,8 @@ private class IntervalDrawableView: UIView
     private let rightSliderView: UIView = UIView(frame: .zero)
     private let topBorderView: UIView = UIView(frame: .zero)
     private let bottomBorderView: UIView = UIView(frame: .zero)
-    private let leftArrow: UIImageView = UIImageView(image: makeArrow(reverse: false))
-    private let rightArrow: UIImageView = UIImageView(image: makeArrow(reverse: true))
+    private let leftArrow: UIImageView = ArrowView(reverse: false, size: Consts.arrowSize, offset: Consts.arrowOffset)
+    private let rightArrow: UIImageView = ArrowView(reverse: true, size: Consts.arrowSize, offset: Consts.arrowOffset)
 
     internal init() {
         super.init(frame: .zero)
@@ -281,56 +284,22 @@ private class IntervalDrawableView: UIView
     }
 
     private func configureViews() {
-        unvisibleLeftView.translatesAutoresizingMaskIntoConstraints = false
+        unvisibleLeftView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(unvisibleLeftView)
-        unvisibleRightView.translatesAutoresizingMaskIntoConstraints = false
+        unvisibleRightView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(unvisibleRightView)
-        leftSliderView.translatesAutoresizingMaskIntoConstraints = false
+        leftSliderView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(leftSliderView)
-        rightSliderView.translatesAutoresizingMaskIntoConstraints = false
+        rightSliderView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(rightSliderView)
-        topBorderView.translatesAutoresizingMaskIntoConstraints = false
+        topBorderView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(topBorderView)
-        bottomBorderView.translatesAutoresizingMaskIntoConstraints = false
+        bottomBorderView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(bottomBorderView)
-        leftArrow.translatesAutoresizingMaskIntoConstraints = false
+        leftArrow.translatesAutoresizingMaskIntoConstraints = true
         addSubview(leftArrow)
-        rightArrow.translatesAutoresizingMaskIntoConstraints = false
+        rightArrow.translatesAutoresizingMaskIntoConstraints = true
         addSubview(rightArrow)
-    }
-    
-    private static func makeArrow(reverse: Bool) -> UIImage? {
-        let centerArrowX: CGFloat = 4
-        let edgeArrowX: CGFloat = Consts.sliderWidth - 4
-        let arrowHeight: CGFloat = 11
-
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: Consts.sliderWidth, height: arrowHeight + 2), false, UIScreen.main.scale)
-
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-
-        context.setStrokeColor(UIColor.black.cgColor)
-        context.setLineWidth(2.0)
-        context.setLineCap(.round)
-        context.setLineJoin(.round)
-
-        context.beginPath()
-        if reverse {
-            context.move(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 1))
-            context.addLine(to: CGPoint(x: Consts.sliderWidth - centerArrowX, y: 1 + arrowHeight * 0.5))
-            context.addLine(to: CGPoint(x: Consts.sliderWidth - edgeArrowX, y: 1 + arrowHeight))
-        } else {
-            context.move(to: CGPoint(x: edgeArrowX, y: 1))
-            context.addLine(to: CGPoint(x: centerArrowX, y: 1 + arrowHeight * 0.5))
-            context.addLine(to: CGPoint(x: edgeArrowX, y: 1 + arrowHeight))
-        }
-        context.strokePath()
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return image?.withRenderingMode(.alwaysTemplate)
     }
 
     required init?(coder aDecoder: NSCoder) {

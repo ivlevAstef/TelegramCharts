@@ -19,16 +19,23 @@ private enum Consts
 
     internal static let hintYOffset: CGFloat = 4
     internal static let hintCornerRadius: CGFloat = 5
+    
+    internal static let arrowSize: CGSize = CGSize(width: 8, height: 12)
+    internal static let arrowOffset: CGSize = CGSize(width: 2, height: 2)
 }
 
 internal final class HintAndOtherView: UIView
 {
+    internal var hintClickHandler: ((Chart.Date) -> Void)?
+    
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
     private var ui: ChartUIModel?
-    private var lastTouchPosition: CGPoint? = nil
+    private var lastDate: Chart.Date? = nil
+    
+    private var hideHintBlock: DispatchWorkItem?
 
     private let barsView: BarsView = BarsView()
     private let lineView: LineView = LineView()
@@ -38,21 +45,26 @@ internal final class HintAndOtherView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        barsView.translatesAutoresizingMaskIntoConstraints = false
+        barsView.translatesAutoresizingMaskIntoConstraints = true
         // addSubview(barsView) -> setParent
-        lineView.translatesAutoresizingMaskIntoConstraints = false
+        lineView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(lineView)
-        hintView.translatesAutoresizingMaskIntoConstraints = false
+        hintView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(hintView)
 
         hide(hintView: true, lineView: true, barsView: true, animated: false)
 
-        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
-        gestureRecognizer.minimumPressDuration = Configs.minimumPressDuration
-        self.addGestureRecognizer(gestureRecognizer)
+        let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(tapGesture(_:)))
+        longGesture.minimumPressDuration = Configs.minimumPressDuration
+        let tapHintGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnHintGesture(_:)))
+        longGesture.require(toFail: tapHintGesture)
+        
+        self.addGestureRecognizer(longGesture)
+        hintView.addGestureRecognizer(tapHintGesture)
     }
 
     internal func setParent(_ parent: UIView) {
+        barsView.layer.zPosition = 111
         parent.addSubview(barsView)
     }
     internal func updateParentFrame(_ frame: CGRect) {
@@ -63,6 +75,7 @@ internal final class HintAndOtherView: UIView
         lineView.lineColor = style.focusLineColor
         lineView.centerPointColor = style.dotColor
         hintView.backgroundColor = style.hintBackgroundColor
+        hintView.arrowColor = style.hintArrowColor
         hintView.textColor = style.hintTextColor
         barsView.barColor = style.hintBarColor
     }
@@ -70,8 +83,9 @@ internal final class HintAndOtherView: UIView
     internal func update(ui: ChartUIModel) {
         self.ui = ui
         
-        if let touchPosition = lastTouchPosition {
-            touchProcessor(tapPosition: touchPosition, state: .changed)
+        if let date = lastDate {
+            showHintAndOther(date: date, use: ui)
+            hideAfter()
         }
     }
 
@@ -79,48 +93,68 @@ internal final class HintAndOtherView: UIView
     private func tapGesture(_ recognizer: UIGestureRecognizer) {
         touchProcessor(tapPosition: recognizer.location(in: self), state: recognizer.state)
     }
+    
+    @objc
+    private func tapOnHintGesture(_ recognizer: UIGestureRecognizer) {
+        if hintView.isHidden || hintView.alpha < 0.1 {
+            return
+        }
+        hintClickHandler?(hintView.date)
+    }
 
     private func touchProcessor(tapPosition: CGPoint, state: UIGestureRecognizer.State) {
         guard let ui = self.ui else {
             hide(hintView: true, lineView: true, barsView: true)
             return
         }
-
+        
         switch state {
         case .began:
             fallthrough
         case .changed:
-            lastTouchPosition = tapPosition
-            let date = ui.translate(x: tapPosition.x, from: bounds)
-            showHintAndOther(aroundDate: date, use: ui)
+            self.hideHintBlock?.cancel()
+            let aroundDate = ui.translate(x: tapPosition.x, from: bounds)
+            let date = ui.find(around: aroundDate, in: ui.interval)
+            lastDate = date
+            showHintAndOther(date: date, use: ui)
         default:
-            lastTouchPosition = nil
-            hide(hintView: true, lineView: true, barsView: true)
+            hideAfter()
         }
     }
+    
+    private func hideAfter() {
+        self.hideHintBlock?.cancel()
+        let hideHintBlock = DispatchWorkItem { [weak self] in
+            self?.hide(hintView: true, lineView: true, barsView: true)
+            self?.lastDate = nil
+        }
+        self.hideHintBlock = hideHintBlock
+        DispatchQueue.main.asyncAfter(deadline: .now() + Configs.hintAutoHideDelay, execute: hideHintBlock)
+    }
 
-    private func showHintAndOther(aroundDate: Chart.Date, use ui: ChartUIModel) {
-        let nearDate = ui.find(around: aroundDate, in: ui.interval)
-
-        let animated = showHint(in: nearDate, use: ui)
-        let lineRect = showLineIfNeeded(in: nearDate, use: ui)
-        let barsRect = showBarsIfNeeded(in: nearDate, use: ui)
-        updateHintPosition(in: nearDate, use: ui, animated: animated, aroundRects: [lineRect, barsRect])
+    private func showHintAndOther(date: Chart.Date, use ui: ChartUIModel) {
+        let animated = showHint(in: date, use: ui)
+        let lineRect = showLineIfNeeded(in: date, use: ui)
+        let barsRect = showBarsIfNeeded(in: date, use: ui)
+        updateHintPosition(in: date, use: ui, animated: animated, aroundRects: [lineRect, barsRect])
     }
 
     private func showHint(in date: Chart.Date, use ui: ChartUIModel) -> Bool {
-        let rows = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, ColumnViewModel.Value, Int)? in
+        let rows = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, String, ColumnViewModel.Value, Int)? in
             if let value = column.find(by: date)?.original, column.isVisible {
-                return (column.color, value, index)
+                return (column.color, column.name, value, index)
             }
             return nil
         }
 
         let animated = needAnimated(hintView)
         hintView.isHidden = false
+        let percentage = ui.percentage
+        
+        hintView.preRows(rows, percentage: percentage)
         UIView.animateIf(animated, duration: Configs.hintDuration * 0.5, animations: { [weak self] in
             self?.hintView.setDate(date)
-            self?.hintView.setRows(rows)
+            self?.hintView.setRows(rows, percentage: percentage)
         })
 
         if hintView.alpha < 1.0 {
@@ -155,7 +189,7 @@ internal final class HintAndOtherView: UIView
             return .zero
         }
 
-        let animated = needAnimated(lineView)
+        //let animated = needAnimated(lineView)
         self.lineView.isHidden = false
 
         if lineView.alpha < 1.0 {
@@ -193,7 +227,7 @@ internal final class HintAndOtherView: UIView
             return nil
         }.min() ?? CGFloat(0)
 
-        let animated = needAnimated(barsView)
+        //let animated = needAnimated(barsView)
         self.barsView.isHidden = false
 
         if barsView.alpha < 1.0 {
@@ -265,10 +299,10 @@ private class LineView: UIView
             centerView.center = CGPoint(x: Consts.pointSize * 0.5, y: Consts.pointSize * 0.5)
             centerView.backgroundColor = centerColor
             centerView.layer.cornerRadius = Consts.centerPointSize * 0.5
-            centerView.translatesAutoresizingMaskIntoConstraints = false
+            centerView.translatesAutoresizingMaskIntoConstraints = true
             addSubview(centerView)
 
-            translatesAutoresizingMaskIntoConstraints = false
+            translatesAutoresizingMaskIntoConstraints = true
             parent.addSubview(self)
         }
 
@@ -292,7 +326,7 @@ private class LineView: UIView
 
         lineView.frame.origin.x = Consts.pointSize * 0.5
         lineView.frame.size.width = 1
-        lineView.translatesAutoresizingMaskIntoConstraints = false
+        lineView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(lineView)
     }
 
@@ -328,7 +362,7 @@ private class LineView: UIView
     }
 
     internal func setPosition(_ position: CGFloat, limit: CGRect) {
-        let position = max(limit.minX, min(position, limit.maxX - 1))
+        //let position = max(limit.minX, min(position, limit.maxX - 1))
         center = CGPoint(x: position, y: frame.height / 2.0)
     }
 
@@ -369,9 +403,9 @@ private class BarsView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        leftView.translatesAutoresizingMaskIntoConstraints = false
+        leftView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(leftView)
-        rightView.translatesAutoresizingMaskIntoConstraints = false
+        rightView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(rightView)
     }
 
@@ -381,7 +415,8 @@ private class BarsView: UIView
     }
 
     internal func setPosition(_ position: CGFloat, limit: CGRect) {
-        var position = max(limit.minX, min(position, limit.maxX))
+        var position = position
+        //var position = max(limit.minX, min(position, limit.maxX))
         position += (frame.width - limit.width) * 0.5
 
         let leftWidth = position - width * 0.5 - 0.1
@@ -407,18 +442,68 @@ private class BarsView: UIView
     }
 }
 
+extension UILabel {
+    func maxSizeToFit() {
+        let size = self.frame.size
+        sizeToFit()
+        if size.width != self.frame.width {
+            self.frame.size.width = max(size.width, self.frame.width)
+        }
+        if size.height != self.frame.height {
+            self.frame.size.height = max(size.height, self.frame.height)
+        }
+    }
+}
+
 private class HintView: UIView
 {
-    private class Label: UILabel {
+    private class Row: UIView {
         internal let id: Int
+        
+        internal let percentageLabel: UILabel?
+        internal let leftLabel: UILabel = UILabel(frame: .zero)
+        internal let rightLabel: UILabel = UILabel(frame: .zero)
 
-        internal init(id: Int, font: UIFont, parent: UIView) {
+        internal init(id: Int, accentFont: UIFont, font: UIFont, percentage: Bool, parent: UIView) {
             self.id = id
+            self.percentageLabel = percentage ? UILabel(frame: .zero) : nil
+            
             super.init(frame: .zero)
-            self.font = font
+            
+            leftLabel.font = font
+            rightLabel.font = accentFont
+            rightLabel.textAlignment = .right
+            percentageLabel?.font = accentFont
+            
+            leftLabel.translatesAutoresizingMaskIntoConstraints = true
+            addSubview(leftLabel)
+            rightLabel.translatesAutoresizingMaskIntoConstraints = true
+            addSubview(rightLabel)
+            percentageLabel?.translatesAutoresizingMaskIntoConstraints = true
+            if let percentageLabel = percentageLabel {
+                addSubview(percentageLabel)
+            }
 
-            translatesAutoresizingMaskIntoConstraints = false
+            translatesAutoresizingMaskIntoConstraints = true
             parent.addSubview(self)
+        }
+        
+        internal func minWidth() -> CGFloat {
+            let percentageAddWidth = percentageLabel.flatMap { $0.frame.width + 2 } ?? CGFloat(0)
+            return leftLabel.frame.width + Consts.hintHorizontalSpace + rightLabel.frame.width + percentageAddWidth
+        }
+        
+        internal func height() -> CGFloat {
+            let percentageHeight = percentageLabel.flatMap { $0.frame.height } ?? CGFloat(0)
+            return max(percentageHeight, max(leftLabel.frame.height, rightLabel.frame.height))
+        }
+        
+        internal func setWidth(_ width: CGFloat) {
+            self.frame.size = CGSize(width: width, height: height())
+            percentageLabel?.frame.origin = .zero
+            
+            leftLabel.frame.origin.x = (percentageLabel.flatMap { $0.frame.maxX + 2 } ?? 0)
+            rightLabel.frame.origin.x = width - rightLabel.frame.width
         }
 
         internal required init?(coder aDecoder: NSCoder) {
@@ -428,17 +513,28 @@ private class HintView: UIView
 
     internal static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy MMM d"
+        dateFormatter.dateFormat = "EEE, dd MMM yyyy"
         return dateFormatter
     }()
+    
+    internal var arrowColor: UIColor = .white {
+        didSet {
+            arrowView.tintColor = arrowColor
+        }
+    }
+    
+    internal private(set) var date: Chart.Date = 0
 
     internal var textColor: UIColor = .black
     private let font: UIFont
     private let accentFont: UIFont
 
     private let dateLabel: UILabel = UILabel(frame: .zero)
-    private var valueLabels: [Label] = []
+    private let arrowView: UIImageView = ArrowView(reverse: true, size: Consts.arrowSize, offset: Consts.arrowOffset)
+    private var rowsView: [Row] = []
     private var lastIntersectTime: Date = Date()
+    
+    private var maxTopX: CGFloat = 0.0
 
     internal init(font: UIFont, accentFont: UIFont) {
         self.font = font
@@ -448,56 +544,95 @@ private class HintView: UIView
         layer.cornerRadius = Consts.hintCornerRadius
         frame.origin.y = Consts.hintYOffset
 
-        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateLabel.translatesAutoresizingMaskIntoConstraints = true
         self.addSubview(dateLabel)
+        
+        arrowView.translatesAutoresizingMaskIntoConstraints = true
+        self.addSubview(arrowView)
     }
 
     internal func setDate(_ date: Chart.Date) {
+        self.date = date
         let date = Date(timeIntervalSince1970: TimeInterval(date) / 1000.0)
         let dateOfStr = HintView.dateFormatter.string(from: date)
         dateLabel.font = accentFont
         dateLabel.text = dateOfStr
         dateLabel.textColor = textColor
         dateLabel.frame.origin = CGPoint(x: Consts.innerHintPadding, y: Consts.innerHintPadding)
-        dateLabel.sizeToFit()
+        dateLabel.maxSizeToFit()
+        
+        arrowView.center.y = dateLabel.center.y
+        
+        maxTopX = max(maxTopX, dateLabel.frame.maxX + Consts.hintHorizontalSpace + arrowView.frame.width)
+    }
+    
+    internal func preRows(_ rows: [(color: UIColor, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
+        let oldRowsView = rowsView
+        rowsView.removeAll()
+        for (_, _, _, id) in rows {
+            let foundRow = oldRowsView.first(where: { $0.id == id })
+            let rowView = foundRow ?? Row(id: id, accentFont: accentFont, font: font, percentage: percentage, parent: self)
+            
+            rowsView.append(rowView)
+        }
+        
+        for row in oldRowsView {
+            if !rowsView.contains(where: { $0.id == row.id }) {
+                row.removeFromSuperview()
+            }
+        }
+        
+        var yPosition = dateLabel.frame.maxY + Consts.hintLabelsSpace
+        for row in rowsView {
+            row.frame.origin = CGPoint(x: Consts.innerHintPadding, y: yPosition)
+            var size = CGSize(width: maxTopX - Consts.innerHintPadding, height: row.height())
+            size.width = max(size.width, row.frame.width)
+            size.height = max(size.height, row.frame.height)
+            row.frame.size = size
+            yPosition = row.frame.maxY + Consts.hintLabelsSpace
+        }
     }
 
-    internal func setRows(_ rows: [(color: UIColor, value: ColumnViewModel.Value, id: Int)])
-    {
+    internal func setRows(_ rows: [(color: UIColor, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
 
-        var rightX = dateLabel.frame.maxX
+        var rightX = maxTopX
 
-        let oldValueLabels = valueLabels
-        valueLabels.removeAll()
-        for (color, value, id) in rows {
-            let foundLabel = oldValueLabels.first(where: { $0.id == id })
-            let valueLabel = foundLabel ?? Label(id: id, font: font, parent: self)
-
-            valueLabel.text = numberFormatter.string(from: NSNumber(value: value))
-            valueLabel.textColor = color
-            valueLabel.sizeToFit()
-
-            valueLabels.append(valueLabel)
-
-            rightX = max(rightX, Consts.innerHintPadding + valueLabel.frame.width)
-        }
-
-        for label in oldValueLabels {
-            if !valueLabels.contains(where: { $0.id == label.id }) {
-                label.removeFromSuperview()
+        let sum: Double = rows.map { Double($0.value) }.reduce(Double(0), +)
+        
+        for (color, name, value, id) in rows {
+            guard let rowView = rowsView.first(where: { $0.id == id }) else {
+                assert(false, "call pre rows")
+                continue
             }
+
+            rowView.rightLabel.text = numberFormatter.string(from: NSNumber(value: value))
+            rowView.rightLabel.textColor = color
+            rowView.rightLabel.maxSizeToFit()
+            
+            rowView.leftLabel.text = name
+            rowView.leftLabel.textColor = textColor
+            rowView.leftLabel.maxSizeToFit()
+            
+            rowView.percentageLabel?.text = "\(Int(round(100.0 * Double(value) / sum)))%"
+            rowView.percentageLabel?.textColor = textColor
+            rowView.percentageLabel?.maxSizeToFit()
+
+            rightX = max(rightX, Consts.innerHintPadding + rowView.minWidth())
         }
 
         var maxY = dateLabel.frame.maxY
         var yPosition = dateLabel.frame.maxY + Consts.hintLabelsSpace
-        for valueLabel in valueLabels {
-            valueLabel.frame.origin = CGPoint(x: rightX - valueLabel.frame.width, y: yPosition)
-            yPosition = valueLabel.frame.maxY + Consts.hintLabelsSpace
-            maxY = max(valueLabel.frame.maxY, maxY)
+        for row in rowsView {
+            row.frame.origin = CGPoint(x: Consts.innerHintPadding, y: yPosition)
+            row.setWidth(rightX - Consts.innerHintPadding)
+            
+            yPosition = row.frame.maxY + Consts.hintLabelsSpace
+            maxY = max(row.frame.maxY, maxY)
         }
 
+        arrowView.frame.origin.x = rightX - arrowView.frame.width
         frame.size = CGSize(width: rightX + Consts.innerHintPadding, height: maxY + Consts.innerHintPadding)
     }
 

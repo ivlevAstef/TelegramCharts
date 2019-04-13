@@ -14,6 +14,8 @@ public class ChartWithIntervalView: UIView
         didSet { updateFrame() }
     }
     
+    public var hintClickHandler: ((Chart.Date) -> Void)?
+    
     private static let defaultIntervalViewHeight: CGFloat = 40.0
 
     private let chartView: ChartView
@@ -40,10 +42,14 @@ public class ChartWithIntervalView: UIView
     }
 
     private func configureSubviews() {
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        intervalView.translatesAutoresizingMaskIntoConstraints = false
+        chartView.translatesAutoresizingMaskIntoConstraints = true
+        intervalView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(chartView)
         addSubview(intervalView)
+        
+        chartView.hintClickHandler = { [weak self] date in
+            self?.hintClickHandler?(date)
+        }
     }
     
     private func updateFrame() {

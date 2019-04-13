@@ -28,7 +28,7 @@ internal final class IntervalLabel: UIView
     internal init() {
         super.init(frame: .zero)
         
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.translatesAutoresizingMaskIntoConstraints = true
         label.textAlignment = .center
         label.clipsToBounds = false
         addSubview(label)

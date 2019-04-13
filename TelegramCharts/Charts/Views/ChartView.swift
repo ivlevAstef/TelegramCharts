@@ -21,6 +21,8 @@ public class ChartView: UIView
         didSet { updateFrame() }
     }
     
+    public var hintClickHandler: ((Chart.Date) -> Void)?
+    
     private let margins: UIEdgeInsets
     private var ui: ChartUIModel? = nil
     
@@ -66,22 +68,26 @@ public class ChartView: UIView
     }
 
     private func configureSubviews() {
-        columnsView.translatesAutoresizingMaskIntoConstraints = false
+        columnsView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(columnsView)
 
         hintView.setParent(columnsView)
 
-        horizontalAxisView.translatesAutoresizingMaskIntoConstraints = false
+        horizontalAxisView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(horizontalAxisView)
 
-        verticalAxisView.translatesAutoresizingMaskIntoConstraints = false
+        verticalAxisView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(verticalAxisView)
 
-        hintView.translatesAutoresizingMaskIntoConstraints = false
+        hintView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(hintView)
         
-        intervalLabel.translatesAutoresizingMaskIntoConstraints = false
+        intervalLabel.translatesAutoresizingMaskIntoConstraints = true
         addSubview(intervalLabel)
+        
+        hintView.hintClickHandler = { [weak self] date in
+            self?.hintClickHandler?(date)
+        }
     }
     
     private func updateFrame() {

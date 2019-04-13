@@ -22,7 +22,7 @@ internal class ColumnView: UIView
         self.margins = margins
         self.columnLayer = columnLayer
         super.init(frame: .zero)
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(contentView)
         
         // without contentView clipsToBounds unwork... WTF?

@@ -30,18 +30,20 @@ internal struct ColumnUIModel
     internal let data: [Data]
     internal let verticalValues: [AABB.Value]
     internal let color: UIColor
+    internal let name: String
     internal let size: Double
     internal let type: ColumnViewModel.ColumnType
     
     internal init(isVisible: Bool, isOpacity: Bool,
                   aabb: AABB, data: [Data], verticalValues: [AABB.Value],
-                  color: UIColor, size: Double, type: ColumnViewModel.ColumnType) {
+                  color: UIColor, name: String, size: Double, type: ColumnViewModel.ColumnType) {
         self.isVisible = isVisible
         self.isOpacity = isOpacity
         self.aabb = aabb
         self.data = data
         self.verticalValues = verticalValues
         self.color = color
+        self.name = name
         self.size = size
         self.type = type
     }

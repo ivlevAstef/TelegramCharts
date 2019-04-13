@@ -17,6 +17,8 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
 {
     internal let identifier: String = "ChartTableViewCell"
     
+    internal var hintClickHandler: ((_ date: Chart.Date) -> Void)?
+    
     override internal var frame: CGRect {
         didSet { updateFrame() }
     }
@@ -29,8 +31,12 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
 
         self.selectionStyle = .none
 
-        chartView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(chartView)
+        chartView.translatesAutoresizingMaskIntoConstraints = true
+        contentView.addSubview(chartView)
+        
+        chartView.hintClickHandler = { [weak self] date in
+            self?.hintClickHandler?(date)
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {

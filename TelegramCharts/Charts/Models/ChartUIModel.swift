@@ -21,14 +21,16 @@ internal struct ChartUIModel
     internal let dates: [Chart.Date]
     internal let columns: [ColumnUIModel]
     internal let aabb: AABB
+    internal let percentage: Bool
     
-    public let interval: ChartViewModel.Interval
-    public let fullInterval: ChartViewModel.Interval
+    internal let interval: ChartViewModel.Interval
+    internal let fullInterval: ChartViewModel.Interval
     
     public init(viewModel chartVM: ChartViewModel, fully: Bool, size: Double) {
         self.dates = chartVM.dates
         self.interval = chartVM.interval
         self.fullInterval = chartVM.fullInterval
+        self.percentage = chartVM.percentage
         
         let fixedInterval = calcFixedInterval(by: fully ? fullInterval : interval, use: chartVM.dates)
         
@@ -151,6 +153,24 @@ private func normalAABB(viewModel chartVM: ChartViewModel, interval: ChartViewMo
 
 // Column UI model
 
+private func makeColumnUIModel(_ columnVM: ColumnViewModel,
+                               isOpacity: Bool,
+                               aabb: AABB,
+                               data: [ColumnUIModel.Data],
+                               verticalValues: [AABB.Value],
+                               size: Double) -> ColumnUIModel
+{
+    return ColumnUIModel(isVisible: columnVM.isVisible,
+                         isOpacity: isOpacity,
+                         aabb: aabb,
+                         data: data,
+                         verticalValues: verticalValues,
+                         color: columnVM.color,
+                         name: columnVM.name,
+                         size: size,
+                         type: columnVM.type)
+}
+
 private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, aabb: AABB, size: Double) -> [ColumnUIModel]
 {
     let (begin, end) = makeBeginEndForYValues(viewModel: chartVM, aabb: aabb)
@@ -159,14 +179,12 @@ private func stackedCalculator(viewModel chartVM: ChartViewModel, interval: Char
     return chartVM.columns.map { columnVM in
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, modifier: modifier, prevData: prevData)
         prevData = data
-        return ColumnUIModel(isVisible: columnVM.isVisible,
-                             isOpacity: columnVM.type == .line,
-                             aabb: aabb,
-                             data: data,
-                             verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
-                             color: columnVM.color,
-                             size: size,
-                             type: columnVM.type)
+        return makeColumnUIModel(columnVM,
+                                 isOpacity: columnVM.type == .line,
+                                 aabb: aabb,
+                                 data: data,
+                                 verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
+                                 size: size)
     }
 }
 
@@ -176,14 +194,12 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
     let modifier = makeValueModifier(viewModel: chartVM, interval: interval)
     return chartVM.columns.map { columnVM in
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, modifier: modifier, prevData: nil)
-        return ColumnUIModel(isVisible: columnVM.isVisible,
-                             isOpacity: true,
-                             aabb: aabb,
-                             data: data,
-                             verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
-                             color: columnVM.color,
-                             size: size,
-                             type: columnVM.type)
+        return makeColumnUIModel(columnVM,
+                                 isOpacity: true,
+                                 aabb: aabb,
+                                 data: data,
+                                 verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
+                                 size: size)
     }
 }
 
@@ -207,14 +223,12 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
         let aabb = calculateAABB(column: columnVM)
         let (begin, end) = makeBeginEndForYValues(viewModel: chartVM, aabb: aabb, rounded: false)
         let data = makeData(by: chartVM, columnVM: columnVM, aabb: aabb, modifier: modifier, prevData: nil)
-        return ColumnUIModel(isVisible: columnVM.isVisible,
-                             isOpacity: true,
-                             aabb: aabb,
-                             data: data,
-                             verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
-                             color: columnVM.color,
-                             size: size,
-                             type: columnVM.type)
+        return makeColumnUIModel(columnVM,
+                                 isOpacity: true,
+                                 aabb: aabb,
+                                 data: data,
+                                 verticalValues: makeYValues(viewModel: chartVM, begin: begin, end: end),
+                                 size: size)
     }
 }
 

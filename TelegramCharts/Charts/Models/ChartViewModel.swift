@@ -74,16 +74,20 @@ public class ChartViewModel
         updateListeners.removeAll(where: { $0.value == nil })
     }
 
-    public func toogleVisibleColumn(_ column: ColumnViewModel) -> Bool {
-        assert(columns.contains(where: { $0 === column }), "Doen't found polygon line in data")
-        if column.isVisible && columns.filter({ $0.isVisible }).count <= 1 {
-            return false
+    public func setVisibleColumns(isVisibles: [Bool]) {
+        assert(isVisibles.count == columns.count)
+        
+        // Can't disable all
+        if !isVisibles.contains(true) {
+            assert(false, "Can't disable all")
+            return
         }
         
-        column.isVisible.toggle()
-        updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
+        for (column, isVisible) in zip(columns, isVisibles) {
+            column.isVisible = isVisible
+        }
         
-        return true
+        updateListeners.forEach { $0.value?.chartVisibleIsChanged(self) }
     }
 
     public func updateInterval(_ interval: Interval) {

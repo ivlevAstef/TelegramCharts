@@ -27,7 +27,7 @@ internal final class ColumnsViewFabric
         }
         
         for view in views {
-            view.translatesAutoresizingMaskIntoConstraints = false
+            view.translatesAutoresizingMaskIntoConstraints = true
             parent.addSubview(view)
         }
         

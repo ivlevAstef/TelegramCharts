@@ -21,6 +21,7 @@
 		ABA05B68225E4AA000A927D9 /* AreaViewLayerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */; };
 		ABA05B6A225FB91200A927D9 /* CallFrequenceLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */; };
 		ABA05B6C2260485000A927D9 /* IntervalLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B6B2260485000A927D9 /* IntervalLabel.swift */; };
+		ABA05B6E2261928C00A927D9 /* ArrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA05B6D2261928C00A927D9 /* ArrowView.swift */; };
 		ABAE793C223DE8230063B223 /* AABB.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793B223DE8230063B223 /* AABB.swift */; };
 		ABAE793E223DECC60063B223 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE793D223DECC60063B223 /* ChartViewModel.swift */; };
 		ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAE7943223E17560063B223 /* HorizontalAxisView.swift */; };
@@ -68,6 +69,7 @@
 		ABA05B67225E4AA000A927D9 /* AreaViewLayerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaViewLayerWrapper.swift; sourceTree = "<group>"; };
 		ABA05B69225FB91200A927D9 /* CallFrequenceLimiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallFrequenceLimiter.swift; sourceTree = "<group>"; };
 		ABA05B6B2260485000A927D9 /* IntervalLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalLabel.swift; sourceTree = "<group>"; };
+		ABA05B6D2261928C00A927D9 /* ArrowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrowView.swift; sourceTree = "<group>"; };
 		ABAE793B223DE8230063B223 /* AABB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AABB.swift; sourceTree = "<group>"; };
 		ABAE793D223DECC60063B223 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		ABAE7943223E17560063B223 /* HorizontalAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalAxisView.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				BA41DF8B223F82490021DC82 /* VerticalAxisView.swift */,
 				BA41DFBF2240DF0B0021DC82 /* HintAndOtherView.swift */,
 				ABA05B6B2260485000A927D9 /* IntervalLabel.swift */,
+				ABA05B6D2261928C00A927D9 /* ArrowView.swift */,
 			);
 			path = Internal;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				ABA05B5E225DEDF000A927D9 /* ChartUIModel.swift in Sources */,
 				BACE714B2236020C00068579 /* Style.swift in Sources */,
 				BACE71772238D18300068579 /* WeakRef.swift in Sources */,
+				ABA05B6E2261928C00A927D9 /* ArrowView.swift in Sources */,
 				BACE7160223633D700068579 /* UIColor+Init.swift in Sources */,
 				ABAE7944223E17560063B223 /* HorizontalAxisView.swift in Sources */,
 				BACE71712238BB5E00068579 /* IntervalView.swift in Sources */,
@@ -536,7 +540,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = sia.testwork.TelegramCharts;
+				PRODUCT_BUNDLE_IDENTIFIER = sia.testwork.TelegramCharts2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
@@ -572,7 +576,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = sia.testwork.TelegramCharts;
+				PRODUCT_BUNDLE_IDENTIFIER = sia.testwork.TelegramCharts2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_DISABLE_SAFETY_CHECKS = YES;

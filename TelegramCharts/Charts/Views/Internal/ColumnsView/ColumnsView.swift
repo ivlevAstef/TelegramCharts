@@ -34,7 +34,7 @@ internal final class ColumnsView: UIView
     internal init() {
         super.init(frame: .zero)
 
-        cacheImageView.translatesAutoresizingMaskIntoConstraints = false
+        cacheImageView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(cacheImageView)
     }
 

@@ -100,7 +100,7 @@ internal class MainViewController: UITableViewController, Stylizing
         label.text = chartViewModels[safe: section]?.name
         
         let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.translatesAutoresizingMaskIntoConstraints = true
         view.addSubview(label)
         
         return view
@@ -151,7 +151,10 @@ internal class MainViewController: UITableViewController, Stylizing
             chartCell.actualizeFrame(width: tableView.bounds.width)
             chartCell.applyStyle(StyleController.currentStyle)
             chartCell.setChart(chartViewModel)
-
+            chartCell.hintClickHandler = { [weak self] date in
+                self?.showAlert(date: date)
+            }
+            
             return chartCell
         }
 
@@ -162,14 +165,63 @@ internal class MainViewController: UITableViewController, Stylizing
                 name: columnVM.name,
                 color: columnVM.color,
                 isVisible: columnVM.isVisible,
-                clickHandler: { [weak chartViewModel] in
-                    return chartViewModel?.toogleVisibleColumn(columnVM) ?? false
+                clickHandler: { [weak switchColumnVisibleCell] isLong in
+                    if let cell = switchColumnVisibleCell {
+                        MainViewController.switchToogleVisible(for: columnVM, on: cell, chart: chartViewModel, isLong: isLong)
+                    }
             })
         }
 
         switchColumnVisibleCell.applyStyle(StyleController.currentStyle)
 
         return switchColumnVisibleCell
+    }
+    
+    
+    private func showAlert(date: Chart.Date) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        let date = Date(timeIntervalSince1970: TimeInterval(date) / 1000.0)
+        let dateOfStr = formatter.string(from: date)
+        
+        let message = "Your click on date: \(dateOfStr).\n Bonus goal not implemented.\n But everything works fast."
+        let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private static func switchToogleVisible(for columnVM: ColumnViewModel,
+                                            on cell: SwitchColumnVisibleTableViewCell,
+                                            chart: ChartViewModel,
+                                            isLong: Bool) {
+        if isLong {
+            for column in chart.columns {
+                column.isVisible = false
+            }
+            columnVM.isVisible = true
+        } else {
+            if 2 == chart.columns.count {
+                columnVM.isVisible = !columnVM.isVisible
+                // switch disable
+                if let pair = chart.columns.first(where: { columnVM !== $0 }), !chart.columns.contains(where: { $0.isVisible }) {
+                    pair.isVisible = true
+                }
+            } else {
+                columnVM.isVisible = !columnVM.isVisible
+                // Block disable all
+                if !chart.columns.contains(where: { $0.isVisible }) {
+                    columnVM.isVisible = true
+                }
+            }
+        }
+        
+        let isVisibles = chart.columns.map { $0.isVisible }
+        chart.setVisibleColumns(isVisibles: isVisibles)
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            cell.setIsVisibleOnTogglers(isVisibles)
+        })
     }
 
     @IBAction private func switchStyle(_ sender: Any) {
