@@ -28,12 +28,20 @@ internal final class HintAndOtherView: UIView
 {
     internal var hintClickHandler: ((Chart.Date) -> Void)?
     
+    internal var dateIsChangedHandler: ((Chart.Date?) -> Void)?
+    internal private(set) var currentDate: Chart.Date? = nil {
+        willSet {
+            if newValue != currentDate {
+                dateIsChangedHandler?(newValue)
+            }
+        }
+    }
+    
     private let font: UIFont = UIFont.systemFont(ofSize: 12.0)
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
     private var ui: ChartUIModel?
-    private var lastDate: Chart.Date? = nil
     
     private var hideHintBlock: DispatchWorkItem?
 
@@ -83,7 +91,7 @@ internal final class HintAndOtherView: UIView
     internal func update(ui: ChartUIModel) {
         self.ui = ui
         
-        if let date = lastDate {
+        if let date = currentDate {
             showHintAndOther(date: date, use: ui)
             hideAfter()
         }
@@ -115,7 +123,7 @@ internal final class HintAndOtherView: UIView
             self.hideHintBlock?.cancel()
             let aroundDate = ui.translate(x: tapPosition.x, from: bounds)
             let date = ui.find(around: aroundDate, in: ui.interval)
-            lastDate = date
+            currentDate = date
             showHintAndOther(date: date, use: ui)
         default:
             hideAfter()
@@ -126,26 +134,27 @@ internal final class HintAndOtherView: UIView
         self.hideHintBlock?.cancel()
         let hideHintBlock = DispatchWorkItem { [weak self] in
             self?.hide(hintView: true, lineView: true, barsView: true)
-            self?.lastDate = nil
+            self?.currentDate = nil
         }
         self.hideHintBlock = hideHintBlock
         DispatchQueue.main.asyncAfter(deadline: .now() + Configs.hintAutoHideDelay, execute: hideHintBlock)
     }
 
     private func showHintAndOther(date: Chart.Date, use ui: ChartUIModel) {
-        let animated = showHint(in: date, use: ui)
-        let lineRect = showLineIfNeeded(in: date, use: ui)
-        let barsRect = showBarsIfNeeded(in: date, use: ui)
-        updateHintPosition(in: date, use: ui, animated: animated, aroundRects: [lineRect, barsRect])
+        showHint(in: date, use: ui)
+        showLineIfNeeded(in: date, use: ui)
+        showBarsIfNeeded(in: date, use: ui)
     }
 
-    private func showHint(in date: Chart.Date, use ui: ChartUIModel) -> Bool {
+    private func showHint(in date: Chart.Date, use ui: ChartUIModel) {
         let rows = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, String, ColumnViewModel.Value, Int)? in
             if let value = column.find(by: date)?.original, column.isVisible {
                 return (column.color, column.name, value, index)
             }
             return nil
         }
+        
+        let position = ui.translate(date: date, to: bounds)
 
         let animated = needAnimated(hintView)
         hintView.isHidden = false
@@ -162,20 +171,27 @@ internal final class HintAndOtherView: UIView
                 self?.hintView.alpha = 1.0
             })
         }
-
-        return animated
-    }
-
-    private func updateHintPosition(in date: Chart.Date, use ui: ChartUIModel, animated: Bool, aroundRects: [CGRect]) {
-        let position = ui.translate(date: date, to: bounds)
-
+    
+        var minY = bounds.height
+        for column in ui.columns {
+            if let data = column.find(by: date).flatMap({ column.translate(data: $0, to: bounds) }) {
+                minY = min(minY, min(data.to.y, data.from.y))
+            }
+        }
+        
+        let date1Pos = ui.translate(date: ui.dates[0], to: bounds)
+        let date2Pos = ui.translate(date: ui.dates[1], to: bounds)
+        let width = max(Consts.pointSize, (date2Pos - date1Pos))
+        let rect = CGRect(x: position - width * 0.5, y: minY, width: width, height: bounds.height - minY)
+        
         let limit = bounds
         UIView.animateIf(animated, duration: Configs.hintPositionDuration, animations: { [weak self] in
-            self?.hintView.setPosition(position, aroundRects: aroundRects, limit: limit)
+            self?.hintView.setPosition(position, aroundRect: rect, limit: limit)
         })
+
     }
 
-    private func showLineIfNeeded(in date: Chart.Date, use ui: ChartUIModel) -> CGRect {
+    private func showLineIfNeeded(in date: Chart.Date, use ui: ChartUIModel){
         let position = ui.translate(date: date, to: bounds)
         let points = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, CGFloat, Int)? in
             if let value = column.find(by: date)?.to, column.isVisible, column.type != .bar {
@@ -186,7 +202,7 @@ internal final class HintAndOtherView: UIView
 
         if 0 == points.count {
             hide(lineView: true)
-            return .zero
+            return
         }
 
         //let animated = needAnimated(lineView)
@@ -204,11 +220,9 @@ internal final class HintAndOtherView: UIView
         self.lineView.setPoints(points)
         self.lineView.setPosition(position, limit: bounds)
         self.lineView.setHeightAndYStart(height: limit.height, yStart: yStart)
-
-        return lineView.myRect()
     }
 
-    private func showBarsIfNeeded(in date: Chart.Date, use ui: ChartUIModel) -> CGRect {
+    private func showBarsIfNeeded(in date: Chart.Date, use ui: ChartUIModel) {
         let position = ui.translate(date: date, to: bounds)
 
         let bars = ui.columns.filter { column in
@@ -217,7 +231,7 @@ internal final class HintAndOtherView: UIView
 
         if 0 == bars.count {
             hide(barsView: true)
-            return .zero
+            return
         }
 
         let minY = bars.compactMap { column -> CGFloat? in
@@ -245,8 +259,6 @@ internal final class HintAndOtherView: UIView
             self?.barsView.setBars(minY: minY, width: width)
             self?.barsView.setPosition(position, limit: limit)
         })
-
-        return barsView.myRect()
     }
 
     private func needAnimated(_ view: UIView) -> Bool {
@@ -366,22 +378,6 @@ private class LineView: UIView
         center = CGPoint(x: position, y: frame.height / 2.0)
     }
 
-    internal func myRect() -> CGRect {
-        var minX: CGFloat = 99999
-        var minY: CGFloat = 99999
-        var maxX: CGFloat = -99999
-        var maxY: CGFloat = -99999
-
-        for view in pointViews {
-            minX = min(minX, view.frame.minX + frame.minX)
-            minY = min(minY, view.frame.minY + frame.minY)
-            maxX = max(maxX, view.frame.maxX + frame.minX)
-            maxY = max(maxY, view.frame.maxY + frame.minY)
-        }
-
-        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
-    }
-
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -433,10 +429,6 @@ private class BarsView: UIView
         }
     }
 
-    internal func myRect() -> CGRect {
-        return CGRect(x: leftView.frame.width, y: minY, width: width, height: frame.height - minY)
-    }
-
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -455,9 +447,9 @@ extension UILabel {
     }
 }
 
-private class HintView: UIView
+private final class HintView: UIView
 {
-    private class Row: UIView {
+    private final class Row: UIView {
         internal let id: Int
         
         internal let percentageLabel: UILabel?
@@ -636,12 +628,12 @@ private class HintView: UIView
         frame.size = CGSize(width: rightX + Consts.innerHintPadding, height: maxY + Consts.innerHintPadding)
     }
 
-    internal func setPosition(_ position: CGFloat, aroundRects: [CGRect], limit: CGRect) {
+    internal func setPosition(_ position: CGFloat, aroundRect: CGRect, limit: CGRect) {
         let lastRect = frame
 
         var rect = frame
         rect.origin.x = position - rect.width * 0.5
-        if aroundRects.contains(where: { rect.intersects($0) }) {
+        if aroundRect.intersects(rect) {
             lastIntersectTime = Date()
         }
         let centerPriority = CGFloat(Date().timeIntervalSince1970 - lastIntersectTime.timeIntervalSince1970)
@@ -651,12 +643,12 @@ private class HintView: UIView
 
         var testRect = frame
         testRect.origin.x = limit.minX
-        if aroundRects.contains(where: { testRect.intersects($0) }) {
+        if aroundRect.intersects(testRect) {
             leftPriority = -1
         }
 
         testRect.origin.x = limit.maxX - frame.size.width
-        if aroundRects.contains(where: { testRect.intersects($0) }) {
+        if aroundRect.intersects(testRect) {
             rightPriority = -1
         }
 
@@ -678,7 +670,7 @@ private class HintView: UIView
         if centerPriority > leftPriority && centerPriority > rightPriority {
             setPosition(position, limit: limit)
         } else {
-            let subWidth = ((aroundRects.map{ $0.width }.max() ?? 0) + frame.width) * 0.5
+            let subWidth = (aroundRect.width + frame.width) * 0.5
             if leftPriority < rightPriority {
                 setPosition(position + subWidth, limit: limit)
             } else {

@@ -8,7 +8,7 @@
 
 import UIKit
 
-internal class ColumnView: UIView
+internal final class ColumnView: UIView
 {
     override internal var frame: CGRect {
         didSet { updateFrame() }
@@ -30,14 +30,27 @@ internal class ColumnView: UIView
         contentView.layer.addSublayer(columnLayer.layer)
     }
     
+    @inline(__always)
+    internal func setStyle(_ style: ChartStyle) {
+        self.columnLayer.setStyle(style)
+    }
+    
+    @inline(__always)
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        columnLayer.updateSelector(to: date, animated: animated, duration: duration)
+    }
+    
+    @inline(__always)
     internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
         columnLayer.update(ui: ui, animated: animated, duration: duration, t: t)
     }
 
+    @inline(__always)
     internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         columnLayer.confirm(ui: ui, animated: animated, duration: duration)
     }
 
+    @inline(__always)
     internal func drawCurrentState(to context: CGContext) {
         columnLayer.drawCurrentState(to: context)
     }

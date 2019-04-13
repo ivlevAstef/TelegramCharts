@@ -88,6 +88,10 @@ public class ChartView: UIView
         hintView.hintClickHandler = { [weak self] date in
             self?.hintClickHandler?(date)
         }
+        
+        hintView.dateIsChangedHandler = { [weak self] date in
+            self?.columnsView.updateSelector(to: date, animated: true, duration: Configs.hintPositionDuration)
+        }
     }
     
     private func updateFrame() {

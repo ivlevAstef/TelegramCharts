@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class ColumnViewModel
+public final class ColumnViewModel
 {
     public typealias Value = Column.Value
 

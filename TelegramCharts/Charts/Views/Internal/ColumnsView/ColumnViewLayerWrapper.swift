@@ -14,8 +14,8 @@ internal class ColumnViewLayerWrapper
     internal var minX: CGFloat = 0
     internal var maxX: CGFloat = 0
 
-    internal private(set) var color: UIColor?
-    internal private(set) var size: Double = 1.0
+    internal private(set) var selectedDate: Chart.Date?
+    internal private(set) var ui: ColumnUIModel?
 
     private var fromPointsData: [ColumnUIModel.UIData] = []
     private var toPointsData: [ColumnUIModel.UIData] = []
@@ -34,6 +34,9 @@ internal class ColumnViewLayerWrapper
         pathLayer = CAShapeLayer()
         layer.addSublayer(pathLayer)
     }
+    
+    internal func setStyle(_ style: ChartStyle) {
+    }
 
     internal func fillLayer(_ layer: CAShapeLayer) {
         fatalError("override")
@@ -47,12 +50,19 @@ internal class ColumnViewLayerWrapper
     {
         fatalError("override")
     }
+    
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        fatalError("override")
+    }
 
     internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
-        self.color = ui.color
-        self.size = ui.size
+        self.ui = ui
         let interval = updateInterval(ui: ui, t: t)
         updatePoints(ui: ui, t: t, interval: interval, animated: animated, duration: duration)
+        
+        if let date = selectedDate {
+            updateSelector(to: date, animated: false, duration: 0)
+        }
     }
 
     internal func confirm(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {

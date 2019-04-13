@@ -21,6 +21,7 @@ internal final class ColumnsView: UIView
     private var columnsViews: [ColumnView] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
     private var margins: UIEdgeInsets = .zero
+    private var style: ChartStyle? = nil
 
     private var cornerRadius: CGFloat = 0.0
     private var updateCacheBlock: DispatchWorkItem?
@@ -37,10 +38,26 @@ internal final class ColumnsView: UIView
         cacheImageView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(cacheImageView)
     }
+    
+    internal func setStyle(_ style: ChartStyle) {
+        self.style = style
+        for columnView in columnsViews {
+            columnView.setStyle(style)
+        }
+    }
+    
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        for columnView in columnsViews {
+            columnView.updateSelector(to: date, animated: animated, duration: duration)
+        }
+    }
 
     internal func premake(margins: UIEdgeInsets, types: [ColumnViewModel.ColumnType]) {
         self.margins = margins
         columnsViews = ColumnsViewFabric.makeColumnViews(by: types, margins: margins, parent: self)
+        if let style = self.style {
+            setStyle(style)
+        }
         updateFrame()
         setCornerRadius(cornerRadius)
     }

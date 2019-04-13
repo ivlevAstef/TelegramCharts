@@ -206,7 +206,7 @@ extension IntervalView: ChartUpdateListener
     }
 }
 
-private class IntervalDrawableView: UIView
+private final class IntervalDrawableView: UIView
 {
     private var arrowColor: UIColor = UIColor.white
 

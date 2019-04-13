@@ -200,15 +200,15 @@ internal final class VerticalAxisView: UIView
 
 }
 
-private class Left {}
-private class Right {}
+private final class Left {}
+private final class Right {}
 
 private protocol ValueViewProtocol {
     func setStyle(color: UIColor, lineColor: UIColor, shadowColor: UIColor)
     func setWidth(_ width: CGFloat)
 }
 
-private class ValueView<T>: UIView, ValueViewProtocol
+private final class ValueView<T>: UIView, ValueViewProtocol
 {
     internal private(set) var value: AABB.Value = 0
     internal private(set) var unique: Int64 = 0

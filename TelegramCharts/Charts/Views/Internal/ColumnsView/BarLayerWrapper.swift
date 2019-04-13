@@ -15,19 +15,19 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
     
     internal override func fillLayer(_ layer: CAShapeLayer) {
         layer.lineWidth = 0
-        layer.lineCap = .butt
-        layer.lineJoin = .miter
         layer.strokeColor = nil
-        layer.fillColor = color?.cgColor
+        layer.fillColor = ui?.color.cgColor
         layer.opacity = 1.0
     }
 
     internal override func fillContext(_ context: CGContext) {
         context.setLineWidth(0)
-        context.setLineCap(.butt)
-        context.setLineJoin(.miter)
-        context.setFillColor((color ?? UIColor.clear).cgColor)
+        context.setFillColor((ui?.color ?? UIColor.clear).cgColor)
         context.fillPath()
+    }
+    
+    internal override func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {

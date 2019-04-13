@@ -165,7 +165,7 @@ internal final class HorizontalAxisView: UIView
     
 }
 
-private class DateLabel: UILabel
+private final class DateLabel: UILabel
 {
     internal static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()

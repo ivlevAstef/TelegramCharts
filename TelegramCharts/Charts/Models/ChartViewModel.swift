@@ -14,7 +14,7 @@ public protocol ChartUpdateListener: class
     func chartIntervalIsChanged(_ viewModel: ChartViewModel)
 }
 
-public class ChartViewModel
+public final class ChartViewModel
 {
     public struct Interval
     {
