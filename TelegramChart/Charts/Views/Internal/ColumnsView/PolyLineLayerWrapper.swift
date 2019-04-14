@@ -10,8 +10,8 @@ import UIKit
 
 private enum Consts
 {
-    internal static let pointSize: CGFloat = 10
-    internal static let centerPointSize: CGFloat = 5
+    internal static let pointSize: CGFloat = 8
+    internal static let centerPointSize: CGFloat = 4
 }
 
 internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
@@ -83,31 +83,18 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {
-        return makePath(by: calculatePoints(ui: ui, points: points, interval: interval))
-    }
-    
-    private func calculatePoints(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> [CGPoint] {
-        let datas = ui.split(uiDatas: points, in: interval)
-        var result = [CGPoint](repeating: CGPoint.zero, count: datas.count)
-        for i in 0..<datas.count {
-            result[i] = datas[i].to
-        }
-        return result
-    }
-    
-    private func makePath(by points: [CGPoint]) -> UIBezierPath {
         let path = UIBezierPath()
+        let datas = ui.split(uiDatas: points, in: interval)
         
-        guard let firstPoint = points.first else {
+        if datas.isEmpty {
             return path
         }
-
-        path.move(to: firstPoint)
-        for point in points.dropFirst() {
-            path.addLine(to: point)
+        
+        path.move(to: datas[0].to)
+        for i in 1..<datas.count {
+            path.addLine(to: datas[i].to)
         }
         
         return path
     }
-
 }

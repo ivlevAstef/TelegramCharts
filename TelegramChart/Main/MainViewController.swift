@@ -112,6 +112,10 @@ internal class MainViewController: UITableViewController, Stylizing
 
     internal override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if 0 <= section && section < chartViewModels.count {
+            if chartViewModels[section].columns.count <= 1 {
+                return 1 // 0-1 columns, not need switch
+            }
+            
             return 2 // Chart + switch column visible
         }
         

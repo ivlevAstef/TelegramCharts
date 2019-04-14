@@ -14,7 +14,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
     private static let minHeight: CGFloat = 1
     
     private var barColor: UIColor?
-    private var lastStep: CGFloat = 0.0
+    private var step: CGFloat = 0.0
     
     internal init() {
         super.init(countSelectorLayers: 1)
@@ -27,7 +27,6 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
     
     internal override func fillLayer(_ layer: CAShapeLayer) {
         layer.lineWidth = 0
-        layer.strokeColor = nil
         layer.fillColor = fillColor.cgColor
     }
 
@@ -73,9 +72,9 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         selectorLayers[0].fillColor = ui.color.cgColor
         
         let height = max(BarLayerWrapper.minHeight, position.from.y - position.to.y)
-        let path = UIBezierPath(rect: CGRect(x: position.from.x - lastStep,
+        let path = UIBezierPath(rect: CGRect(x: position.from.x - step,
                                              y: position.to.y,
-                                             width: 2 * lastStep,
+                                             width: 2 * step,
                                              height: height))
         
         selectorLayers[0].path = path.cgPath
@@ -95,40 +94,20 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
     }
 
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {
-        return makePath(by: calculatePoints(ui: ui, points: points, interval: interval))
-    }
-    
-    private func calculatePoints(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> [CGPoint] {
+        let path = UIBezierPath()
         let datas = ui.split(uiDatas: points, in: interval)
         let step = (datas[1].from.x - datas[0].from.x) / 2
-        self.lastStep = step
-        
-        var result = [CGPoint](repeating: CGPoint.zero, count: 4 * datas.count)
-        for i in 0..<datas.count {
-            result[2 * i] = CGPoint(x: datas[i].from.x - step, y: datas[i].from.y)
-            result[2 * i + 1] = CGPoint(x: datas[i].from.x + step, y: datas[i].from.y)
-        }
+        self.step = step
         
         for i in 0..<datas.count {
             let height = max(BarLayerWrapper.minHeight, datas[i].from.y - datas[i].to.y)
-            result[result.count - 2 * i - 1] = CGPoint(x: datas[i].to.x - step, y: datas[i].from.y - height)
-            result[result.count - 2 * i - 2] = CGPoint(x: datas[i].to.x + step, y: datas[i].from.y - height)
+            path.move(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y))
+            path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y))
+            path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y - height))
+            path.addLine(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y - height))
+            path.close()
         }
-        return result
-    }
-    
-    private func makePath(by points: [CGPoint]) -> UIBezierPath {
-        let path = UIBezierPath()
-        
-        guard let firstPoint = points.first else {
-            return path
-        }
-        
-        path.move(to: firstPoint)
-        for point in points.dropFirst() {
-            path.addLine(to: point)
-        }
-        
+
         return path
     }
 }

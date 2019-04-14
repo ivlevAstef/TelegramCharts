@@ -10,7 +10,7 @@ import UIKit
 
 private enum Consts
 {
-    internal static let topPadding: CGFloat = 5.0
+    internal static let topPadding: CGFloat = 6.0
     internal static let minDateSpacing: CGFloat = 16.0
 }
 
@@ -68,6 +68,7 @@ internal final class HorizontalAxisView: UIView
         var iter = ui.fullInterval.from
         while iter <= ui.fullInterval.to {
             let date = iter
+            let dateOfStr = DateLabel.string(by: date)
             iter += step
 
             let halfWidth = maxDateWidth * 0.5
@@ -78,11 +79,12 @@ internal final class HorizontalAxisView: UIView
             }
 
             let label: DateLabel
-            if let index = prevLabels.firstIndex(where: { $0.date == date }) {
+            if let index = prevLabels.firstIndex(where: { $0.unique == dateOfStr }) {
                 label = prevLabels[index]
+                label.date = date
                 prevLabels.remove(at: index)
             } else {
-                label = dateLabelCache[date] ?? DateLabel(date: date, font: font)
+                label = dateLabelCache[date] ?? DateLabel(date: date, dateOfStr: dateOfStr, font: font)
                 label.setStyle(color: color)
                 label.translatesAutoresizingMaskIntoConstraints = true
                 dateLabelCache[date] = label
@@ -177,17 +179,23 @@ private final class DateLabel: UILabel
 {
     internal static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM d"
+        dateFormatter.dateFormat = "d MMM"
         return dateFormatter
     }()
     
-    internal let date: Chart.Date
+    internal var date: Chart.Date
+    internal let unique: String
     
-    internal init(date: Chart.Date, font: UIFont) {
+    internal static func string(by date: Chart.Date) -> String {
+        return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(date) / 1000.0))
+    }
+    
+    internal init(date: Chart.Date, dateOfStr: String, font: UIFont) {
         self.date = date
+        self.unique = dateOfStr
         super.init(frame: .zero)
 
-        let dateOfStr = DateLabel.dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(date) / 1000.0))
+        
         self.text = dateOfStr
         self.font = font
 

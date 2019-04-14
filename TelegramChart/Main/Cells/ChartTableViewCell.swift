@@ -43,8 +43,8 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
     }
 
     internal func actualizeFrame(width: CGFloat) {
-        let height = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
-        self.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        let height = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) + 40.0
+        self.frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: width, height: height)
     }
     
     internal func updateFrame() {

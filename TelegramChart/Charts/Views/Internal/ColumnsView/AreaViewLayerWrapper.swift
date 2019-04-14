@@ -8,12 +8,6 @@
 
 import UIKit
 
-private enum Consts
-{
-    internal static let pointSize: CGFloat = 10
-    internal static let centerPointSize: CGFloat = 5
-}
-
 internal final class AreaLayerWrapper: ColumnViewLayerWrapper
 {
     
@@ -67,37 +61,25 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
     }
     
     internal override func makePath(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> UIBezierPath {
-        return makePath(by: calculatePoints(ui: ui, points: points, interval: interval))
-    }
-    
-    private func calculatePoints(ui: ColumnUIModel, points: [ColumnUIModel.UIData], interval: ChartViewModel.Interval) -> [CGPoint] {
+        let path = UIBezierPath()
         let datas = ui.split(uiDatas: points, in: interval)
         
-        var result = [CGPoint](repeating: CGPoint.zero, count: 2 * datas.count)
-        for i in 0..<datas.count {
-            result[i] = CGPoint(x: datas[i].from.x, y: datas[i].from.y)
-        }
-        for i in 0..<datas.count {
-            result[result.count - i - 1] = CGPoint(x: datas[i].to.x, y: datas[i].to.y)
-        }
-        return result
-    }
-    
-    private func makePath(by points: [CGPoint]) -> UIBezierPath {
-        let path = UIBezierPath()
-        
-        guard let firstPoint = points.first else {
+        if datas.isEmpty {
             return path
         }
         
-        
-        path.move(to: firstPoint)
-        for point in points.dropFirst() {
-            path.addLine(to: point)
+        path.move(to: datas[0].from)
+        for i in 1..<datas.count {
+            path.addLine(to: datas[i].from)
         }
+        for i in 0..<datas.count {
+            path.addLine(to: datas[datas.count - i - 1].to)
+        }
+        path.close()
         
         return path
     }
+    
 }
 
 

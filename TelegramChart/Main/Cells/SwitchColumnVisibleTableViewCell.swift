@@ -50,7 +50,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
 
     internal func actualizeFrame(width: CGFloat) {
         let height = (togglers.last?.frame.maxY ?? Consts.margins.top) + Consts.margins.bottom
-        self.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        self.frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: width, height: height)
     }
     
     internal func applyStyle(_ style: Style) {
@@ -98,6 +98,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
             SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: lastColumnToggler, width: bounds.width)
             lastColumnToggler = columnToggler
         }
+        actualizeFrame(width: bounds.width)
     }
     
     private static func layoutColumnToggler(columnToggler: ColumnToggler, last: ColumnToggler?, width: CGFloat) {

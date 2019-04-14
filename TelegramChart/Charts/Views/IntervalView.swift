@@ -63,8 +63,12 @@ public class IntervalView: UIView
         columnsView.premake(margins: .zero, types: chartViewModel.columns.map { $0.type })
 
         self.viewModel = chartViewModel
-        self.ui = ChartUIModel(viewModel: chartViewModel, fully: true, size: 1.0)
+        self.ui = makeChartUIModel(viewModel: chartViewModel)
         update()
+    }
+    
+    private func makeChartUIModel(viewModel: ChartViewModel) -> ChartUIModel {
+        return ChartUIModel(viewModel: viewModel, fully: true, maxSize: 1.0, frame: columnsView.frame, margins: margins)
     }
     
     private func update() {
@@ -193,7 +197,7 @@ public class IntervalView: UIView
 extension IntervalView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        let ui = ChartUIModel(viewModel: viewModel, fully: true, size: 1.0)
+        let ui = makeChartUIModel(viewModel: viewModel)
         self.ui = ui
         
         columnsView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
@@ -201,7 +205,7 @@ extension IntervalView: ChartUpdateListener
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        let ui = ChartUIModel(viewModel: viewModel, fully: true, size: 1.0)
+        let ui = makeChartUIModel(viewModel: viewModel)
         self.ui = ui
         
         intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: false, duration: 0)

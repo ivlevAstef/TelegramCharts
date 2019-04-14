@@ -10,7 +10,7 @@ import UIKit
 
 private enum Consts
 {
-    internal static let horizontalAxisHeight: CGFloat = 20.0
+    internal static let horizontalAxisHeight: CGFloat = 32.0
     internal static let spacing: CGFloat = 10.0
     internal static let topOffset: CGFloat = 30.0
 }
@@ -55,8 +55,12 @@ public class ChartView: UIView
 
         columnsView.premake(margins: self.margins, types: chartViewModel.columns.map { $0.type })
 
-        self.ui = ChartUIModel(viewModel: chartViewModel, fully: false, size: 2.0)
+        self.ui = makeChartUIModel(viewModel: chartViewModel)
         update()
+    }
+    
+    private func makeChartUIModel(viewModel: ChartViewModel) -> ChartUIModel {
+        return ChartUIModel(viewModel: viewModel, fully: false, maxSize: 2.0, frame: columnsView.frame, margins: margins)
     }
     
     private func update() {
@@ -136,7 +140,7 @@ public class ChartView: UIView
 extension ChartView: ChartUpdateListener
 {
     public func chartVisibleIsChanged(_ viewModel: ChartViewModel) {
-        let ui = ChartUIModel(viewModel: viewModel, fully: false, size: 2.0)
+        let ui = makeChartUIModel(viewModel: viewModel)
         self.ui = ui
         
         columnsView.update(ui: ui, animated: true, duration: Configs.visibleChangeDuration)
@@ -146,7 +150,7 @@ extension ChartView: ChartUpdateListener
     }
 
     public func chartIntervalIsChanged(_ viewModel: ChartViewModel) {
-        let ui = ChartUIModel(viewModel: viewModel, fully: false, size: 2.0)
+        let ui = makeChartUIModel(viewModel: viewModel)
         self.ui = ui
         
         columnsView.update(ui: ui, animated: true, duration: Configs.intervalChangeForLinesDuration)

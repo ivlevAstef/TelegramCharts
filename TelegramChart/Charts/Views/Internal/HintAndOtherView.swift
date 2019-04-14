@@ -10,7 +10,7 @@ import UIKit
 
 private enum Consts
 {
-    internal static let pointSize: CGFloat = 10
+    internal static let pointSize: CGFloat = 8
 
     internal static let innerHintPadding: CGFloat = 8
     internal static let hintLabelsSpace: CGFloat = 2

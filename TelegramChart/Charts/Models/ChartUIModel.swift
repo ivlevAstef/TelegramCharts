@@ -27,17 +27,18 @@ internal struct ChartUIModel
     internal let interval: ChartViewModel.Interval
     internal let fullInterval: ChartViewModel.Interval
     
-    public init(viewModel chartVM: ChartViewModel, fully: Bool, size: Double) {
+    public init(viewModel chartVM: ChartViewModel, fully: Bool,
+                maxSize: Double, frame: CGRect, margins: UIEdgeInsets) {
         self.dates = chartVM.dates
         self.interval = chartVM.interval
         self.fullInterval = chartVM.fullInterval
         self.stacked = chartVM.stacked
         self.percentage = chartVM.percentage
 
-        let size = ChartUIModel.calculateSize(viewModel: chartVM, maxSize: size)
+        let size = ChartUIModel.calculateSize(viewModel: chartVM, maxSize: maxSize)
 
         let fixedInterval = calcFixedInterval(by: fully ? fullInterval : interval, use: chartVM.dates)
-        let c = (16.0 + 5) / Double(UIScreen.main.bounds.width)
+        let c = Double((margins.left + margins.right) * 0.5 / frame.size.width)
         let longInterval = calcLongInterval(by: fully ? fullInterval : interval, use: chartVM.dates, c: c)
         
         if chartVM.percentage {

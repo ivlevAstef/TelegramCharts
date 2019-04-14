@@ -45,7 +45,7 @@ class TelegramChartTests: XCTestCase {
         let rect = CGRect(origin: .zero, size: CGSize(width: size, height: size))
         chartView.frame = rect
 
-        let viewModel = ChartViewModel(chart: charts[3], from: 0.25, to: 1.0)
+        let viewModel = ChartViewModel(chart: charts[3], from: 0.0, to: 0.5)
         chartView.setStyle(Style.dayChartStyle)
 
 
