@@ -28,10 +28,12 @@ public class ChartWithIntervalView: UIView
         self.intervalView = IntervalView(margins: margins)
         super.init(frame: .zero)
 
+        self.isOpaque = true
         configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
+        self.backgroundColor = style.backgroundColor
         intervalView.setStyle(style)
         chartView.setStyle(style)
     }

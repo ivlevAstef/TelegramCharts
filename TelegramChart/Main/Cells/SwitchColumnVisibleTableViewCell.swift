@@ -42,8 +42,6 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
 
     internal init() {
         super.init(style: .default, reuseIdentifier: nil)
-
-        self.selectionStyle = .none
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -58,16 +56,14 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
         contentView.backgroundColor = style.mainColor
-        for subview in subviews {
+        for subview in subviews.compactMap({ $0 as? ColumnToggler }) {
             subview.backgroundColor = style.mainColor
         }
     }
     
     internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping (_ long: Bool) -> Void) {
         let columnToggler = ColumnToggler(name: name, color: color)
-        columnToggler.backgroundColor = self.backgroundColor
-        columnToggler.isOpaque = true
-        
+
         columnToggler.isVisible = isVisible
         columnToggler.tapHandler = {
             clickHandler(false)
@@ -75,9 +71,9 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
         columnToggler.longHandler = {
             clickHandler(true)
         }
-        
+
         SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: bounds.width)
-        
+
         contentView.addSubview(columnToggler)
         togglers.append(columnToggler)
 
@@ -143,7 +139,6 @@ private class ColumnToggler: UIView
         super.init(frame: CGRect(x: 0, y: 0, width: label.frame.maxX + Consts.padding, height: Consts.contentHeight))
         
         checkmark.color = elementColor
-        checkmark.backgroundColor = .clear
         
         translatesAutoresizingMaskIntoConstraints = true
         checkmark.translatesAutoresizingMaskIntoConstraints = true
@@ -151,15 +146,15 @@ private class ColumnToggler: UIView
         
         addSubview(checkmark)
         addSubview(label)
-        
+
+        checkmark.backgroundColor = .clear
+
         label.center.y = center.y
         checkmark.center.y = center.y
         
         layer.cornerRadius = Consts.cornerRadius
         layer.masksToBounds = true
-        layer.borderWidth = Consts.borderWidth
-        
-        layer.borderColor = color.cgColor
+        clipsToBounds = true
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnSelf))
         let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(longOnSelf))
@@ -177,11 +172,17 @@ private class ColumnToggler: UIView
             label.textColor = elementColor
             backgroundColor = color
             checkmark.isHidden = false
+
+            layer.borderWidth = 0.0
+            layer.borderColor = nil
         } else {
             label.frame.origin.x = 0.5 * (bounds.width - label.frame.width)
             label.textColor = color
             backgroundColor = .clear
             checkmark.isHidden = true
+
+            layer.borderWidth = Consts.borderWidth
+            layer.borderColor = color.cgColor
         }
     }
     

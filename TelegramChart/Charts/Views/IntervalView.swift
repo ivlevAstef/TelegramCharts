@@ -47,10 +47,12 @@ public class IntervalView: UIView
         self.margins = margins
         super.init(frame: .zero)
 
+        self.isOpaque = true
         initialize()
     }
     
     public func setStyle(_ style: ChartStyle) {
+        self.backgroundColor = style.backgroundColor
         intervalDrawableView.setStyle(style)
     }
 

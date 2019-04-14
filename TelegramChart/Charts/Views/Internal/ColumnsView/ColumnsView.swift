@@ -31,6 +31,8 @@ internal final class ColumnsView: UIView
     private var margins: UIEdgeInsets = .zero
     private var style: ChartStyle? = nil
 
+    private var backColor: UIColor = .white
+
     private var updateCacheBlock: DispatchWorkItem?
 
     private let callFrequenceLimiter = CallFrequenceLimiter()
@@ -54,19 +56,30 @@ internal final class ColumnsView: UIView
         }
         super.init(frame: .zero)
 
+        self.isOpaque = true
+
+        cacheImageView.isOpaque = true
         cacheImageView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(cacheImageView)
 
+        clipContentView.isOpaque = true
         clipContentView.clipsToBounds = true
         clipContentView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(clipContentView)
 
+        contentView.isOpaque = true
         contentView.clipsToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = true
         clipContentView.addSubview(contentView)
     }
     
     internal func setStyle(_ style: ChartStyle) {
+        self.backColor = style.backgroundColor
+        self.backgroundColor = style.backgroundColor
+        cacheImageView.backgroundColor = style.backgroundColor
+        clipContentView.backgroundColor = style.backgroundColor
+        contentView.backgroundColor = style.backgroundColor
+
         self.style = style
         for columnView in columnViews {
             columnView.setStyle(style)
@@ -248,12 +261,14 @@ internal final class ColumnsView: UIView
 
     private func hideCacheState() {
         contentView.isHidden = false
+        clipContentView.isHidden = false
         cacheImageView.isHidden = true
     }
 
     private func showCacheState() {
         if nil != cacheImageView.image {
             contentView.isHidden = true
+            clipContentView.isHidden = true
             cacheImageView.isHidden = false
         }
     }

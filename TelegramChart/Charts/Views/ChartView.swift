@@ -36,10 +36,13 @@ public class ChartView: UIView
         self.margins = margins
         super.init(frame: .zero)
 
+        self.isOpaque = true
         configureSubviews()
     }
 
     public func setStyle(_ style: ChartStyle) {
+        self.backgroundColor = style.backgroundColor
+
         columnsView.setStyle(style)
         horizontalAxisView.setStyle(style)
         verticalAxisView.setStyle(style)

@@ -162,9 +162,15 @@ internal final class HintAndOtherView: UIView
         let date2Pos = ui.translate(date: ui.dates[1], to: bounds)
         let width = max(Consts.pointSize, (date2Pos - date1Pos))
         var rect = CGRect(x: position - width * 0.5, y: minY, width: width, height: bounds.height - minY)
-        rect = rect.insetBy(dx: -6, dy: 0)
+        rect = rect.insetBy(dx: -4, dy: 0)
 
-        let limit = bounds
+        var limit = bounds
+        let minWidth = rect.width + 2 * hintView.frame.width
+        if limit.size.width < minWidth {
+            limit.origin.x = (limit.size.width - minWidth) * 0.5
+            limit.size.width = minWidth
+        }
+
         UIView.animateIf(animated, duration: Configs.hintPositionDuration, animations: { [weak self] in
             self?.hintView.setPosition(position, aroundRect: rect, limit: limit)
         })
@@ -258,7 +264,7 @@ private final class HintView: UIView
             self.percentageLabel = percentage ? OptimizeUILabel(frame: .zero) : nil
             
             super.init(frame: .zero)
-            
+
             leftLabel.font = font
             rightLabel.font = accentFont
             rightLabel.textAlignment = .right
@@ -329,6 +335,7 @@ private final class HintView: UIView
         self.font = font
         self.accentFont = accentFont
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+        self.isOpaque = true
 
         layer.cornerRadius = Consts.hintCornerRadius
         frame.origin.y = Consts.hintYOffset
@@ -360,7 +367,7 @@ private final class HintView: UIView
         for (_, _, _, id) in rows {
             let foundRow = oldRowsView.first(where: { $0.id == id })
             let rowView = foundRow ?? Row(id: id, accentFont: accentFont, font: font, percentage: percentage, parent: self)
-            
+
             rowsView.append(rowView)
         }
         
@@ -456,8 +463,8 @@ private final class HintView: UIView
 
             let lastCenter = 0.5 * lastRect.minX + 0.5 * lastRect.maxX
             let procentTranslate = (lastCenter - position) / lastRect.width
-            leftPriority *= (procentTranslate < 0) ? 1 : procentTranslate
-            rightPriority *= (procentTranslate > 0) ? 1 : -procentTranslate
+            leftPriority *= (procentTranslate < 0) ? 1 : max(0.05, abs(procentTranslate))
+            rightPriority *= (procentTranslate > 0) ? 1 : max(0.05, abs(procentTranslate))
         }
 
         if centerPriority > leftPriority && centerPriority > rightPriority {

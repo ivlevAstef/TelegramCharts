@@ -90,16 +90,16 @@ internal class MainViewController: UITableViewController, Stylizing
     }
     
     internal override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 36
+        return 50
     }
     
     internal override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let label = UILabel(frame: CGRect(x: 16, y: 16, width: tableView.bounds.width - 16, height: 16))
+        let label = UILabel(frame: CGRect(x: 16, y: 30, width: tableView.bounds.width - 16, height: 16))
         label.font = UIFont.systemFont(ofSize: 14.0)
         label.textColor = subTitleColor
-        label.text = chartViewModels[safe: section]?.name
+        label.text = chartViewModels[safe: section]?.name.uppercased()
         
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 36))
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 50))
         label.translatesAutoresizingMaskIntoConstraints = true
         view.addSubview(label)
         

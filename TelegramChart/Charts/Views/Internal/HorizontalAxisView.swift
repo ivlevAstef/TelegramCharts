@@ -33,6 +33,7 @@ internal final class HorizontalAxisView: UIView
     
     internal func setStyle(_ style: ChartStyle) {
         color = style.textColor
+        backgroundColor = style.backgroundColor
 
         for subview in subviews.compactMap({ $0 as? DateLabel }) {
             subview.setStyle(color: color)
@@ -81,7 +82,8 @@ internal final class HorizontalAxisView: UIView
                 label = prevLabels[index]
                 prevLabels.remove(at: index)
             } else {
-                label = dateLabelCache[date] ?? DateLabel(date: date, font: font, color: color)
+                label = dateLabelCache[date] ?? DateLabel(date: date, font: font)
+                label.setStyle(color: color)
                 label.translatesAutoresizingMaskIntoConstraints = true
                 dateLabelCache[date] = label
                 addSubview(label)
@@ -181,14 +183,13 @@ private final class DateLabel: UILabel
     
     internal let date: Chart.Date
     
-    internal init(date: Chart.Date, font: UIFont, color: UIColor) {
+    internal init(date: Chart.Date, font: UIFont) {
         self.date = date
         super.init(frame: .zero)
 
         let dateOfStr = DateLabel.dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(date) / 1000.0))
         self.text = dateOfStr
         self.font = font
-        self.textColor = color
 
         if let size = dateSizeCache[dateOfStr] {
             self.frame.size = size

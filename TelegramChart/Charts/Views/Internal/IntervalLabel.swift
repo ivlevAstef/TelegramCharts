@@ -27,7 +27,8 @@ internal final class IntervalLabel: UIView
     
     internal init() {
         super.init(frame: .zero)
-        
+
+        self.isOpaque = true
         label.translatesAutoresizingMaskIntoConstraints = true
         label.textAlignment = .center
         label.clipsToBounds = false
@@ -35,7 +36,7 @@ internal final class IntervalLabel: UIView
     }
     
     internal func setStyle(_ style: ChartStyle) {
-        self.backgroundColor = .clear
+        self.backgroundColor = style.backgroundColor
         self.label.textColor = style.intervalTextColor
         self.label.font = font
     }
