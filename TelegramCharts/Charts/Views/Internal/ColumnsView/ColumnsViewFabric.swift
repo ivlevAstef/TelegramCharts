@@ -10,25 +10,28 @@ import UIKit
 
 internal final class ColumnsViewFabric
 {
-    internal static func makeColumnViews(by types: [ColumnViewModel.ColumnType], margins: UIEdgeInsets, parent: UIView) -> [ColumnView] {
-        let views: [ColumnView] = types.map { type in
+    internal static func makeColumnViews(by types: [ColumnViewModel.ColumnType], parent: UIView) -> [ColumnViewLayerWrapper] {
+        let views: [ColumnViewLayerWrapper] = types.map { type in
             switch type {
             case .line:
-                return ColumnView(margins: margins, columnLayer: PolyLineLayerWrapper())
+                return PolyLineLayerWrapper()
             case .area:
-                return ColumnView(margins: margins, columnLayer: AreaLayerWrapper())
+                return AreaLayerWrapper()
             case .bar:
-                return ColumnView(margins: margins, columnLayer: BarLayerWrapper())
+                return BarLayerWrapper()
             }
         }
         
-        for view in parent.subviews.compactMap({ $0 as? ColumnView }) {
-            view.removeFromSuperview()
+        for layer in parent.layer.sublayers ?? [] {
+            layer.removeFromSuperlayer()
         }
         
         for view in views {
-            view.translatesAutoresizingMaskIntoConstraints = true
-            parent.addSubview(view)
+            parent.layer.addSublayer(view.layer)
+        }
+        
+        for view in views {
+            parent.layer.addSublayer(view.selectorLayer)
         }
         
         return views

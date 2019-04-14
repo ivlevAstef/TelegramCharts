@@ -65,18 +65,42 @@ internal class ColumnViewLayerWrapper
     }
     
     internal func drawCurrentState(to context: CGContext) {
-        if let path = saveNewPath, oldIsVisible {
-            context.saveGState()
-            context.addPath(path)
-            fillContext(context)
-            context.restoreGState()
+        guard let path = saveNewPath, oldIsVisible else {
+            return
         }
         
-        if nil != selectedDate {
+        context.saveGState()
+        context.addPath(path)
+        fillContext(context)
+        context.restoreGState()
+    }
+    
+    internal func drawSelectorState(to context: CGContext) {
+        if nil == selectedDate || false == (self.ui?.isVisible ?? false) {
+            return
+        }
+        
+        context.saveGState()
+        for layer in selectorLayers {
+            guard let path = layer.path else {
+                continue
+            }
             context.saveGState()
-            drawSelectorContext(to: context)
+            context.addPath(path)
+            
+            context.setFillColor(layer.fillColor ?? UIColor.clear.cgColor)
+            context.setStrokeColor(layer.strokeColor ?? UIColor.clear.cgColor)
+            context.setLineWidth(layer.lineWidth)
+            if nil != layer.fillColor {
+                context.fillPath()
+            }
+            if nil != layer.strokeColor {
+                context.strokePath()
+            }
+            
             context.restoreGState()
         }
+        context.restoreGState()
     }
     
     internal func updateSelector(to position: ColumnUIModel.UIData) {
@@ -84,22 +108,19 @@ internal class ColumnViewLayerWrapper
     }
     
     internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
-        if let ui = self.ui, let date = date, let position = ui.dataTranslate(date: date, to: layer.bounds) {
+        let selectorIsVisible = nil != date && (self.ui?.isVisible ?? false)
+        if let ui = self.ui, let date = date, let position = ui.dataTranslate(date: date, to: layer.bounds), selectorIsVisible {
             fromSelectorPointData = nil
             toSelectorPointData = position
             updateSelector(to: position)
+        } else {
+            fromSelectorPointData = nil
+            toSelectorPointData = nil
         }
         
-        if (nil == selectedDate && nil != date) || (nil != selectedDate && nil == date) {
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(animated ? duration : 0.0)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-
-            selectorLayer.opacity = nil != date ? 1.0 : 0.0
-            CATransaction.commit()
-        }
-
         self.selectedDate = date
+        
+        confirmSelectorOpacity(animated: animated, duration: duration)
     }
 
     internal func update(ui: ColumnUIModel, animated: Bool, duration: TimeInterval, t: CGFloat) {
@@ -113,6 +134,7 @@ internal class ColumnViewLayerWrapper
         confirmOpacity(ui: ui, animated: animated, duration: duration)
         confirmPoints(ui: ui, animated: animated, duration: duration)
         confirmSelector(ui: ui, animated: animated, duration: duration)
+        confirmSelectorOpacity(animated: animated, duration: duration)
     }
     
     private func updateSelector(ui: ColumnUIModel, t: CGFloat) {
@@ -208,6 +230,19 @@ internal class ColumnViewLayerWrapper
             }
         }
     }
+    
+    private func confirmSelectorOpacity(animated: Bool, duration: TimeInterval) {
+        let selectorIsVisible = nil != selectedDate && (self.ui?.isVisible ?? false)
+        
+        if (selectorLayer.opacity < 1 && selectorIsVisible) || (selectorLayer.opacity > 0 && !selectorIsVisible) {
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(animated ? duration : 0.0)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
+            
+            selectorLayer.opacity = selectorIsVisible ? 1.0 : 0.0
+            CATransaction.commit()
+        }
+    }
 
     private func confirmPoints(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         fillLayer(pathLayer)
@@ -234,28 +269,6 @@ internal class ColumnViewLayerWrapper
             CATransaction.commit()
         }
         oldIsVisible = ui.isVisible
-    }
-    
-    private func drawSelectorContext(to context: CGContext) {
-        for layer in selectorLayers {
-            guard let path = layer.path else {
-                continue
-            }
-            context.saveGState()
-            context.addPath(path)
-            
-            context.setFillColor(layer.fillColor ?? UIColor.clear.cgColor)
-            context.setStrokeColor(layer.strokeColor ?? UIColor.clear.cgColor)
-            context.setLineWidth(layer.lineWidth)
-            if nil != layer.fillColor {
-                context.fillPath()
-            }
-            if nil != layer.strokeColor {
-                context.strokePath()
-            }
-            
-            context.restoreGState()
-        }
     }
     
     private func calculateInterval(for uis: [ColumnUIModel]) -> ChartViewModel.Interval {
