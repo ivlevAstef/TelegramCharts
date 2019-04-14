@@ -9,8 +9,8 @@
 import UIKit
 
 private enum Consts {
-    internal static let imageTopOffset: CGFloat = 8.0
-    internal static let imageBottomOffset: CGFloat = 8.0
+    internal static let topOffset: CGFloat = 7.0
+    internal static let bottomOffset: CGFloat = 5.0
 }
 
 internal final class ColumnsView: UIView
@@ -25,6 +25,7 @@ internal final class ColumnsView: UIView
     private var ui: ChartUIModel?
     private var columnViews: [ColumnViewLayerWrapper] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
+    private let clipContentView: UIView = UIView(frame: .zero)
     private let contentView: UIView = UIView(frame: .zero)
     private var margins: UIEdgeInsets = .zero
     private var style: ChartStyle? = nil
@@ -37,18 +38,18 @@ internal final class ColumnsView: UIView
     private var oldTime: DT = currentTime()
     private var oldDuration: TimeInterval = 0.0
     private var delayOfSec: Double = 1.0 / 60.0
-    
-    private var imageTopOffset: CGFloat = 0.0
-    private var imageBottomOffset: CGFloat = 0.0
 
     internal init() {
         super.init(frame: .zero)
 
         cacheImageView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(cacheImageView)
-        
+
+        clipContentView.clipsToBounds = true
+        clipContentView.translatesAutoresizingMaskIntoConstraints = true
+        addSubview(clipContentView)
         contentView.translatesAutoresizingMaskIntoConstraints = true
-        addSubview(contentView)
+        clipContentView.addSubview(contentView)
     }
     
     internal func setStyle(_ style: ChartStyle) {
@@ -59,15 +60,6 @@ internal final class ColumnsView: UIView
     }
     
     internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
-        if nil == date {
-            imageTopOffset = 0.0
-            imageBottomOffset = 0.0
-        } else {
-            imageTopOffset = Consts.imageTopOffset
-            imageBottomOffset = Consts.imageBottomOffset
-        }
-        updateImageFrameIfNeeded()
-        
         var needUpdateAny: Bool = false
         for columnView in columnViews {
             columnView.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
@@ -114,7 +106,7 @@ internal final class ColumnsView: UIView
 
     internal func setCornerRadius(_ cornerRadius: CGFloat) {
         self.cornerRadius = cornerRadius
-        
+
         contentView.layer.cornerRadius = cornerRadius
         contentView.layer.masksToBounds = cornerRadius > 0
         cacheImageView.layer.cornerRadius = cornerRadius
@@ -145,26 +137,26 @@ internal final class ColumnsView: UIView
     }
 
     private func updateFrame() {
-        contentView.frame = bounds
+        let rect = CGRect(x: bounds.origin.x, y: bounds.origin.y - Consts.topOffset,
+                          width: bounds.width, height: bounds.height + Consts.topOffset + Consts.bottomOffset)
+        if !rect.equalTo(cacheImageView.frame) {
+            cacheImageView.frame = rect
+        }
+
+        if !rect.equalTo(clipContentView.frame) {
+            clipContentView.frame = rect
+            contentView.frame = clipContentView.bounds
+        }
         
-        updateImageFrameIfNeeded()
-        
-        let rect = CGRect(x: bounds.minX + margins.left,
-                          y: bounds.minY + margins.top,
-                          width: bounds.width - margins.left - margins.right,
-                          height: bounds.height - margins.top - margins.bottom)
+        let subRect = CGRect(x: bounds.minX + margins.left,
+                             y: bounds.minY + margins.top + Consts.topOffset,
+                             width: bounds.width - margins.left - margins.right,
+                             height: bounds.height - margins.top - margins.bottom)
         for view in columnViews {
-            view.layer.frame = rect
-            view.selectorLayer.frame = rect
+            view.layer.frame = subRect
+            view.selectorLayer.frame = subRect
             view.minX = -margins.left - 2 // reserve
             view.maxX = bounds.width + 2 // reserve
-        }
-    }
-    private func updateImageFrameIfNeeded() {
-        let imageRect = CGRect(x: bounds.origin.x, y: bounds.origin.y - imageTopOffset,
-                               width: bounds.width, height: bounds.height + imageTopOffset + imageBottomOffset)
-        if !imageRect.equalTo(cacheImageView.frame) {
-            cacheImageView.frame = imageRect
         }
     }
 
@@ -175,7 +167,7 @@ internal final class ColumnsView: UIView
         let fullDuration = animated ? (delayOfSec + duration) : delayOfSec
         let deadline: DispatchTime = .now() + fullDuration
 
-        let size = CGSize(width: frame.width, height: frame.height + imageTopOffset + imageBottomOffset)
+        let size = CGSize(width: frame.width, height: frame.height + Consts.topOffset + Consts.bottomOffset)
         var capturedBlock: DispatchWorkItem!
         let block = DispatchWorkItem { [weak self] in
             guard let `self` = self else {
@@ -204,7 +196,7 @@ internal final class ColumnsView: UIView
             return nil
         }
 
-        context.translateBy(x: margins.left, y: margins.top + imageTopOffset)
+        context.translateBy(x: margins.left, y: margins.top + Consts.topOffset)
         columnViews.forEach { $0.drawCurrentState(to: context) }
         columnViews.forEach { $0.drawSelectorState(to: context) }
 
