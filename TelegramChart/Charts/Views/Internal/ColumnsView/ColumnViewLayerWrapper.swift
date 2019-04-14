@@ -54,7 +54,7 @@ internal class ColumnViewLayerWrapper
     private var oldDuration: TimeInterval = 0.0
 
     private let pathLayer: CAShapeLayer
-    private var oldIsVisible: Bool = true
+    private var isVisible: Bool = true
 
     private var saveOldPath: CGPath?
     private var saveNewPath: CGPath?
@@ -89,7 +89,7 @@ internal class ColumnViewLayerWrapper
     }
     
     internal func drawCurrentState(to context: CGContext) {
-        guard let path = saveNewPath, oldIsVisible else {
+        guard let path = saveNewPath, isVisible else {
             return
         }
         
@@ -272,7 +272,7 @@ internal class ColumnViewLayerWrapper
     }
 
     private func confirmOpacity(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
-        if oldIsVisible != ui.isVisible && ui.isOpacity {
+        if isVisible != ui.isVisible && ui.isOpacity {
             let opacity: Float = ui.isVisible ? 1.0 : 0.0
             if animated {
                 Support.opacityAnimation(duration: duration, to: opacity, on: layer)
@@ -280,7 +280,7 @@ internal class ColumnViewLayerWrapper
                 layer.opacity = opacity
             }
         }
-        oldIsVisible = ui.isVisible
+        isVisible = ui.isVisible
     }
     
     private func calculateInterval(for uis: [ColumnUIModel]) -> ChartViewModel.Interval {

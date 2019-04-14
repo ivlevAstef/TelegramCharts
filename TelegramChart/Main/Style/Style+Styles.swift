@@ -66,7 +66,7 @@ extension Style
         textShadowColor: UIColor(r: 33, g: 47, b: 63).withAlphaComponent(0.75),
         dotColor: UIColor(r: 33, g: 47, b: 63),
         linesColor: UIColor(hex: "8596AB", alpha: 0.2),
-        focusLineColor: UIColor(hex: "8596AB", alpha: 0.3),
+        focusLineColor: UIColor(hex: "BACCE1", alpha: 0.6),
         intervalUnvisibleColor: UIColor(hex: "18222D", alpha: 0.6),
         intervalBorderColor: UIColor(hex: "56626D"),
         intervalArrowColor: .white
