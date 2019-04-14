@@ -128,13 +128,13 @@ internal final class HintAndOtherView: UIView
             }
             return nil
         }
-        
+
         let position = ui.translate(date: date, to: bounds)
 
         let animated = needAnimated(hintView)
         hintView.isHidden = false
         let percentage = ui.percentage
-        
+
         hintView.preRows(rows, percentage: percentage)
         UIView.animateIf(animated, duration: Configs.hintDuration, animations: { [weak self] in
             self?.hintView.setDate(date)
@@ -146,20 +146,20 @@ internal final class HintAndOtherView: UIView
                 self?.hintView.alpha = 1.0
             })
         }
-    
+
         var minY = bounds.height
         for column in ui.columns {
             if let data = column.find(by: date).flatMap({ column.translate(data: $0, to: bounds) }) {
                 minY = min(minY, min(data.to.y, data.from.y))
             }
         }
-        
+
         let date1Pos = ui.translate(date: ui.dates[0], to: bounds)
         let date2Pos = ui.translate(date: ui.dates[1], to: bounds)
         let width = max(Consts.pointSize, (date2Pos - date1Pos))
         var rect = CGRect(x: position - width * 0.5, y: minY, width: width, height: bounds.height - minY)
         rect = rect.insetBy(dx: -6, dy: 0)
-        
+
         let limit = bounds
         UIView.animateIf(animated, duration: Configs.hintPositionDuration, animations: { [weak self] in
             self?.hintView.setPosition(position, aroundRect: rect, limit: limit)
@@ -189,8 +189,22 @@ internal final class HintAndOtherView: UIView
     }
 }
 
-extension UILabel {
-    func maxSizeToFit() {
+class OptimizeUILabel: UILabel {
+    private var maxTextLength: Int = 0
+    
+    func optimizeReText(_ text: String?) {
+        if self.text == text {
+            return
+        }
+        
+        self.text = text
+        if let text = text, text.count >= maxTextLength {
+            maxTextLength = text.count
+            maxSizeToFit()
+        }
+    }
+    
+    private func maxSizeToFit() {
         let size = self.frame.size
         sizeToFit()
         if size.width != self.frame.width {
@@ -207,13 +221,13 @@ private final class HintView: UIView
     private final class Row: UIView {
         internal let id: Int
         
-        internal let percentageLabel: UILabel?
-        internal let leftLabel: UILabel = UILabel(frame: .zero)
-        internal let rightLabel: UILabel = UILabel(frame: .zero)
+        internal let percentageLabel: OptimizeUILabel?
+        internal let leftLabel: OptimizeUILabel = OptimizeUILabel(frame: .zero)
+        internal let rightLabel: OptimizeUILabel = OptimizeUILabel(frame: .zero)
 
         internal init(id: Int, accentFont: UIFont, font: UIFont, percentage: Bool, parent: UIView) {
             self.id = id
-            self.percentageLabel = percentage ? UILabel(frame: .zero) : nil
+            self.percentageLabel = percentage ? OptimizeUILabel(frame: .zero) : nil
             
             super.init(frame: .zero)
             
@@ -276,7 +290,7 @@ private final class HintView: UIView
     private let font: UIFont
     private let accentFont: UIFont
 
-    private let dateLabel: UILabel = UILabel(frame: .zero)
+    private let dateLabel: OptimizeUILabel = OptimizeUILabel(frame: .zero)
     private let arrowView: UIImageView = ArrowView(reverse: true, size: Consts.arrowSize, offset: Consts.arrowOffset)
     private var rowsView: [Row] = []
     private var lastIntersectTime: Date = Date()
@@ -303,10 +317,9 @@ private final class HintView: UIView
         let date = Date(timeIntervalSince1970: TimeInterval(date) / 1000.0)
         let dateOfStr = HintView.dateFormatter.string(from: date)
         dateLabel.font = accentFont
-        dateLabel.text = dateOfStr
+        dateLabel.optimizeReText(dateOfStr)
         dateLabel.textColor = textColor
         dateLabel.frame.origin = CGPoint(x: Consts.innerHintPadding, y: Consts.innerHintPadding)
-        dateLabel.maxSizeToFit()
         
         arrowView.center.y = dateLabel.center.y
         
@@ -354,17 +367,14 @@ private final class HintView: UIView
                 continue
             }
 
-            rowView.rightLabel.text = numberFormatter.string(from: NSNumber(value: value))
+            rowView.rightLabel.optimizeReText(numberFormatter.string(from: NSNumber(value: value)))
             rowView.rightLabel.textColor = color
-            rowView.rightLabel.maxSizeToFit()
             
-            rowView.leftLabel.text = name
+            rowView.leftLabel.optimizeReText(name)
             rowView.leftLabel.textColor = textColor
-            rowView.leftLabel.maxSizeToFit()
             
-            rowView.percentageLabel?.text = "\(Int(round(100.0 * Double(value) / sum)))%"
+            rowView.percentageLabel?.optimizeReText("\(Int(round(100.0 * Double(value) / sum)))%")
             rowView.percentageLabel?.textColor = textColor
-            rowView.percentageLabel?.maxSizeToFit()
 
             rightX = max(rightX, Consts.innerHintPadding + rowView.minWidth())
         }

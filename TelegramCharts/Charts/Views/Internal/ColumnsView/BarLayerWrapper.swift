@@ -51,9 +51,22 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         return mainColor
     }
     
-    internal override func updateSelector(to position: ColumnUIModel.UIData) {
+    internal override func updateSelector(to position: ColumnUIModel.UIData, animated: Bool, duration: TimeInterval) {
         guard let ui = self.ui else {
             return
+        }
+        
+        let animated = false
+        
+        if animated {
+            let lastLayer = CAShapeLayer()
+            lastLayer.fillColor = selectorLayers[0].fillColor
+            lastLayer.path = selectorLayers[0].path
+            lastLayer.opacity = 1.0
+            selectorLayer.addSublayer(lastLayer)
+            opacityAnimated(duration: duration, to: 0.0, on: lastLayer, completion: {
+                lastLayer.removeFromSuperlayer()
+            })
         }
         
         selectorLayers[0].fillColor = ui.color.cgColor
@@ -64,6 +77,23 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
                                              height: position.from.y - position.to.y))
         
         selectorLayers[0].path = path.cgPath
+        
+        if animated {
+            let layer = selectorLayers[0]
+            layer.opacity = 0.0
+            opacityAnimated(duration: duration, to: 1.0, on: layer)
+        }
+    }
+    
+    private func opacityAnimated(duration: TimeInterval, to opacity: Float, on layer: CAShapeLayer, completion: (() -> Void)? = nil)
+    {
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(duration)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
+        CATransaction.setCompletionBlock(completion)
+        
+        layer.opacity = opacity
+        CATransaction.commit()
     }
     
     internal override func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {

@@ -40,7 +40,7 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
         context.fillPath()
     }
     
-    internal override func updateSelector(to position: ColumnUIModel.UIData) {
+    internal override func updateSelector(to position: ColumnUIModel.UIData, animated: Bool, duration: TimeInterval) {
         guard let ui = self.ui else {
             return
         }

@@ -49,8 +49,6 @@ internal final class ColumnsView: UIView
         
         contentView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(contentView)
-        
-        contentView.clipsToBounds = true
     }
     
     internal func setStyle(_ style: ChartStyle) {

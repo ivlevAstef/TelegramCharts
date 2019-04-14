@@ -33,17 +33,19 @@ internal struct ChartUIModel
         self.percentage = chartVM.percentage
         
         let fixedInterval = calcFixedInterval(by: fully ? fullInterval : interval, use: chartVM.dates)
+        let c = (16.0 + 5) / Double(UIScreen.main.bounds.width)
+        let longInterval = calcLongInterval(by: fully ? fullInterval : interval, use: chartVM.dates, c: c)
         
         if chartVM.percentage {
             self.aabb = percentageAABB(viewModel: chartVM, interval: fixedInterval)
         } else if chartVM.stacked {
-            self.aabb = stackedAABB(viewModel: chartVM, interval: fixedInterval)
+            self.aabb = stackedAABB(viewModel: chartVM, interval: fixedInterval, longInterval: longInterval)
         } else {
-            self.aabb = normalAABB(viewModel: chartVM, interval: fixedInterval)
+            self.aabb = normalAABB(viewModel: chartVM, interval: fixedInterval, longInterval: longInterval)
         }
         
         if chartVM.yScaled {
-            self.columns = y2Calculator(viewModel: chartVM, interval: fixedInterval, aabb: self.aabb, size: size)
+            self.columns = y2Calculator(viewModel: chartVM, interval: fixedInterval, longInterval: longInterval, aabb: self.aabb, size: size)
         } else if chartVM.stacked {
             self.columns = stackedCalculator(viewModel: chartVM, interval: fixedInterval, aabb: self.aabb, size: size)
         } else {
@@ -113,13 +115,13 @@ private func makePercentageValueModifier(viewModel chartVM: ChartViewModel, inte
 
 // AABB
 
-private func stackedAABB(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval) -> AABB {
+private func stackedAABB(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, longInterval: ChartViewModel.Interval) -> AABB {
     var minValue: AABB.Value = 0
     var maxValue: AABB.Value = 0
     
     let visibleColumns = chartVM.columns.filter { $0.isVisible }
     for i in 0..<chartVM.dates.count {
-        if interval.from <= chartVM.dates[i] && chartVM.dates[i] <= interval.to {
+        if longInterval.from <= chartVM.dates[i] && chartVM.dates[i] <= longInterval.to {
             let value = AABB.Value(visibleColumns.map { $0.values[i] }.reduce(0, +))
             
             minValue = min(minValue, value)
@@ -134,13 +136,13 @@ private func percentageAABB(viewModel chartVM: ChartViewModel, interval: ChartVi
     return AABB(minDate: interval.from, maxDate: interval.to, minValue: 0, maxValue: 100)
 }
 
-private func normalAABB(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval) -> AABB {
+private func normalAABB(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, longInterval: ChartViewModel.Interval) -> AABB {
     var minValue: AABB.Value = AABB.Value.greatestFiniteMagnitude
     var maxValue: AABB.Value = -AABB.Value.greatestFiniteMagnitude
     
     let visibleColumns = chartVM.columns.filter { $0.isVisible }
     for i in 0..<chartVM.dates.count {
-        if interval.from <= chartVM.dates[i] && chartVM.dates[i] <= interval.to {
+        if longInterval.from <= chartVM.dates[i] && chartVM.dates[i] <= longInterval.to {
             for column in visibleColumns {
                 minValue = min(minValue, AABB.Value(column.values[i]))
                 maxValue = max(maxValue, AABB.Value(column.values[i]))
@@ -203,13 +205,14 @@ private func simpleCalculator(viewModel chartVM: ChartViewModel, interval: Chart
     }
 }
 
-private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, aabb: AABB, size: Double) -> [ColumnUIModel] {
+private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartViewModel.Interval, longInterval: ChartViewModel.Interval,
+                          aabb: AABB, size: Double) -> [ColumnUIModel] {
     func calculateAABB(column: ColumnViewModel) -> AABB {
         var minValue: AABB.Value = AABB.Value.greatestFiniteMagnitude
         var maxValue: AABB.Value = -AABB.Value.greatestFiniteMagnitude
         
         for i in 0..<chartVM.dates.count {
-            if interval.from <= chartVM.dates[i] && chartVM.dates[i] <= interval.to {
+            if longInterval.from <= chartVM.dates[i] && chartVM.dates[i] <= longInterval.to {
                 minValue = min(minValue, AABB.Value(column.values[i]))
                 maxValue = max(maxValue, AABB.Value(column.values[i]))
             }
@@ -234,11 +237,20 @@ private func y2Calculator(viewModel chartVM: ChartViewModel, interval: ChartView
 
 // MARK: - Support
 
-private func calcFixedInterval(by interval: ChartViewModel.Interval, use dates: [Chart.Date]) -> ChartViewModel.Interval {
-    let dateStep = dates[1] - dates[0]
+private func calcLongInterval(by interval: ChartViewModel.Interval, use dates: [Chart.Date], c: Double) -> ChartViewModel.Interval {
+    let dateStep = Double(dates[1] - dates[0])
+    let dateRange = Double(interval.to - interval.from)
     
-    let minDate = max(dates[0], interval.from - 1 * dateStep)
-    let maxDate = min(dates[dates.count - 1], interval.to + 1 * dateStep)
+    let minDate = max(dates[0], Chart.Date(Double(interval.from) - 2.0 * dateStep - c * dateRange))
+    let maxDate = min(dates[dates.count - 1], Chart.Date(Double(interval.to) + 2.0 * dateStep + c * dateRange))
+    
+    return ChartViewModel.Interval(from: minDate, to: maxDate)
+}
+
+private func calcFixedInterval(by interval: ChartViewModel.Interval, use dates: [Chart.Date]) -> ChartViewModel.Interval {
+    let dateStep = Double(dates[1] - dates[0])
+    let minDate = max(dates[0], Chart.Date(Double(interval.from) - 1.0 * dateStep))
+    let maxDate = min(dates[dates.count - 1], Chart.Date(Double(interval.to) + 1.0 * dateStep))
     
     return ChartViewModel.Interval(from: minDate, to: maxDate)
 }

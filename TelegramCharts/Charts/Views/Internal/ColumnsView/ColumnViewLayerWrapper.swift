@@ -103,7 +103,7 @@ internal class ColumnViewLayerWrapper
         context.restoreGState()
     }
     
-    internal func updateSelector(to position: ColumnUIModel.UIData) {
+    internal func updateSelector(to position: ColumnUIModel.UIData, animated: Bool, duration: TimeInterval) {
         fatalError("override")
     }
     
@@ -112,7 +112,7 @@ internal class ColumnViewLayerWrapper
         if let ui = self.ui, let date = date, let position = ui.dataTranslate(date: date, to: layer.bounds), selectorIsVisible {
             fromSelectorPointData = nil
             toSelectorPointData = position
-            updateSelector(to: position)
+            updateSelector(to: position, animated: animated, duration: duration)
         } else {
             fromSelectorPointData = nil
             toSelectorPointData = nil
@@ -213,11 +213,11 @@ internal class ColumnViewLayerWrapper
         for layer in selectorLayers {
             var oldPath: CGPath? = nil
             if let fromPositionData = fromSelectorPointData {
-                updateSelector(to: fromPositionData) // update path
+                updateSelector(to: fromPositionData, animated: false, duration: 0.0) // update path
                 oldPath = layer.path
             }
             
-            updateSelector(to: toPositionData) // update path
+            updateSelector(to: toPositionData, animated: false, duration: 0.0) // update path
             
             if animated && nil != oldPath && nil != layer.path {
                 let animation = CABasicAnimation(keyPath: "path")

@@ -42,7 +42,7 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
         context.strokePath()
     }
     
-    internal override func updateSelector(to position: ColumnUIModel.UIData) {
+    internal override func updateSelector(to position: ColumnUIModel.UIData, animated: Bool, duration: TimeInterval) {
         guard let ui = self.ui else {
             return
         }
