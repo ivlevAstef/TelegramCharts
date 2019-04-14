@@ -33,7 +33,7 @@ public class IntervalView: UIView
     private let margins: UIEdgeInsets
     private var viewModel: ChartViewModel? = nil
     private var ui: ChartUIModel? = nil
-    private var columnsView: ColumnsView = ColumnsView()
+    private var columnsView: ColumnsView = ColumnsView(isAdditionalOffset: false)
     private var columnsViewRect: CGRect = .zero
     private var intervalDrawableView: IntervalDrawableView = IntervalDrawableView()
 
@@ -57,6 +57,7 @@ public class IntervalView: UIView
     public func setChart(_ chartViewModel: ChartViewModel) {
         chartViewModel.registerUpdateListener(self)
 
+        columnsView.setCornerRadius(Consts.cornerRadius)
         columnsView.premake(margins: .zero, types: chartViewModel.columns.map { $0.type })
 
         self.viewModel = chartViewModel
@@ -95,7 +96,6 @@ public class IntervalView: UIView
                                  height: bounds.height - 2 * Consts.verticalPadding - margins.top - margins.bottom)
 
         columnsView.frame = columnsViewRect
-        columnsView.setCornerRadius(Consts.cornerRadius)
         
         self.intervalDrawableView.frame = CGRect(x: Consts.padding + margins.left,
                                                  y: margins.top,

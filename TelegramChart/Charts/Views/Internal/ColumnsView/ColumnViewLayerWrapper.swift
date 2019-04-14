@@ -16,6 +16,8 @@ internal class ColumnViewLayerWrapper
     
     internal private(set) var selectedDate: Chart.Date?
     internal private(set) var ui: ColumnUIModel?
+
+    internal var isFirst: Bool = false
     
     internal let selectorLayer: CALayer = CALayer()
     internal let selectorLayers: [CAShapeLayer]
@@ -109,7 +111,8 @@ internal class ColumnViewLayerWrapper
     
     internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
         let selectorIsVisible = nil != date && (self.ui?.isVisible ?? false)
-        if let ui = self.ui, let date = date, let position = ui.dataTranslate(date: date, to: layer.bounds), selectorIsVisible {
+        if let ui = self.ui, let date = date,
+           let position = ui.dataTranslate(date: date, to: selectorLayer.bounds), selectorIsVisible {
             fromSelectorPointData = nil
             toSelectorPointData = position
             updateSelector(to: position, animated: animated, duration: duration)
@@ -142,7 +145,7 @@ internal class ColumnViewLayerWrapper
             return
         }
         
-        guard let newPointData = ui.dataTranslate(date: date, to: layer.bounds) else {
+        guard let newPointData = ui.dataTranslate(date: date, to: selectorLayer.bounds) else {
             assert(false)
             return
         }
@@ -208,7 +211,6 @@ internal class ColumnViewLayerWrapper
         guard let toPositionData = toSelectorPointData else {
             return
         }
-        
         
         for layer in selectorLayers {
             var oldPath: CGPath? = nil

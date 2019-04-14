@@ -164,11 +164,11 @@
 		BA56DDE2226307FB007DB4E9 /* TelegramChart */ = {
 			isa = PBXGroup;
 			children = (
-				BA56DDE3226307FB007DB4E9 /* Resources */,
+				BA56DE1B226307FB007DB4E9 /* Main */,
 				BA56DDF7226307FB007DB4E9 /* Charts */,
+				BA56DDE3226307FB007DB4E9 /* Resources */,
 				BA56DE15226307FB007DB4E9 /* Utils */,
 				BA56DE1A226307FB007DB4E9 /* AppDelegate.swift */,
-				BA56DE1B226307FB007DB4E9 /* Main */,
 			);
 			path = TelegramChart;
 			sourceTree = "<group>";
@@ -188,10 +188,10 @@
 		BA56DDF7226307FB007DB4E9 /* Charts */ = {
 			isa = PBXGroup;
 			children = (
-				BA56DDF8226307FB007DB4E9 /* ChartProvider.swift */,
 				BA56DE01226307FB007DB4E9 /* Configs.swift */,
-				BA56DE02226307FB007DB4E9 /* CallFrequenceLimiter.swift */,
 				BA56DE03226307FB007DB4E9 /* ChartStyle.swift */,
+				BA56DDF8226307FB007DB4E9 /* ChartProvider.swift */,
+				BA56DE02226307FB007DB4E9 /* CallFrequenceLimiter.swift */,
 				BA56DDF9226307FB007DB4E9 /* Models */,
 				BA56DE04226307FB007DB4E9 /* Views */,
 			);
@@ -201,13 +201,13 @@
 		BA56DDF9226307FB007DB4E9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				BA56DDFA226307FB007DB4E9 /* ColumnUIModel.swift */,
-				BA56DDFB226307FB007DB4E9 /* Column.swift */,
-				BA56DDFC226307FB007DB4E9 /* Chart.swift */,
-				BA56DDFD226307FB007DB4E9 /* ChartViewModel.swift */,
-				BA56DDFE226307FB007DB4E9 /* AABB.swift */,
-				BA56DDFF226307FB007DB4E9 /* ColumnViewModel.swift */,
 				BA56DE00226307FB007DB4E9 /* ChartUIModel.swift */,
+				BA56DDFA226307FB007DB4E9 /* ColumnUIModel.swift */,
+				BA56DDFD226307FB007DB4E9 /* ChartViewModel.swift */,
+				BA56DDFF226307FB007DB4E9 /* ColumnViewModel.swift */,
+				BA56DDFC226307FB007DB4E9 /* Chart.swift */,
+				BA56DDFB226307FB007DB4E9 /* Column.swift */,
+				BA56DDFE226307FB007DB4E9 /* AABB.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -242,9 +242,9 @@
 				BA56DE0C226307FB007DB4E9 /* ColumnsViewFabric.swift */,
 				BA56DE11226307FB007DB4E9 /* ColumnsView.swift */,
 				BA56DE0D226307FB007DB4E9 /* ColumnViewLayerWrapper.swift */,
+				BA56DE10226307FB007DB4E9 /* PolyLineLayerWrapper.swift */,
 				BA56DE0E226307FB007DB4E9 /* BarLayerWrapper.swift */,
 				BA56DE0F226307FB007DB4E9 /* AreaViewLayerWrapper.swift */,
-				BA56DE10226307FB007DB4E9 /* PolyLineLayerWrapper.swift */,
 			);
 			path = ColumnsView;
 			sourceTree = "<group>";

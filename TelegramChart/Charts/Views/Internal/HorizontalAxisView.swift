@@ -23,6 +23,7 @@ internal final class HorizontalAxisView: UIView
     private var color: UIColor = .black
     
     private var dateLabels: [DateLabel] = []
+    private var dateLabelCache: [Chart.Date: DateLabel] = [:]
     
     private let callFrequenceLimiter = CallFrequenceLimiter()
     
@@ -35,6 +36,9 @@ internal final class HorizontalAxisView: UIView
 
         for subview in subviews.compactMap({ $0 as? DateLabel }) {
             subview.setStyle(color: color)
+        }
+        for label in dateLabelCache.values {
+            label.setStyle(color: color)
         }
     }
     
@@ -77,8 +81,9 @@ internal final class HorizontalAxisView: UIView
                 label = prevLabels[index]
                 prevLabels.remove(at: index)
             } else {
-                label = DateLabel(date: date, font: font, color: color)
+                label = dateLabelCache[date] ?? DateLabel(date: date, font: font, color: color)
                 label.translatesAutoresizingMaskIntoConstraints = true
+                dateLabelCache[date] = label
                 addSubview(label)
                 newLabels.append(label)
                 
@@ -183,6 +188,8 @@ private final class DateLabel: UILabel
         self.font = font
         self.textColor = color
         self.sizeToFit()
+
+        self.frame.origin.y = Consts.topPadding
     }
 
     internal func setStyle(color: UIColor) {
@@ -190,7 +197,10 @@ private final class DateLabel: UILabel
     }
 
     internal func setPosition(_ position: CGFloat, t: Double) {
-        self.frame.origin = CGPoint(x: position - CGFloat(t) * self.frame.width, y: Consts.topPadding)
+        let x = position - CGFloat(t) * self.frame.width
+        if abs(x - self.frame.origin.x) >= 1.0 {
+            self.frame.origin.x = x
+        }
     }
     
     internal required init?(coder aDecoder: NSCoder) {

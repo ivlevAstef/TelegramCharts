@@ -56,19 +56,18 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
             return
         }
         
-        let animated = false
-        
-        if animated {
-            let lastLayer = CAShapeLayer()
-            lastLayer.fillColor = selectorLayers[0].fillColor
-            lastLayer.path = selectorLayers[0].path
-            lastLayer.opacity = 1.0
-            selectorLayer.addSublayer(lastLayer)
-            opacityAnimated(duration: duration, to: 0.0, on: lastLayer, completion: {
-                lastLayer.removeFromSuperlayer()
-            })
-        }
-        
+//
+//        if animated {
+//            let lastLayer = CAShapeLayer()
+//            lastLayer.fillColor = selectorLayers[0].fillColor
+//            lastLayer.path = selectorLayers[0].path
+//            lastLayer.opacity = 1.0
+//            selectorLayer.addSublayer(lastLayer)
+//            opacityAnimated(duration: duration, to: 0.0, on: lastLayer, completion: {
+//                lastLayer.removeFromSuperlayer()
+//            })
+//        }
+
         selectorLayers[0].fillColor = ui.color.cgColor
         
         let path = UIBezierPath(rect: CGRect(x: position.from.x - lastStep,
@@ -78,11 +77,11 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         
         selectorLayers[0].path = path.cgPath
         
-        if animated {
-            let layer = selectorLayers[0]
-            layer.opacity = 0.0
-            opacityAnimated(duration: duration, to: 1.0, on: layer)
-        }
+//        if animated {
+//            let layer = selectorLayers[0]
+//            layer.opacity = 0.0
+//            opacityAnimated(duration: duration, to: 1.0, on: layer)
+//        }
     }
     
     private func opacityAnimated(duration: TimeInterval, to opacity: Float, on layer: CAShapeLayer, completion: (() -> Void)? = nil)

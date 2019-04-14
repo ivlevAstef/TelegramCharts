@@ -208,6 +208,8 @@ private protocol ValueViewProtocol {
     func setWidth(_ width: CGFloat)
 }
 
+
+private var valueViewsCache: [String: CGSize] = [:]
 private final class ValueView<T>: UIView, ValueViewProtocol
 {
     internal private(set) var value: AABB.Value = 0
@@ -226,7 +228,6 @@ private final class ValueView<T>: UIView, ValueViewProtocol
         }
     }
 
-    private var labelSize: CGSize = .zero
     private let label: UILabel = UILabel(frame: .zero)
     private let shadow: UIView = UIView(frame: .zero)
     private let line: UIView = UIView(frame: .zero)
@@ -234,30 +235,32 @@ private final class ValueView<T>: UIView, ValueViewProtocol
     internal init(value: AABB.Value, font: UIFont, parentWidth: CGFloat) {
         super.init(frame: CGRect(x: 0, y: 0, width: parentWidth, height: 0))
         updateValue(value)
-        
+
         shadow.translatesAutoresizingMaskIntoConstraints = true
         addSubview(shadow)
         label.translatesAutoresizingMaskIntoConstraints = true
         addSubview(label)
         line.translatesAutoresizingMaskIntoConstraints = true
         addSubview(line)
-        
-        label.text = ValueView.abbreviationNumber(Int64(value))
+
+        let text = ValueView.abbreviationNumber(Int64(value))
+        label.text = text
         label.font = font
-        label.sizeToFit()
-        labelSize = label.frame.size
-        shadow.frame = label.frame.inset(by: UIEdgeInsets(top: 2, left: -2, bottom: 2, right: -2))
-        label.frame.origin.x = Consts.labelPadding
-        label.frame.size.width = parentWidth - 2 * Consts.labelPadding
-        
-        let widthDiff = (shadow.frame.width - labelSize.width) * 0.5
-        if T.self is Right.Type {
-            label.textAlignment = .right
-            shadow.frame.origin.x = parentWidth - labelSize.width - Consts.labelPadding - widthDiff
+        if let size = valueViewsCache[text] {
+            label.frame.size = size
         } else {
-            label.textAlignment = .left
-            shadow.frame.origin.x = Consts.labelPadding - widthDiff
+            label.sizeToFit()
+            valueViewsCache[text] = label.frame.size
         }
+
+        shadow.frame = label.frame.inset(by: UIEdgeInsets(top: 2, left: -2, bottom: 2, right: -2))
+
+        if T.self is Right.Type {
+            label.frame.origin.x = parentWidth - label.frame.width - Consts.labelPadding
+        } else {
+            label.frame.origin.x = Consts.labelPadding
+        }
+        shadow.frame.origin.x = label.frame.origin.x - (shadow.frame.width - label.frame.width) * 0.5
 
         frame.size.height = label.frame.height + 1
 
@@ -272,19 +275,19 @@ private final class ValueView<T>: UIView, ValueViewProtocol
     internal func setStyle(color: UIColor, lineColor: UIColor, shadowColor: UIColor) {
         label.textColor = columnColor ?? color
         line.backgroundColor = lineColor
-        
+
         shadow.layer.cornerRadius = 5.0
+        shadow.layer.masksToBounds = true
         shadow.backgroundColor = shadowColor
     }
     
     internal func setWidth(_ width: CGFloat) {
         frame.size.width = width
         line.frame.size.width = width
-        label.frame.size.width = width
         
         if T.self is Right.Type {
-            let widthDiff = (shadow.frame.width - labelSize.width) * 0.5
-            shadow.frame.origin.x = width - labelSize.width - Consts.labelPadding - widthDiff
+            label.frame.origin.x = width - label.frame.width - Consts.labelPadding
+            shadow.frame.origin.x = label.frame.origin.x - (shadow.frame.width - label.frame.width) * 0.5
         }
     }
 

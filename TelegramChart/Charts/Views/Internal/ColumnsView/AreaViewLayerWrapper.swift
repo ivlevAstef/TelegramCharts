@@ -18,13 +18,14 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
 {
     
     internal init() {
-        super.init(countSelectorLayers: 2)
+        // First line, second round, third center
+        super.init(countSelectorLayers: 1)
     }
     
     internal override func setStyle(_ style: ChartStyle) {
         super.setStyle(style)
-        selectorLayers[1].fillColor = style.dotColor.cgColor
-        //lineColor = style.focusLineColor
+        selectorLayers[0].strokeColor = style.focusLineColor.cgColor
+        selectorLayers[0].lineWidth = 1.0
     }
     
     
@@ -44,15 +45,18 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
         guard let ui = self.ui else {
             return
         }
-        
-        let bezierPaths = [
-            UIBezierPath(arcCenter: position.to, radius: Consts.pointSize * 0.5, startAngle: 0, endAngle: CGFloat(2.0 * .pi), clockwise: true),
-            UIBezierPath(arcCenter: position.to, radius: Consts.centerPointSize * 0.5, startAngle: 0, endAngle: CGFloat(2.0 * .pi), clockwise: true)
-        ]
-        
-        selectorLayers[0].fillColor = ui.color.cgColor
-        for (bezierPath, layer) in zip(bezierPaths, selectorLayers) {
-            layer.path = bezierPath.cgPath
+
+        if isFirst {
+            let max = ui.translate(value: ui.aabb.maxValue, to: selectorLayer.bounds)
+            let min = ui.translate(value: ui.aabb.minValue, to: selectorLayer.bounds)
+
+            let line = UIBezierPath()
+            line.move(to: CGPoint(x: position.to.x, y: max))
+            line.addLine(to: CGPoint(x: position.to.x, y: min))
+
+            selectorLayers[0].path = line.cgPath
+        } else {
+            selectorLayers[0].path = nil
         }
     }
     

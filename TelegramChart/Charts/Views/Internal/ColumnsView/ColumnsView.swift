@@ -29,17 +29,28 @@ internal final class ColumnsView: UIView
     private let contentView: UIView = UIView(frame: .zero)
     private var margins: UIEdgeInsets = .zero
     private var style: ChartStyle? = nil
-    
-    private var cornerRadius: CGFloat = 0.0
+
     private var updateCacheBlock: DispatchWorkItem?
 
     private let callFrequenceLimiter = CallFrequenceLimiter()
+
+    private let criticalSection: DispatchSemaphore = DispatchSemaphore(value: 1)
 
     private var oldTime: DT = currentTime()
     private var oldDuration: TimeInterval = 0.0
     private var delayOfSec: Double = 1.0 / 60.0
 
-    internal init() {
+    private let topOffset: CGFloat
+    private let bottomOffset: CGFloat
+
+    internal init(isAdditionalOffset: Bool) {
+        if isAdditionalOffset {
+            topOffset = Consts.topOffset
+            bottomOffset = Consts.bottomOffset
+        } else {
+            topOffset = 0.0
+            bottomOffset = 0.0
+        }
         super.init(frame: .zero)
 
         cacheImageView.translatesAutoresizingMaskIntoConstraints = true
@@ -48,6 +59,8 @@ internal final class ColumnsView: UIView
         clipContentView.clipsToBounds = true
         clipContentView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(clipContentView)
+
+        contentView.clipsToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = true
         clipContentView.addSubview(contentView)
     }
@@ -60,10 +73,15 @@ internal final class ColumnsView: UIView
     }
     
     internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+        criticalSection.wait()
+
+        updateIsFirst()
         var needUpdateAny: Bool = false
         for columnView in columnViews {
             columnView.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
         }
+
+        criticalSection.signal()
         
         if let ui = self.ui, needUpdateAny {
             // in indeally need update part - only who is return needUpdateAny :)
@@ -80,11 +98,11 @@ internal final class ColumnsView: UIView
             setStyle(style)
         }
         updateFrame()
-        setCornerRadius(cornerRadius)
     }
 
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         self.ui = ui
+        
         assert(columnViews.count == ui.columns.count)
         
         callFrequenceLimiter.update { [weak self] in
@@ -105,15 +123,31 @@ internal final class ColumnsView: UIView
     }
 
     internal func setCornerRadius(_ cornerRadius: CGFloat) {
-        self.cornerRadius = cornerRadius
-
         contentView.layer.cornerRadius = cornerRadius
-        contentView.layer.masksToBounds = cornerRadius > 0
+        contentView.layer.masksToBounds = true
         cacheImageView.layer.cornerRadius = cornerRadius
-        cacheImageView.layer.masksToBounds = cornerRadius > 0
+        cacheImageView.layer.masksToBounds = true
+    }
+
+    private func updateIsFirst() {
+        guard let ui = self.ui else {
+            return
+        }
+
+        for columnView in columnViews {
+            columnView.isFirst = false
+        }
+
+        // first visible
+        let zipColumns = zip(ui.columns, columnViews)
+        zipColumns.first { $0.0.isVisible }?.1.isFirst = true
     }
     
     private func recalculate(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
+        criticalSection.wait()
+        defer { criticalSection.signal() }
+
+        updateIsFirst()
         let defaultOffset = 1.0 / 120.0
         let t: CGFloat = CGFloat((defaultOffset + delayOfSec + ColumnsView.currentTime() - oldTime) / oldDuration)
         
@@ -137,8 +171,8 @@ internal final class ColumnsView: UIView
     }
 
     private func updateFrame() {
-        let rect = CGRect(x: bounds.origin.x, y: bounds.origin.y - Consts.topOffset,
-                          width: bounds.width, height: bounds.height + Consts.topOffset + Consts.bottomOffset)
+        let rect = CGRect(x: bounds.origin.x, y: bounds.origin.y - topOffset,
+                          width: bounds.width, height: bounds.height + topOffset + bottomOffset)
         if !rect.equalTo(cacheImageView.frame) {
             cacheImageView.frame = rect
         }
@@ -149,7 +183,7 @@ internal final class ColumnsView: UIView
         }
         
         let subRect = CGRect(x: bounds.minX + margins.left,
-                             y: bounds.minY + margins.top + Consts.topOffset,
+                             y: bounds.minY + margins.top + topOffset,
                              width: bounds.width - margins.left - margins.right,
                              height: bounds.height - margins.top - margins.bottom)
         for view in columnViews {
@@ -167,7 +201,7 @@ internal final class ColumnsView: UIView
         let fullDuration = animated ? (delayOfSec + duration) : delayOfSec
         let deadline: DispatchTime = .now() + fullDuration
 
-        let size = CGSize(width: frame.width, height: frame.height + Consts.topOffset + Consts.bottomOffset)
+        let size = CGSize(width: frame.width, height: frame.height + topOffset + bottomOffset)
         var capturedBlock: DispatchWorkItem!
         let block = DispatchWorkItem { [weak self] in
             guard let `self` = self else {
@@ -196,7 +230,10 @@ internal final class ColumnsView: UIView
             return nil
         }
 
-        context.translateBy(x: margins.left, y: margins.top + Consts.topOffset)
+        criticalSection.wait()
+        defer { criticalSection.signal() }
+
+        context.translateBy(x: margins.left, y: margins.top + topOffset)
         columnViews.forEach { $0.drawCurrentState(to: context) }
         columnViews.forEach { $0.drawSelectorState(to: context) }
 

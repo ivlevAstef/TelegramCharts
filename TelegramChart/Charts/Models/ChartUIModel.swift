@@ -31,7 +31,9 @@ internal struct ChartUIModel
         self.interval = chartVM.interval
         self.fullInterval = chartVM.fullInterval
         self.percentage = chartVM.percentage
-        
+
+        let size = ChartUIModel.calculateSize(viewModel: chartVM, maxSize: size)
+
         let fixedInterval = calcFixedInterval(by: fully ? fullInterval : interval, use: chartVM.dates)
         let c = (16.0 + 5) / Double(UIScreen.main.bounds.width)
         let longInterval = calcLongInterval(by: fully ? fullInterval : interval, use: chartVM.dates, c: c)
@@ -51,6 +53,17 @@ internal struct ChartUIModel
         } else {
             self.columns = simpleCalculator(viewModel: chartVM, interval: fixedInterval, aabb: self.aabb, size: size)
         }
+    }
+
+    private static func calculateSize(viewModel chartVM: ChartViewModel, maxSize: Double) -> Double {
+        let distance = Double(chartVM.interval.to - chartVM.interval.from)
+        let fullDistance = Double(chartVM.fullInterval.to - chartVM.fullInterval.from)
+
+        let count = Double(chartVM.dates.count) * (distance / fullDistance)
+
+        let cSize = Double(0.75 * UIScreen.main.bounds.width) / count
+
+        return max(1.0, min(cSize, maxSize))
     }
     
     internal func translate(date: Chart.Date, to rect: CGRect) -> CGFloat {
@@ -122,7 +135,10 @@ private func stackedAABB(viewModel chartVM: ChartViewModel, interval: ChartViewM
     let visibleColumns = chartVM.columns.filter { $0.isVisible }
     for i in 0..<chartVM.dates.count {
         if longInterval.from <= chartVM.dates[i] && chartVM.dates[i] <= longInterval.to {
-            let value = AABB.Value(visibleColumns.map { $0.values[i] }.reduce(0, +))
+            var value: AABB.Value = 0
+            for column in visibleColumns {
+                value += AABB.Value(column.values[i])
+            }
             
             minValue = min(minValue, value)
             maxValue = max(maxValue, value)

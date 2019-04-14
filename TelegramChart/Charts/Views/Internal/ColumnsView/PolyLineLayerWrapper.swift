@@ -17,13 +17,15 @@ private enum Consts
 internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
 {
     internal init() {
-        super.init(countSelectorLayers: 2)
+        // First line, second round, third center
+        super.init(countSelectorLayers: 3)
     }
     
     internal override func setStyle(_ style: ChartStyle) {
         super.setStyle(style)
-        selectorLayers[1].fillColor = style.dotColor.cgColor
-        //lineColor = style.focusLineColor
+        selectorLayers[0].strokeColor = style.focusLineColor.cgColor
+        selectorLayers[0].lineWidth = 1.0
+        selectorLayers[2].fillColor = style.dotColor.cgColor
     }
     
     internal override func fillLayer(_ layer: CAShapeLayer) {
@@ -52,9 +54,22 @@ internal final class PolyLineLayerWrapper: ColumnViewLayerWrapper
             UIBezierPath(arcCenter: position.to, radius: Consts.centerPointSize * 0.5, startAngle: 0, endAngle: CGFloat(2.0 * .pi), clockwise: true)
         ]
         
-        selectorLayers[0].fillColor = ui.color.cgColor
-        for (bezierPath, layer) in zip(bezierPaths, selectorLayers) {
+        selectorLayers[1].fillColor = ui.color.cgColor
+        for (bezierPath, layer) in zip(bezierPaths, selectorLayers.dropFirst()) {
             layer.path = bezierPath.cgPath
+        }
+
+        if isFirst {
+            let max = ui.translate(value: ui.aabb.maxValue, to: selectorLayer.bounds)
+            let min = ui.translate(value: ui.aabb.minValue, to: selectorLayer.bounds)
+
+            let line = UIBezierPath()
+            line.move(to: CGPoint(x: position.to.x, y: max))
+            line.addLine(to: CGPoint(x: position.to.x, y: min))
+
+            selectorLayers[0].path = line.cgPath
+        } else {
+            selectorLayers[0].path = nil
         }
     }
 

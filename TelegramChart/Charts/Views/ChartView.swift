@@ -26,7 +26,7 @@ public class ChartView: UIView
     private let margins: UIEdgeInsets
     private var ui: ChartUIModel? = nil
     
-    private var columnsView: ColumnsView = ColumnsView()
+    private var columnsView: ColumnsView = ColumnsView(isAdditionalOffset: true)
     private let verticalAxisView: VerticalAxisView = VerticalAxisView(topOffset: Consts.topOffset)
     private let horizontalAxisView: HorizontalAxisView = HorizontalAxisView()
     private let hintView: HintAndOtherView = HintAndOtherView()

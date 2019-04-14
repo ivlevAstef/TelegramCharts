@@ -18,18 +18,21 @@ internal final class CallFrequenceLimiter
     }
     
     internal func update(_ block: @escaping () -> DispatchTimeInterval) {
+#if TEST_PERFORMANCE
         block()
-//        self.updateBlock?.cancel()
-//        let updateBlock = DispatchWorkItem { [weak self] in
-//            let delay = block()
-//            self?.deadline = .now() + delay
-//        }
-//        self.updateBlock = updateBlock
-//
-//        if DispatchTime.now() >= deadline {
-//            updateBlock.perform()
-//        } else {
-//            DispatchQueue.main.asyncAfter(deadline: deadline, execute: updateBlock)
-//        }
+#else
+        self.updateBlock?.cancel()
+        let updateBlock = DispatchWorkItem { [weak self] in
+            let delay = block()
+            self?.deadline = .now() + delay
+        }
+        self.updateBlock = updateBlock
+
+        if DispatchTime.now() >= deadline {
+            updateBlock.perform()
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: deadline, execute: updateBlock)
+        }
+#endif
     }
 }
