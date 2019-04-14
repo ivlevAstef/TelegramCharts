@@ -10,6 +10,10 @@ import Foundation
 
 public class ChartProvider
 {
+    public init() {
+        
+    }
+
     public func getCharts(_ completion: @escaping ([Chart]) -> Void) {
         var anyRawChartsWithName: [(RawChart,String)] = []
 

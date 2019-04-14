@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1020"
+   LastUpgradeVersion = "1010"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,28 +14,38 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BACE712A2235FBEA00068579"
-               BuildableName = "TelegramCharts.app"
-               BlueprintName = "TelegramCharts"
-               ReferencedContainer = "container:TelegramCharts.xcodeproj">
+               BlueprintIdentifier = "BA56DDBE2263079C007DB4E9"
+               BuildableName = "TelegramChart.app"
+               BlueprintName = "TelegramChart"
+               ReferencedContainer = "container:TelegramChart.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BA56DDD22263079E007DB4E9"
+               BuildableName = "TelegramChartTests.xctest"
+               BlueprintName = "TelegramChartTests"
+               ReferencedContainer = "container:TelegramChart.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BACE712A2235FBEA00068579"
-            BuildableName = "TelegramCharts.app"
-            BlueprintName = "TelegramCharts"
-            ReferencedContainer = "container:TelegramCharts.xcodeproj">
+            BlueprintIdentifier = "BA56DDBE2263079C007DB4E9"
+            BuildableName = "TelegramChart.app"
+            BlueprintName = "TelegramChart"
+            ReferencedContainer = "container:TelegramChart.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -55,10 +65,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BACE712A2235FBEA00068579"
-            BuildableName = "TelegramCharts.app"
-            BlueprintName = "TelegramCharts"
-            ReferencedContainer = "container:TelegramCharts.xcodeproj">
+            BlueprintIdentifier = "BA56DDBE2263079C007DB4E9"
+            BuildableName = "TelegramChart.app"
+            BlueprintName = "TelegramChart"
+            ReferencedContainer = "container:TelegramChart.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -74,10 +84,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BACE712A2235FBEA00068579"
-            BuildableName = "TelegramCharts.app"
-            BlueprintName = "TelegramCharts"
-            ReferencedContainer = "container:TelegramCharts.xcodeproj">
+            BlueprintIdentifier = "BA56DDBE2263079C007DB4E9"
+            BuildableName = "TelegramChart.app"
+            BlueprintName = "TelegramChart"
+            ReferencedContainer = "container:TelegramChart.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
