@@ -8,6 +8,28 @@
 
 import UIKit
 
+internal class Support {
+    internal static func pathAnimation(duration: TimeInterval, from: CGPath, to: CGPath, on layer: CAShapeLayer) {
+        let animation = CABasicAnimation(keyPath: "path")
+        animation.duration = duration
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        animation.fromValue = from
+        animation.toValue = to
+        animation.isRemovedOnCompletion = true
+        layer.add(animation, forKey: "path")
+    }
+
+    internal static func opacityAnimation(duration: TimeInterval, to opacity: Float, on layer: CALayer, completion: (() -> Void)? = nil) {
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(duration)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
+        CATransaction.setCompletionBlock(completion)
+
+        layer.opacity = opacity
+        CATransaction.commit()
+    }
+}
+
 internal class ColumnViewLayerWrapper
 {
     internal let layer: CALayer = CALayer()
@@ -221,14 +243,8 @@ internal class ColumnViewLayerWrapper
             
             updateSelector(to: toPositionData, animated: false, duration: 0.0) // update path
             
-            if animated && nil != oldPath && nil != layer.path {
-                let animation = CABasicAnimation(keyPath: "path")
-                animation.duration = duration
-                animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-                animation.fromValue = oldPath
-                animation.toValue = layer.path
-                animation.isRemovedOnCompletion = true
-                layer.add(animation, forKey: "path")
+            if let oldPath = oldPath, let newPath = layer.path, animated {
+                Support.pathAnimation(duration: duration, from: oldPath, to: newPath, on: layer)
             }
         }
     }
@@ -237,12 +253,12 @@ internal class ColumnViewLayerWrapper
         let selectorIsVisible = nil != selectedDate && (self.ui?.isVisible ?? false)
         
         if (selectorLayer.opacity < 1 && selectorIsVisible) || (selectorLayer.opacity > 0 && !selectorIsVisible) {
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(animated ? duration : 0.0)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-            
-            selectorLayer.opacity = selectorIsVisible ? 1.0 : 0.0
-            CATransaction.commit()
+            let opacity: Float = selectorIsVisible ? 1.0 : 0.0
+            if animated {
+                Support.opacityAnimation(duration: duration, to: opacity, on: selectorLayer)
+            } else {
+                selectorLayer.opacity = opacity
+            }
         }
     }
 
@@ -250,25 +266,19 @@ internal class ColumnViewLayerWrapper
         fillLayer(pathLayer)
         pathLayer.path = saveNewPath
 
-        if animated && nil != saveOldPath && nil != saveNewPath {
-            let animation = CABasicAnimation(keyPath: "path")
-            animation.duration = duration
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-            animation.fromValue = saveOldPath
-            animation.toValue = saveNewPath
-            animation.isRemovedOnCompletion = true
-            pathLayer.add(animation, forKey: "path")
+        if let oldPath = saveOldPath, let newPath = saveNewPath, animated {
+            Support.pathAnimation(duration: duration, from: oldPath, to: newPath, on: pathLayer)
         }
     }
 
     private func confirmOpacity(ui: ColumnUIModel, animated: Bool, duration: TimeInterval) {
         if oldIsVisible != ui.isVisible && ui.isOpacity {
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(animated ? duration : 0.0)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-
-            layer.opacity = ui.isVisible ? 1.0 : 0.0
-            CATransaction.commit()
+            let opacity: Float = ui.isVisible ? 1.0 : 0.0
+            if animated {
+                Support.opacityAnimation(duration: duration, to: opacity, on: layer)
+            } else {
+                layer.opacity = opacity
+            }
         }
         oldIsVisible = ui.isVisible
     }

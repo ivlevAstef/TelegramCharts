@@ -45,7 +45,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
             barColor.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
             
             let (r, g, b, a) = (r1 * a2 + r2 * (1 - a2), g1 * a2 + g2 * (1 - a2), b1 * a2 + b2 * (1 - a2), CGFloat(1.0))
-            return UIColor(red: r, green: g, blue: b, alpha: a)
+            return UIColor(red: r, green: g, blue: b, alpha: a1)
         }
         
         return mainColor
@@ -55,7 +55,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         guard let ui = self.ui else {
             return
         }
-        
+
 //
 //        if animated {
 //            let lastLayer = CAShapeLayer()
@@ -83,17 +83,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
 //            opacityAnimated(duration: duration, to: 1.0, on: layer)
 //        }
     }
-    
-    private func opacityAnimated(duration: TimeInterval, to opacity: Float, on layer: CAShapeLayer, completion: (() -> Void)? = nil)
-    {
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(duration)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-        CATransaction.setCompletionBlock(completion)
-        
-        layer.opacity = opacity
-        CATransaction.commit()
-    }
+
     
     internal override func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval, needUpdateAny: inout Bool) {
         needUpdateAny = needUpdateAny || (nil == selectedDate && nil != date) || (nil != selectedDate && nil == date)

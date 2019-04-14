@@ -29,9 +29,8 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
     internal init() {
         super.init(style: .default, reuseIdentifier: nil)
 
-        self.selectionStyle = .none
-
         chartView.translatesAutoresizingMaskIntoConstraints = true
+        chartView.isOpaque = true
         contentView.addSubview(chartView)
         
         chartView.hintClickHandler = { [weak self] date in
@@ -62,6 +61,7 @@ internal class ChartTableViewCell: UITableViewCell, Stylizing, IActualizedCell
 
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
+        contentView.backgroundColor = style.mainColor
         chartView.backgroundColor = style.mainColor
 
         chartView.setStyle(style.chartStyle)

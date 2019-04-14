@@ -67,6 +67,10 @@ internal final class HintAndOtherView: UIView
         hintView.backgroundColor = style.hintBackgroundColor
         hintView.arrowColor = style.hintArrowColor
         hintView.textColor = style.hintTextColor
+
+        if let ui = self.ui {
+            update(ui: ui)
+        }
     }
 
     internal func update(ui: ChartUIModel) {
@@ -189,8 +193,32 @@ internal final class HintAndOtherView: UIView
     }
 }
 
+extension Character {
+    func length() -> Double {
+        let symbol = "\(self)"
+        if let number = Int(symbol) {
+            if 1 == number {
+                return 8
+            }
+            return 10
+        }
+
+        return 10
+    }
+}
+
+extension String {
+    func length() -> Double {
+        var result: Double = 0
+        for symbol in self {
+            result += symbol.length()
+        }
+        return result
+    }
+}
+
 class OptimizeUILabel: UILabel {
-    private var maxTextLength: Int = 0
+    private var maxTextLength: Double = 0
     
     func optimizeReText(_ text: String?) {
         if self.text == text {
@@ -198,8 +226,8 @@ class OptimizeUILabel: UILabel {
         }
         
         self.text = text
-        if let text = text, text.count >= maxTextLength {
-            maxTextLength = text.count
+        if let length = text?.length(), length >= maxTextLength {
+            maxTextLength = length
             maxSizeToFit()
         }
     }

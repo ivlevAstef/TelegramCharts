@@ -23,6 +23,7 @@ internal final class ColumnsView: UIView
     }
 
     private var ui: ChartUIModel?
+    private var selectedDate: Chart.Date?
     private var columnViews: [ColumnViewLayerWrapper] = []
     private let cacheImageView: UIImageView = UIImageView(frame: .zero)
     private let clipContentView: UIView = UIView(frame: .zero)
@@ -70,13 +71,17 @@ internal final class ColumnsView: UIView
         for columnView in columnViews {
             columnView.setStyle(style)
         }
+
+        updateSelector(to: self.selectedDate, animated: true, duration: 0.1, needUpdateAny: true)
     }
-    
-    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval) {
+
+    internal func updateSelector(to date: Chart.Date?, animated: Bool, duration: TimeInterval,
+                                 needUpdateAny: Bool = false) {
+        self.selectedDate = date
         criticalSection.wait()
 
         updateIsFirst()
-        var needUpdateAny: Bool = false
+        var needUpdateAny = needUpdateAny
         for columnView in columnViews {
             columnView.updateSelector(to: date, animated: animated, duration: duration, needUpdateAny: &needUpdateAny)
         }
@@ -129,6 +134,7 @@ internal final class ColumnsView: UIView
         cacheImageView.layer.masksToBounds = true
     }
 
+    // It's very very bad :(
     private func updateIsFirst() {
         guard let ui = self.ui else {
             return
@@ -140,7 +146,7 @@ internal final class ColumnsView: UIView
 
         // first visible
         let zipColumns = zip(ui.columns, columnViews)
-        zipColumns.first { $0.0.isVisible }?.1.isFirst = true
+        zipColumns.first { $0.0.isVisible && ($0.0.type == .line || $0.0.type == .area) }?.1.isFirst = true
     }
     
     private func recalculate(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {

@@ -46,6 +46,8 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
             return
         }
 
+        let oldPath = selectorLayers[0].path
+
         if isFirst {
             let max = ui.translate(value: ui.aabb.maxValue, to: selectorLayer.bounds)
             let min = ui.translate(value: ui.aabb.minValue, to: selectorLayer.bounds)
@@ -57,6 +59,10 @@ internal final class AreaLayerWrapper: ColumnViewLayerWrapper
             selectorLayers[0].path = line.cgPath
         } else {
             selectorLayers[0].path = nil
+        }
+
+        if let oldPath = oldPath, let newPath = selectorLayers[0].path, animated {
+            Support.pathAnimation(duration: duration, from: oldPath, to: newPath, on: selectorLayers[0])
         }
     }
     

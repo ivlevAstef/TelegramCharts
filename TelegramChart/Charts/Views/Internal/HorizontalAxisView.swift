@@ -170,6 +170,7 @@ internal final class HorizontalAxisView: UIView
     
 }
 
+private var dateSizeCache: [String: CGSize] = [:]
 private final class DateLabel: UILabel
 {
     internal static let dateFormatter: DateFormatter = {
@@ -183,11 +184,17 @@ private final class DateLabel: UILabel
     internal init(date: Chart.Date, font: UIFont, color: UIColor) {
         self.date = date
         super.init(frame: .zero)
-        
-        self.text = DateLabel.dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(date) / 1000.0))
+
+        let dateOfStr = DateLabel.dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(date) / 1000.0))
+        self.text = dateOfStr
         self.font = font
         self.textColor = color
-        self.sizeToFit()
+
+        if let size = dateSizeCache[dateOfStr] {
+            self.frame.size = size
+        } else {
+            self.sizeToFit()
+        }
 
         self.frame.origin.y = Consts.topPadding
     }

@@ -45,7 +45,8 @@ public final class ChartViewModel
             case .area: type = .area
             case .bar: type = .bar
             }
-            return ColumnViewModel(name: column.name, values: column.values, color: UIColor(hex: column.color), type: type)
+            let color = UIColor(hex: column.color, alpha: 0.9)
+            return ColumnViewModel(name: column.name, values: column.values, color: color, type: type)
         }
         self.name = chart.name
         self.yScaled = chart.yScaled
@@ -93,31 +94,5 @@ public final class ChartViewModel
     public func updateInterval(_ interval: Interval) {
         self.interval = interval
         updateListeners.forEach { $0.value?.chartIntervalIsChanged(self) }
-    }
-}
-
-extension UIColor
-{
-    fileprivate convenience init(hex: String) {
-        var hex = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
-        if hex.hasPrefix("#") {
-            hex.remove(at: hex.startIndex)
-        }
-
-        if hex.count != 6 {
-            self.init(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
-            return
-        }
-
-        var hexValue: UInt32 = 0
-        Scanner(string: hex).scanHexInt32(&hexValue)
-
-        self.init(
-            red: CGFloat((hexValue & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((hexValue & 0x00FF00) >> 8) / 255.0,
-            blue: CGFloat(hexValue & 0x0000FF) / 255.0,
-            alpha: CGFloat(1.0)
-        )
     }
 }

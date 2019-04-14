@@ -57,10 +57,16 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     
     internal func applyStyle(_ style: Style) {
         backgroundColor = style.mainColor
+        contentView.backgroundColor = style.mainColor
+        for subview in subviews {
+            subview.backgroundColor = style.mainColor
+        }
     }
     
     internal func addColumnVisibleToogler(name: String, color: UIColor, isVisible: Bool, clickHandler: @escaping (_ long: Bool) -> Void) {
         let columnToggler = ColumnToggler(name: name, color: color)
+        columnToggler.backgroundColor = self.backgroundColor
+        columnToggler.isOpaque = true
         
         columnToggler.isVisible = isVisible
         columnToggler.tapHandler = {

@@ -215,10 +215,10 @@
 		BA56DE04226307FB007DB4E9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				BA56DE05226307FB007DB4E9 /* ChartView.swift */,
-				BA56DE06226307FB007DB4E9 /* Internal */,
-				BA56DE13226307FB007DB4E9 /* IntervalView.swift */,
 				BA56DE14226307FB007DB4E9 /* ChartWithIntervalView.swift */,
+				BA56DE05226307FB007DB4E9 /* ChartView.swift */,
+				BA56DE13226307FB007DB4E9 /* IntervalView.swift */,
+				BA56DE06226307FB007DB4E9 /* Internal */,
 			);
 			path = Views;
 			sourceTree = "<group>";
