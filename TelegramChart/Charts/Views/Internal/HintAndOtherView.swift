@@ -126,11 +126,16 @@ internal final class HintAndOtherView: UIView
     }
 
     private func showHint(in date: Chart.Date, use ui: ChartUIModel) {
-        let rows = ui.columns.enumerated().compactMap { (index, column) -> (UIColor, String, ColumnViewModel.Value, Int)? in
+        var rows = ui.columns.enumerated().compactMap { (index, column) -> (UIColor?, String, ColumnViewModel.Value, Int)? in
             if let value = column.find(by: date)?.original, column.isVisible {
                 return (column.color, column.name, value, index)
             }
             return nil
+        }
+        
+        if ui.stacked && !ui.percentage {
+            let sum = rows.map { $0.2 }.reduce(0, +)
+            rows.append((nil, "All", sum, ui.columns.count))
         }
 
         let position = ui.translate(date: date, to: bounds)
@@ -361,7 +366,7 @@ private final class HintView: UIView
         maxTopX = max(maxTopX, dateLabel.frame.maxX + Consts.hintHorizontalSpace + arrowView.frame.width)
     }
     
-    internal func preRows(_ rows: [(color: UIColor, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
+    internal func preRows(_ rows: [(color: UIColor?, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
         let oldRowsView = rowsView
         rowsView.removeAll()
         for (_, _, _, id) in rows {
@@ -388,7 +393,7 @@ private final class HintView: UIView
         }
     }
 
-    internal func setRows(_ rows: [(color: UIColor, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
+    internal func setRows(_ rows: [(color: UIColor?, name: String, value: ColumnViewModel.Value, id: Int)], percentage: Bool) {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
 
@@ -403,7 +408,7 @@ private final class HintView: UIView
             }
 
             rowView.rightLabel.optimizeReText(numberFormatter.string(from: NSNumber(value: value)))
-            rowView.rightLabel.textColor = color
+            rowView.rightLabel.textColor = color ?? textColor
             
             rowView.leftLabel.optimizeReText(name)
             rowView.leftLabel.textColor = textColor

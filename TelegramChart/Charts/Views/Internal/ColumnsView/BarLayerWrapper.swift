@@ -11,6 +11,8 @@ import UIKit
 
 internal final class BarLayerWrapper: ColumnViewLayerWrapper
 {
+    private static let minHeight: CGFloat = 1
+    
     private var barColor: UIColor?
     private var lastStep: CGFloat = 0.0
     
@@ -44,7 +46,7 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
             mainColor.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
             barColor.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
             
-            let (r, g, b, a) = (r1 * a2 + r2 * (1 - a2), g1 * a2 + g2 * (1 - a2), b1 * a2 + b2 * (1 - a2), CGFloat(1.0))
+            let (r, g, b) = (r1 * a2 + r2 * (1 - a2), g1 * a2 + g2 * (1 - a2), b1 * a2 + b2 * (1 - a2))
             return UIColor(red: r, green: g, blue: b, alpha: a1)
         }
         
@@ -70,10 +72,11 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
 
         selectorLayers[0].fillColor = ui.color.cgColor
         
+        let height = max(BarLayerWrapper.minHeight, position.from.y - position.to.y)
         let path = UIBezierPath(rect: CGRect(x: position.from.x - lastStep,
                                              y: position.to.y,
                                              width: 2 * lastStep,
-                                             height: position.from.y - position.to.y))
+                                             height: height))
         
         selectorLayers[0].path = path.cgPath
         
@@ -105,9 +108,11 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
             result[2 * i] = CGPoint(x: datas[i].from.x - step, y: datas[i].from.y)
             result[2 * i + 1] = CGPoint(x: datas[i].from.x + step, y: datas[i].from.y)
         }
+        
         for i in 0..<datas.count {
-            result[result.count - 2 * i - 1] = CGPoint(x: datas[i].to.x - step, y: datas[i].to.y)
-            result[result.count - 2 * i - 2] = CGPoint(x: datas[i].to.x + step, y: datas[i].to.y)
+            let height = max(BarLayerWrapper.minHeight, datas[i].from.y - datas[i].to.y)
+            result[result.count - 2 * i - 1] = CGPoint(x: datas[i].to.x - step, y: datas[i].from.y - height)
+            result[result.count - 2 * i - 2] = CGPoint(x: datas[i].to.x + step, y: datas[i].from.y - height)
         }
         return result
     }

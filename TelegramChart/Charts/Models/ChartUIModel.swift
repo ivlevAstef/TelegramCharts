@@ -22,6 +22,7 @@ internal struct ChartUIModel
     internal let columns: [ColumnUIModel]
     internal let aabb: AABB
     internal let percentage: Bool
+    internal let stacked: Bool
     
     internal let interval: ChartViewModel.Interval
     internal let fullInterval: ChartViewModel.Interval
@@ -30,6 +31,7 @@ internal struct ChartUIModel
         self.dates = chartVM.dates
         self.interval = chartVM.interval
         self.fullInterval = chartVM.fullInterval
+        self.stacked = chartVM.stacked
         self.percentage = chartVM.percentage
 
         let size = ChartUIModel.calculateSize(viewModel: chartVM, maxSize: size)
