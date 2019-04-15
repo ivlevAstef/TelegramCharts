@@ -38,10 +38,32 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     }
     private var prevFrame: CGRect = .zero
     
+    private var imageCacheView: ImageCacheView = ImageCacheView()
+    private var cacheBlock: DispatchWorkItem? = nil
+    private var buttonsView: UIView = UIView(frame: .zero)
     private var togglers: [ColumnToggler] = []
 
     internal init() {
         super.init(style: .default, reuseIdentifier: nil)
+        
+        imageCacheView.isUserInteractionEnabled = false
+        imageCacheView.cacheMethod = { [weak self] context in
+            self?.cacheButtons(context: context)
+        }
+        imageCacheView.translatesAutoresizingMaskIntoConstraints = true
+        addSubview(imageCacheView)
+        
+        buttonsView.translatesAutoresizingMaskIntoConstraints = true
+        addSubview(buttonsView)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnSelf(_:)))
+        let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(longOnSelf(_:)))
+        tapGesture.delegate = self
+        longGesture.delegate = self
+        tapGesture.require(toFail: longGesture)
+        
+        addGestureRecognizer(tapGesture)
+        addGestureRecognizer(longGesture)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -50,7 +72,11 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
 
     internal func actualizeFrame(width: CGFloat) {
         let height = (togglers.last?.frame.maxY ?? Consts.margins.top) + Consts.margins.bottom
-        self.frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: width, height: height)
+        let rect = CGRect(x: frame.origin.x, y: frame.origin.y, width: width, height: height)
+        
+        buttonsView.frame = CGRect(origin: .zero, size: rect.size)
+        imageCacheView.frame = CGRect(origin: .zero, size: rect.size)
+        self.frame = rect
     }
     
     internal func applyStyle(_ style: Style) {
@@ -72,18 +98,48 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
             clickHandler(true)
         }
 
-        SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: bounds.width)
+        SwitchColumnVisibleTableViewCell.layoutColumnToggler(columnToggler: columnToggler, last: togglers.last, width: buttonsView.frame.width)
+        
+        columnToggler.makeCacheImages()
 
-        contentView.addSubview(columnToggler)
+        buttonsView.addSubview(columnToggler)
         togglers.append(columnToggler)
-
-        self.frame.size.height = columnToggler.frame.maxY + Consts.margins.bottom
+    }
+    
+    internal func setIsVisibleOnTogglers(_ isVisibles: [Bool], animated: Bool, duration: TimeInterval) {
+        UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+            self?.setIsVisibleOnTogglers(isVisibles)
+        })
+        
+        updateCache(after: animated ? duration : 0.0)
+    }
+    
+    internal func updateCache(after duration: TimeInterval) {
+        buttonsView.isHidden = false
+        imageCacheView.isHidden = true
+        
+        imageCacheView.cacheAfter(deadline: .now() + duration, in: buttonsView.frame.size) { [weak self] image in
+            self?.imageCacheView.image = image
+            self?.buttonsView.isHidden = true
+            self?.imageCacheView.isHidden = false
+        }
     }
     
     internal func setIsVisibleOnTogglers(_ isVisibles: [Bool]) {
         assert(isVisibles.count == togglers.count)
         for (toggler, isVisible) in zip(togglers, isVisibles) {
             toggler.isVisible = isVisible
+        }
+    }
+
+    private func cacheButtons(context: CGContext) {
+        for toggler in togglers {
+            let image: UIImage? = toggler.isVisible ? toggler.visibleImage : toggler.unvisibleImage
+            
+            if let image = image {
+                let rect = CGRect(origin: toggler.position, size: toggler.size)
+                image.draw(in: rect)
+            }
         }
     }
 
@@ -99,18 +155,57 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
             lastColumnToggler = columnToggler
         }
         actualizeFrame(width: bounds.width)
+        
+        updateCache(after: 0.0)
     }
     
     private static func layoutColumnToggler(columnToggler: ColumnToggler, last: ColumnToggler?, width: CGFloat) {
         let margins = Consts.margins
         if let lastToggler = last {
-            columnToggler.frame.origin = CGPoint(x: lastToggler.frame.maxX + Consts.togglersSpacing, y: lastToggler.frame.origin.y)
+            columnToggler.position = CGPoint(x: lastToggler.frame.maxX + Consts.togglersSpacing, y: lastToggler.frame.origin.y)
             if columnToggler.frame.maxX > width - margins.right {
-                columnToggler.frame.origin = CGPoint(x: margins.left, y: lastToggler.frame.maxY + Consts.togglersSpacing)
+                columnToggler.position = CGPoint(x: margins.left, y: lastToggler.frame.maxY + Consts.togglersSpacing)
             }
         } else {
-            columnToggler.frame.origin = CGPoint(x: margins.left, y: margins.top)
+            columnToggler.position = CGPoint(x: margins.left, y: margins.top)
         }
+    }
+    
+    @objc private func tapOnSelf(_ tapGesture: UITapGestureRecognizer) {
+        if let toggler = findButton(tapGesture) {
+            toggler.tapHandler?()
+        }
+    }
+    
+    @objc private func longOnSelf(_ tapGesture: UILongPressGestureRecognizer) {
+        if let toggler = findButton(tapGesture) {
+            toggler.longHandler?()
+        }
+    }
+    
+    private func findButton(_ gestureRecognizer: UIGestureRecognizer) -> ColumnToggler? {
+        guard let view = gestureRecognizer.view else {
+            return nil
+        }
+        
+        let loc = gestureRecognizer.location(in: view)
+        
+        for toggler in togglers {
+            let position = view.convert(loc, to: toggler)
+            if toggler.point(inside: position, with: nil) {
+                return toggler
+            }
+        }
+        
+        return nil
+    }
+}
+
+extension SwitchColumnVisibleTableViewCell
+{
+    override func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    {
+        return true
     }
 }
 
@@ -123,6 +218,16 @@ private class ColumnToggler: UIView
             changeUIVisible()
         }
     }
+    
+    internal var position: CGPoint = .zero {
+        didSet {
+            self.frame.origin = position
+        }
+    }
+    
+    internal let size: CGSize
+    internal private(set) var unvisibleImage: UIImage?
+    internal private(set) var visibleImage: UIImage?
     
     private let checkmark: CheckmarkView
     private let label: UILabel
@@ -137,13 +242,18 @@ private class ColumnToggler: UIView
         
         label.frame.origin.x = checkmark.frame.maxX + Consts.spacing
         
-        super.init(frame: CGRect(x: 0, y: 0, width: label.frame.maxX + Consts.padding, height: Consts.contentHeight))
+        self.size = CGSize(width: floor(label.frame.maxX + Consts.padding), height: Consts.contentHeight)
+        super.init(frame: CGRect(origin: .zero, size: size))
         
         checkmark.color = elementColor
         
         translatesAutoresizingMaskIntoConstraints = true
         checkmark.translatesAutoresizingMaskIntoConstraints = true
         label.translatesAutoresizingMaskIntoConstraints = true
+        
+        self.isUserInteractionEnabled = true
+        checkmark.isUserInteractionEnabled = false
+        label.isUserInteractionEnabled = false
         
         addSubview(checkmark)
         addSubview(label)
@@ -156,15 +266,29 @@ private class ColumnToggler: UIView
         layer.cornerRadius = Consts.cornerRadius
         layer.masksToBounds = true
         clipsToBounds = true
+    }
+    
+    internal func makeCacheImages() {
+        func currentStateCache() {
+            if self.isVisible {
+                visibleImage = ImageCacheView.cache(in: self.size, executor: { (context) in
+                    self.layer.render(in: context)
+                })
+            } else {
+                unvisibleImage = ImageCacheView.cache(in: self.size, executor: { (context) in
+                    self.layer.render(in: context)
+                })
+            }
+        }
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapOnSelf))
-        let longGesture = UILongPressGestureRecognizer(target: self, action: #selector(longOnSelf))
-        tapGesture.delegate = self
-        longGesture.delegate = self
-        tapGesture.require(toFail: longGesture)
+        currentStateCache()
         
-        addGestureRecognizer(tapGesture)
-        addGestureRecognizer(longGesture)
+        self.isVisible = !self.isVisible
+        self.changeUIVisible()
+        currentStateCache()
+        
+        self.isVisible = !self.isVisible
+        self.changeUIVisible()
     }
     
     private func changeUIVisible() {
@@ -191,14 +315,6 @@ private class ColumnToggler: UIView
         return UIColor.white
     }
     
-    @objc private func tapOnSelf() {
-        tapHandler?()
-    }
-    
-    @objc private func longOnSelf() {
-        longHandler?()
-    }
-    
     private static func makeAndResizeLabel(name: String) -> UILabel {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: Consts.contentHeight))
         label.text = name
@@ -209,14 +325,6 @@ private class ColumnToggler: UIView
     
     internal required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-extension ColumnToggler: UIGestureRecognizerDelegate
-{
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
-    {
-        return true
     }
 }
 

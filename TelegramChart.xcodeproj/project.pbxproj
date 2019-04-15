@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABE2C056226420BB0036A67E /* ImageCacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE2C055226420BB0036A67E /* ImageCacheView.swift */; };
 		BA56DDD82263079E007DB4E9 /* TelegramChartTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA56DDD72263079E007DB4E9 /* TelegramChartTests.swift */; };
 		BA56DE2E226307FB007DB4E9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA56DDF1226307FB007DB4E9 /* Assets.xcassets */; };
 		BA56DE2F226307FB007DB4E9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BA56DDF2226307FB007DB4E9 /* LaunchScreen.storyboard */; };
@@ -65,6 +66,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		ABE2C055226420BB0036A67E /* ImageCacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheView.swift; sourceTree = "<group>"; };
 		BA56DDBF2263079C007DB4E9 /* TelegramChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TelegramChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA56DDD32263079E007DB4E9 /* TelegramChartTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TelegramChartTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA56DDD72263079E007DB4E9 /* TelegramChartTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelegramChartTests.swift; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 				BA56DE17226307FB007DB4E9 /* Array+SafeGet.swift */,
 				BA56DE18226307FB007DB4E9 /* WeakRef.swift */,
 				BA56DE19226307FB007DB4E9 /* UIView+animate.swift */,
+				ABE2C055226420BB0036A67E /* ImageCacheView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				BA56DE56226307FB007DB4E9 /* Stylizing.swift in Sources */,
 				BA56DE36226307FB007DB4E9 /* ChartViewModel.swift in Sources */,
 				BA56DE3F226307FB007DB4E9 /* HorizontalAxisView.swift in Sources */,
+				ABE2C056226420BB0036A67E /* ImageCacheView.swift in Sources */,
 				BA56DE46226307FB007DB4E9 /* PolyLineLayerWrapper.swift in Sources */,
 				BA56DE4E226307FB007DB4E9 /* UIView+animate.swift in Sources */,
 				BA56DE38226307FB007DB4E9 /* ColumnViewModel.swift in Sources */,

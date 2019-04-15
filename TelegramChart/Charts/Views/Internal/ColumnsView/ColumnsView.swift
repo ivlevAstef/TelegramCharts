@@ -25,15 +25,13 @@ internal final class ColumnsView: UIView
     private var ui: ChartUIModel?
     private var selectedDate: Chart.Date?
     private var columnViews: [ColumnViewLayerWrapper] = []
-    private let cacheImageView: UIImageView = UIImageView(frame: .zero)
+    private let cacheImageView: ImageCacheView = ImageCacheView()
     private let clipContentView: UIView = UIView(frame: .zero)
     private let contentView: UIView = UIView(frame: .zero)
     private var margins: UIEdgeInsets = .zero
     private var style: ChartStyle? = nil
 
     private var backColor: UIColor = .white
-
-    private var updateCacheBlock: DispatchWorkItem?
 
     private let callFrequenceLimiter = CallFrequenceLimiter()
 
@@ -60,6 +58,9 @@ internal final class ColumnsView: UIView
 
         cacheImageView.isOpaque = true
         cacheImageView.translatesAutoresizingMaskIntoConstraints = true
+        cacheImageView.cacheMethod = { [weak self] context in
+            self?.cacheLayerState(context)
+        }
         addSubview(cacheImageView)
 
         clipContentView.isOpaque = true
@@ -214,49 +215,26 @@ internal final class ColumnsView: UIView
     }
 
     private func cacheUpdate(animated: Bool, duration: TimeInterval) {
-        self.updateCacheBlock?.cancel()
         hideCacheState()
-
+        
         let fullDuration = animated ? (delayOfSec + duration) : delayOfSec
         let deadline: DispatchTime = .now() + fullDuration
-
+        
         let size = CGSize(width: frame.width, height: frame.height + topOffset + bottomOffset)
-        var capturedBlock: DispatchWorkItem!
-        let block = DispatchWorkItem { [weak self] in
-            guard let `self` = self else {
-                return
-            }
-            let image = self.cacheLayerState(size: size)
-            DispatchQueue.main.asyncAfter(deadline: deadline) { [weak self] in
-                if !capturedBlock.isCancelled {
-                    self?.cacheImageView.image = image
-                    self?.showCacheState()
-                }
-            }
+        
+        self.cacheImageView.cacheAfter(deadline: deadline, in: size) { [weak self] image in
+            self?.cacheImageView.image = image
+            self?.showCacheState()
         }
-        capturedBlock = block
-        updateCacheBlock = block
-
-        let fastDuration = animated ? duration : 0.0
-        DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + fastDuration, execute: block)
     }
 
-    private func cacheLayerState(size: CGSize) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, UIScreen.main.scale)
-        defer { UIGraphicsEndImageContext() }
-
-        guard let context = UIGraphicsGetCurrentContext() else {
-            return nil
-        }
-
+    private func cacheLayerState(_ context: CGContext) {
         criticalSection.wait()
         defer { criticalSection.signal() }
 
         context.translateBy(x: margins.left, y: margins.top + topOffset)
         columnViews.forEach { $0.drawCurrentState(to: context) }
         columnViews.forEach { $0.drawSelectorState(to: context) }
-
-        return UIGraphicsGetImageFromCurrentImageContext()
     }
 
     private func hideCacheState() {

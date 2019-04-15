@@ -175,7 +175,8 @@ internal class MainViewController: UITableViewController, Stylizing
                     }
             })
         }
-
+        
+        switchColumnVisibleCell.actualizeFrame(width: tableView.bounds.width)
         switchColumnVisibleCell.applyStyle(StyleController.currentStyle)
 
         return switchColumnVisibleCell
@@ -222,10 +223,7 @@ internal class MainViewController: UITableViewController, Stylizing
         
         let isVisibles = chart.columns.map { $0.isVisible }
         chart.setVisibleColumns(isVisibles: isVisibles)
-        
-        UIView.animate(withDuration: 0.2, animations: {
-            cell.setIsVisibleOnTogglers(isVisibles)
-        })
+        cell.setIsVisibleOnTogglers(isVisibles, animated: true, duration: 0.2)
     }
 
     @IBAction private func switchStyle(_ sender: Any) {
