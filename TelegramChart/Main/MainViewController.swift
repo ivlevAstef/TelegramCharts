@@ -188,7 +188,7 @@ internal class MainViewController: UITableViewController, Stylizing
         let date = Date(timeIntervalSince1970: TimeInterval(date) / 1000.0)
         let dateOfStr = formatter.string(from: date)
         
-        let message = "Your click on date: \(dateOfStr).\n Bonus goal not implemented.\n But everything works fast.\nTooltip automatic hide after 5 seconds."
+        let message = "Your click on date: \(dateOfStr).\n Bonus goal not implemented. It's not difficult, but requires testing and time.\n But everything works fast on all devices.\n\nP.S. Tooltip automatic hide after 5 seconds."
         let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 
