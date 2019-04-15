@@ -12,7 +12,7 @@ private enum Consts
 {
     internal static let horizontalAxisHeight: CGFloat = 32.0
     internal static let spacing: CGFloat = 10.0
-    internal static let topOffset: CGFloat = 30.0
+    internal static let topOffset: CGFloat = 36.0
 }
 
 public class ChartView: UIView

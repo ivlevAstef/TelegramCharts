@@ -54,20 +54,20 @@ internal final class IntervalLabel: UIView
         let text = "\(fromOfStr) - \(toOfStr)"
         
         if self.label.text != text {
-            UIView.animateIf(animated, duration: duration, animations: { [weak self] in
-                guard let `self` = self else {
-                    return
-                }
-                
+//            UIView.animateIf(animated, duration: duration, animations: { [weak self] in
+//                guard let `self` = self else {
+//                    return
+//                }
+            
                 self.label.text = text
-            })
+//            })
         }
     }
     
     private func updateFrame()
     {
         label.frame = self.bounds
-        label.frame.size.height = 16.0
+        label.frame.size.height = 18.0
     }
     
     internal required init?(coder aDecoder: NSCoder) {
