@@ -200,6 +200,8 @@ internal class MainViewController: UITableViewController, Stylizing
                                             on cell: SwitchColumnVisibleTableViewCell,
                                             chart: ChartViewModel,
                                             isLong: Bool) {
+        let lastState = chart.columns.map { $0.isVisible }
+        
         if isLong {
             for column in chart.columns {
                 column.isVisible = false
@@ -221,9 +223,16 @@ internal class MainViewController: UITableViewController, Stylizing
             }
         }
         
-        let isVisibles = chart.columns.map { $0.isVisible }
-        chart.setVisibleColumns(isVisibles: isVisibles)
-        cell.setIsVisibleOnTogglers(isVisibles, animated: true, duration: 0.2)
+        let newState = chart.columns.map { $0.isVisible }
+        if newState.elementsEqual(lastState) {
+            if let index = chart.columns.firstIndex(where: { $0 === columnVM }) {
+                cell.shake(index: index)
+            }
+            return
+        }
+        
+        chart.setVisibleColumns(isVisibles: newState)
+        cell.setIsVisibleOnTogglers(newState, animated: true, duration: 0.2)
     }
 
     @IBAction private func switchStyle(_ sender: Any) {

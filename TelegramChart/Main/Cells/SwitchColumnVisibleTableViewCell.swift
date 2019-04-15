@@ -117,7 +117,7 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     internal func updateCache(after duration: TimeInterval) {
         buttonsView.isHidden = false
         imageCacheView.isHidden = true
-        
+
         imageCacheView.cacheAfter(deadline: .now() + duration, in: buttonsView.frame.size) { [weak self] image in
             self?.imageCacheView.image = image
             self?.buttonsView.isHidden = true
@@ -130,6 +130,25 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
         for (toggler, isVisible) in zip(togglers, isVisibles) {
             toggler.isVisible = isVisible
         }
+    }
+    
+    internal func shake(index: Int) {
+        guard let toggler = togglers[safe: index] else {
+            return
+        }
+        
+        if toggler.isAnimated {
+            return
+        }
+        
+        let duration: TimeInterval = 0.5
+        
+        toggler.isAnimated = true
+        toggler.shake(distance: -3, duration: duration) { [weak toggler] in
+            toggler?.isAnimated = false
+        }
+        
+        updateCache(after: duration)
     }
 
     private func cacheButtons(context: CGContext) {
@@ -172,13 +191,13 @@ internal class SwitchColumnVisibleTableViewCell: UITableViewCell, Stylizing, IAc
     }
     
     @objc private func tapOnSelf(_ tapGesture: UITapGestureRecognizer) {
-        if let toggler = findButton(tapGesture) {
+        if let toggler = findButton(tapGesture), tapGesture.state == .ended {
             toggler.tapHandler?()
         }
     }
     
-    @objc private func longOnSelf(_ tapGesture: UILongPressGestureRecognizer) {
-        if let toggler = findButton(tapGesture) {
+    @objc private func longOnSelf(_ longGesture: UILongPressGestureRecognizer) {
+        if let toggler = findButton(longGesture), longGesture.state == .began {
             toggler.longHandler?()
         }
     }
@@ -225,6 +244,7 @@ private class ColumnToggler: UIView
         }
     }
     
+    internal var isAnimated: Bool = false
     internal let size: CGSize
     internal private(set) var unvisibleImage: UIImage?
     internal private(set) var visibleImage: UIImage?

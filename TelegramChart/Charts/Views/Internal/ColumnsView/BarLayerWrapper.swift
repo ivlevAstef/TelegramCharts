@@ -71,7 +71,8 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
 
         selectorLayers[0].fillColor = ui.color.cgColor
         
-        let height = max(BarLayerWrapper.minHeight, position.from.y - position.to.y)
+        let minHeight = ui.isVisible ? BarLayerWrapper.minHeight: 0.0
+        let height = max(minHeight, position.from.y - position.to.y)
         let path = UIBezierPath(rect: CGRect(x: position.from.x - step,
                                              y: position.to.y,
                                              width: 2 * step,
@@ -99,13 +100,14 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         let step = (datas[1].from.x - datas[0].from.x) / 2
         self.step = step
         
+        let minHeight = ui.isVisible ? BarLayerWrapper.minHeight: 0.0
         for i in 0..<datas.count {
-            let height = max(BarLayerWrapper.minHeight, datas[i].from.y - datas[i].to.y)
+            let height = max(minHeight, datas[i].from.y - datas[i].to.y)
             path.move(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y))
             path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y))
             path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y - height))
             path.addLine(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y - height))
-            path.close()
+            path.addLine(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y))
         }
 
         return path

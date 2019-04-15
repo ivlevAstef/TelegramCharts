@@ -18,4 +18,32 @@ extension UIView
             completion?(true)
         }
     }
+    
+    public func shake(distance: CGFloat, duration: TimeInterval, completion: (() -> Void)? = nil) {
+        let step = duration / 4
+        self.moveX(x: -distance, duration: step) { [weak self] in
+            self?.moveX(x: 2 * distance, duration: step) {
+                self?.moveX(x: -2 * distance, duration: step) {
+                    self?.moveX(x: distance, duration: step) {
+                        completion?()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func setX(x: CGFloat, duration: TimeInterval, completion: @escaping () -> Void) {
+        var frame = self.frame
+        frame.origin.x = x
+        
+        UIView.animate(withDuration: duration, animations: { [weak self] in
+            self?.frame = frame
+        }, completion: { _ in
+            completion()
+        })
+    }
+    
+    private func moveX(x: CGFloat, duration: TimeInterval, completion: @escaping () -> Void) {
+        self.setX(x: frame.origin.x + x, duration: duration, completion: completion)
+    }
 }
