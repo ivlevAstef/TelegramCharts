@@ -46,7 +46,7 @@ internal final class HorizontalAxisView: UIView
     internal func update(ui: ChartUIModel, animated: Bool, duration: TimeInterval) {
         callFrequenceLimiter.update { [weak self] in
             self?.updateLogic(ui: ui, animated: animated, duration: duration)
-            return DispatchTimeInterval.milliseconds(33)
+            return DispatchTimeInterval.milliseconds(30)
         }
     }
     

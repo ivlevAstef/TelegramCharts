@@ -64,7 +64,7 @@ internal final class VerticalAxisView: UIView
             }
             
             let isUpdated = self.updateLogic(ui: ui, animated: animated, duration: duration)
-            return isUpdated ? DispatchTimeInterval.milliseconds(200) : DispatchTimeInterval.milliseconds(33)
+            return isUpdated ? DispatchTimeInterval.milliseconds(150) : DispatchTimeInterval.milliseconds(30)
         }
     }
     
@@ -160,7 +160,7 @@ internal final class VerticalAxisView: UIView
         let translateAnimatedViews = equalViews.filter { abs($0.position - ui.translate(value: $0.value, to: rect)) > 0.1 }
         if translateAnimatedViews.count > 0 {
             let rect = self.rect
-            UIView.animateIf(animated, duration: duration * 0.5, animations: {
+            UIView.animateIf(animated, duration: duration, animations: {
                 for view in translateAnimatedViews {
                     view.position = ui.translate(value: view.value, to: rect)
                 }

@@ -45,7 +45,7 @@ public final class ChartViewModel
             case .area: type = .area
             case .bar: type = .bar
             }
-            let color = UIColor(hex: column.color, alpha: 0.9)
+            let color = UIColor(hex: column.color, alpha: 1.0)
             return ColumnViewModel(name: column.name, values: column.values, color: color, type: type)
         }
         self.name = chart.name

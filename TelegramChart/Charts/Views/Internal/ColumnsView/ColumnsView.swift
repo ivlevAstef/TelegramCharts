@@ -39,7 +39,7 @@ internal final class ColumnsView: UIView
 
     private var oldTime: DT = currentTime()
     private var oldDuration: TimeInterval = 0.0
-    private var delayOfSec: Double = 1.0 / 60.0
+    private var delayOfSec: Double = 1.0 / 240.0
 
     private let topOffset: CGFloat
     private let bottomOffset: CGFloat
@@ -135,9 +135,9 @@ internal final class ColumnsView: UIView
             
             let end = DispatchTime.now()
             let delayInNSec = (end.uptimeNanoseconds &- start.uptimeNanoseconds)
-            let p = 2.0 / (10.0 + 1.0)
-            self.delayOfSec = p * self.delayOfSec + (1.0 - p) * Double(delayInNSec) / Double(NSEC_PER_SEC)
-            return DispatchTimeInterval.nanoseconds(max(Int(delayInNSec), 33333333))
+            let p = 2.0 / (50.0 + 1.0)
+            self.delayOfSec = (1.0 - p) * self.delayOfSec + p * (Double(delayInNSec) / Double(NSEC_PER_SEC))
+            return DispatchTimeInterval.milliseconds(max(Int(self.delayOfSec * 1000.0), 30))
         }
     }
 
@@ -168,11 +168,14 @@ internal final class ColumnsView: UIView
         defer { criticalSection.signal() }
 
         updateIsFirst()
-        let defaultOffset = 1.0 / 120.0
+        let defaultOffset = 1.0 / 100.0
         let t: CGFloat = CGFloat((defaultOffset + delayOfSec + ColumnsView.currentTime() - oldTime) / oldDuration)
+
+        let enableAcceleratedProcessing: Bool = delayOfSec > 0.005
         
         let zipColumns = zip(ui.columns, columnViews)
         for (columnUI, columnView) in zipColumns {
+            columnView.enableAcceleratedProcessing = enableAcceleratedProcessing
             columnView.update(ui: columnUI, animated: animated, duration: duration, t: t)
         }
         self.oldTime = ColumnsView.currentTime()

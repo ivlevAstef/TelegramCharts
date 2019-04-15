@@ -40,6 +40,8 @@ internal final class HintAndOtherView: UIView
     private var color: UIColor = .black
     private var lineColor: UIColor = .black
 
+    private let callFrequenceLimiter = CallFrequenceLimiter()
+
     private var ui: ChartUIModel?
     
     private var hideHintBlock: DispatchWorkItem?
@@ -109,7 +111,11 @@ internal final class HintAndOtherView: UIView
             let aroundDate = ui.translate(x: tapPosition.x, from: bounds)
             let date = ui.find(around: aroundDate, in: ui.interval)
             currentDate = date
-            showHint(in: date, use: ui)
+            callFrequenceLimiter.update { [weak self] in
+                self?.showHint(in: date, use: ui)
+                return DispatchTimeInterval.milliseconds(30)
+            }
+
         default:
             hideAfter()
         }

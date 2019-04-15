@@ -39,7 +39,8 @@ internal class ColumnViewLayerWrapper
     internal private(set) var selectedDate: Chart.Date?
     internal private(set) var ui: ColumnUIModel?
 
-    internal var isFirst: Bool = false
+    internal var isFirst: Bool = false // not good
+    internal var enableAcceleratedProcessing: Bool = false
     
     internal let selectorLayer: CALayer = CALayer()
     internal let selectorLayers: [CAShapeLayer]

@@ -182,7 +182,6 @@ internal class MainViewController: UITableViewController, Stylizing
         return switchColumnVisibleCell
     }
     
-    
     private func showAlert(date: Chart.Date) {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yyyy"

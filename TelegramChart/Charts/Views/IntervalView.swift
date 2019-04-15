@@ -107,8 +107,8 @@ public class IntervalView: UIView
                                                  y: margins.top,
                                                  width: bounds.width - 2 * Consts.padding - margins.left - margins.right,
                                                  height: bounds.height - margins.top - margins.bottom)
-        
-        
+        self.intervalDrawableView.updateStaticViews()
+
         update()
     }
 
@@ -208,13 +208,16 @@ extension IntervalView: ChartUpdateListener
         let ui = makeChartUIModel(viewModel: viewModel)
         self.ui = ui
         
-        intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: false, duration: 0)
+        intervalDrawableView.update(ui: ui, polyRect: columnsViewRect, animated: true, duration: Configs.intervalChangeForIntervalDuration)
     }
 }
 
 private final class IntervalDrawableView: UIView
 {
     private var arrowColor: UIColor = UIColor.white
+
+    private let unvisibleLeftCornerView: UIView = UIView(frame: .zero)
+    private let unvisibleRightCornerView: UIView = UIView(frame: .zero)
 
     private let unvisibleLeftView: UIView = UIView(frame: .zero)
     private let unvisibleRightView: UIView = UIView(frame: .zero)
@@ -225,6 +228,8 @@ private final class IntervalDrawableView: UIView
     private let leftArrow: UIImageView = ArrowView(reverse: false, size: Consts.arrowSize, offset: Consts.arrowOffset)
     private let rightArrow: UIImageView = ArrowView(reverse: true, size: Consts.arrowSize, offset: Consts.arrowOffset)
 
+    private let callFrequenceLimiter = CallFrequenceLimiter()
+
     internal init() {
         super.init(frame: .zero)
 
@@ -232,6 +237,8 @@ private final class IntervalDrawableView: UIView
     }
 
     internal func setStyle(_ style: ChartStyle) {
+        unvisibleLeftCornerView.backgroundColor = style.intervalUnvisibleColor
+        unvisibleRightCornerView.backgroundColor = style.intervalUnvisibleColor
         unvisibleLeftView.backgroundColor = style.intervalUnvisibleColor
         unvisibleRightView.backgroundColor = style.intervalUnvisibleColor
         leftSliderView.backgroundColor = style.intervalBorderColor
@@ -244,40 +251,79 @@ private final class IntervalDrawableView: UIView
 
     internal func update(ui: ChartUIModel, polyRect: CGRect, animated: Bool, duration: TimeInterval)
     {
+        callFrequenceLimiter.update { [weak self] in
+            UIView.animateIf(animated, duration: duration, animations: {
+                self?.updateLogic(ui: ui, polyRect: polyRect, animated: animated, duration: duration)
+            })
+
+            return DispatchTimeInterval.milliseconds(33)
+        }
+    }
+
+    internal func updateStaticViews() {
+        let cornerRadii = CGSize(width: Consts.cornerRadius, height: Consts.cornerRadius)
+        let unvisibleRect = CGRect(x: bounds.origin.x, y: bounds.origin.y + Consts.verticalPadding,
+                                   width: bounds.width, height: bounds.height - 2 * Consts.verticalPadding)
+
+
+        unvisibleLeftCornerView.frame = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
+                                               width: Consts.cornerRadius, height: unvisibleRect.height)
+        let unvisibleLeftMask = CAShapeLayer()
+        unvisibleLeftMask.path = UIBezierPath(roundedRect: unvisibleLeftCornerView.bounds,
+                                              byRoundingCorners: [.topLeft, .bottomLeft],
+                                              cornerRadii: cornerRadii).cgPath
+        unvisibleLeftCornerView.layer.mask = unvisibleLeftMask
+
+
+        unvisibleRightCornerView.frame = CGRect(x: unvisibleRect.maxX - Consts.cornerRadius, y: unvisibleRect.minY,
+                                                width: Consts.cornerRadius, height: unvisibleRect.height)
+        let unvisibleRightMask = CAShapeLayer()
+        unvisibleRightMask.path = UIBezierPath(roundedRect: unvisibleRightCornerView.bounds,
+                                               byRoundingCorners: [.topRight, .bottomRight],
+                                               cornerRadii: cornerRadii).cgPath
+        unvisibleRightCornerView.layer.mask = unvisibleRightMask
+
+
+        leftSliderView.frame = CGRect(x: 0, y: bounds.minY, width: Consts.sliderWidth, height: bounds.height)
+        let leftMask = CAShapeLayer()
+        leftMask.path = UIBezierPath(roundedRect: leftSliderView.bounds,
+                                     byRoundingCorners: [.topLeft, .bottomLeft],
+                                     cornerRadii: cornerRadii).cgPath
+        leftSliderView.layer.mask = leftMask
+
+
+        rightSliderView.frame = CGRect(x: 0, y: bounds.minY, width: Consts.sliderWidth, height: bounds.height)
+        let rightMask = CAShapeLayer()
+        rightMask.path = UIBezierPath(roundedRect: rightSliderView.bounds,
+                                      byRoundingCorners: [.topRight, .bottomRight],
+                                      cornerRadii: cornerRadii).cgPath
+        rightSliderView.layer.mask = rightMask
+    }
+
+    internal func updateLogic(ui: ChartUIModel, polyRect: CGRect, animated: Bool, duration: TimeInterval) {
         let polyRect = CGRect(origin: .zero, size: polyRect.size)
 
         let interval = ui.interval
         let leftX = ui.translate(date: interval.from, to: polyRect)
         let rightX = ui.translate(date: interval.to, to: polyRect)
-        
-        let cornerRadii = CGSize(width: Consts.cornerRadius, height: Consts.cornerRadius)
 
-        let unvisibleRect = CGRect(x: bounds.origin.x, y: bounds.origin.y + Consts.verticalPadding,
-                                   width: bounds.width, height: bounds.height - 2 * Consts.verticalPadding)
+        let unvisibleRect = CGRect(x: bounds.origin.x + Consts.cornerRadius,
+                                   y: bounds.origin.y + Consts.verticalPadding,
+                                   width: bounds.width - Consts.cornerRadius,
+                                   height: bounds.height - 2 * Consts.verticalPadding)
 
         unvisibleLeftView.frame = CGRect(x: unvisibleRect.minX, y: unvisibleRect.minY,
-                                         width: leftX - unvisibleRect.minX + Consts.sliderWidth, height: unvisibleRect.height)
-        let unvisibleLeftMask = CAShapeLayer()
-        unvisibleLeftMask.path = UIBezierPath(roundedRect: unvisibleLeftView.bounds, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: cornerRadii).cgPath
-        unvisibleLeftView.layer.mask = unvisibleLeftMask
+                                         width: leftX - unvisibleRect.minX + Consts.sliderWidth,
+                                         height: unvisibleRect.height)
         
         unvisibleRightView.frame = CGRect(x: rightX - Consts.sliderWidth, y: unvisibleRect.minY,
-                                          width: unvisibleRect.width - rightX + Consts.sliderWidth, height: unvisibleRect.height)
-        let unvisibleRightMask = CAShapeLayer()
-        unvisibleRightMask.path = UIBezierPath(roundedRect: unvisibleRightView.bounds, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: cornerRadii).cgPath
-        unvisibleRightView.layer.mask = unvisibleRightMask
-        
-        leftSliderView.frame = CGRect(x: leftX, y: bounds.minY,
-                                      width: Consts.sliderWidth, height: bounds.height)
-        let leftMask = CAShapeLayer()
-        leftMask.path = UIBezierPath(roundedRect: leftSliderView.bounds, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: cornerRadii).cgPath
-        leftSliderView.layer.mask = leftMask
-        
-        rightSliderView.frame = CGRect(x: rightX - Consts.sliderWidth, y: bounds.minY,
-                                       width: Consts.sliderWidth, height: bounds.height)
-        let rightMask = CAShapeLayer()
-        rightMask.path = UIBezierPath(roundedRect: rightSliderView.bounds, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: cornerRadii).cgPath
-        rightSliderView.layer.mask = rightMask
+                                          width: unvisibleRect.width - rightX + Consts.sliderWidth,
+                                          height: unvisibleRect.height)
+
+
+        leftSliderView.frame.origin.x = leftX
+        rightSliderView.frame.origin.x = rightX - Consts.sliderWidth
+
 
         topBorderView.frame = CGRect(x: leftX + Consts.sliderWidth - 0.5, y: bounds.minY,
                                      width: rightX - leftX - 2 * Consts.sliderWidth + 0.5, height: 2)
@@ -290,6 +336,10 @@ private final class IntervalDrawableView: UIView
     }
 
     private func configureViews() {
+        unvisibleLeftCornerView.translatesAutoresizingMaskIntoConstraints = true
+        addSubview(unvisibleLeftCornerView)
+        unvisibleRightCornerView.translatesAutoresizingMaskIntoConstraints = true
+        addSubview(unvisibleRightCornerView)
         unvisibleLeftView.translatesAutoresizingMaskIntoConstraints = true
         addSubview(unvisibleLeftView)
         unvisibleRightView.translatesAutoresizingMaskIntoConstraints = true
