@@ -253,7 +253,7 @@ class OptimizeUILabel: UILabel {
         let size = self.frame.size
         sizeToFit()
         if size.width != self.frame.width {
-            self.frame.size.width = max(size.width, self.frame.width)
+            self.frame.size.width = max(size.width, self.frame.width + 1.0/*because can truncail...*/)
         }
         if size.height != self.frame.height {
             self.frame.size.height = max(size.height, self.frame.height)
