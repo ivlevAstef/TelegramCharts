@@ -73,10 +73,10 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
         
         let minHeight = ui.isVisible ? BarLayerWrapper.minHeight: 0.0
         let height = max(minHeight, position.from.y - position.to.y)
-        let path = UIBezierPath(rect: CGRect(x: position.from.x - step,
-                                             y: position.to.y,
-                                             width: 2 * step,
-                                             height: height))
+        let path = UIBezierPath(rect: CGRect(x: ceil(position.from.x - step),
+                                             y: ceil(position.to.y),
+                                             width: ceil(2 * step),
+                                             height: ceil(height)))
         
         selectorLayers[0].path = path.cgPath
         
@@ -109,26 +109,26 @@ internal final class BarLayerWrapper: ColumnViewLayerWrapper
 
         if enableAcceleratedProcessing {
             let firstHeight = max(minHeight, datas[0].from.y - datas[0].to.y)
-            path.move(to: CGPoint(x: datas[0].to.x - step, y: datas[0].from.y - firstHeight))
+            path.move(to: CGPoint(x: ceil(datas[0].to.x - step), y: ceil(datas[0].from.y - firstHeight)))
             for data in datas {
-                path.addLine(to: CGPoint(x: data.from.x - step, y: data.from.y))
-                path.addLine(to: CGPoint(x: data.from.x + step, y: data.from.y))
+                path.addLine(to: CGPoint(x: ceil(data.from.x - step), y: ceil(data.from.y)))
+                path.addLine(to: CGPoint(x: ceil(data.from.x + step), y: ceil(data.from.y)))
             }
 
             for i in 0..<datas.count {
                 let data = datas[datas.count - 1 - i]
                 let height = max(minHeight, data.from.y - data.to.y)
-                path.addLine(to: CGPoint(x: data.from.x + step, y: data.from.y - height))
-                path.addLine(to: CGPoint(x: data.from.x - step, y: data.from.y - height))
+                path.addLine(to: CGPoint(x: ceil(data.from.x + step), y: ceil(data.from.y - height)))
+                path.addLine(to: CGPoint(x: ceil(data.from.x - step), y: ceil(data.from.y - height)))
             }
         } else {
             for i in 0..<datas.count {
                 let height = max(minHeight, datas[i].from.y - datas[i].to.y)
-                path.move(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y))
-                path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y))
-                path.addLine(to: CGPoint(x: datas[i].from.x + step, y: datas[i].from.y - height))
-                path.addLine(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y - height))
-                path.addLine(to: CGPoint(x: datas[i].from.x - step, y: datas[i].from.y))
+                path.move(to: CGPoint(x: ceil(datas[i].from.x - step), y: ceil(datas[i].from.y)))
+                path.addLine(to: CGPoint(x: ceil(datas[i].from.x + step), y: ceil(datas[i].from.y)))
+                path.addLine(to: CGPoint(x: ceil(datas[i].from.x + step), y: ceil(datas[i].from.y - height)))
+                path.addLine(to: CGPoint(x: ceil(datas[i].from.x - step), y: ceil(datas[i].from.y - height)))
+                path.addLine(to: CGPoint(x: ceil(datas[i].from.x - step), y: ceil(datas[i].from.y)))
             }
         }
 
