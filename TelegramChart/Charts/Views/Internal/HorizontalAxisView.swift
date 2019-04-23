@@ -86,20 +86,20 @@ internal final class HorizontalAxisView: UIView
             } else {
                 label = dateLabelCache[date] ?? DateLabel(date: date, dateOfStr: dateOfStr, font: font)
                 label.setStyle(color: color)
-                label.translatesAutoresizingMaskIntoConstraints = true
                 dateLabelCache[date] = label
-                addSubview(label)
-                newLabels.append(label)
                 
                 let (position, t) = calcPosition(date: date)
                 label.setPosition(position, t: t)
+                
+                addSubview(label)
+                newLabels.append(label)
             }
 
             dateLabels.append(label)
         }
-
+        
         // update position for all labels
-        UIView.animateIf(animated, duration: duration, animations: { [subviews] in
+        UIView.animateIf(animated, duration: duration * 0.5, animations: { [subviews] in
             for label in subviews.compactMap({ $0 as? DateLabel }) {
                 let (position, t) = calcPosition(date: label.date)
                 label.setPosition(position, t: t)
@@ -108,18 +108,20 @@ internal final class HorizontalAxisView: UIView
 
         for label in newLabels {
             // out screen
-            if label.frame.minX <= self.bounds.minX || label.frame.maxX >= self.bounds.maxX {
+            if label.frame.maxX < self.bounds.minX || self.bounds.maxX < label.frame.minX {
                 label.alpha = 1.0
             } else {
                 label.alpha = 0.0
             }
         }
-
+        
         if prevLabels.count > 0 {
             UIView.animateIf(animated, duration: duration * 0.5, animations: {
                 prevLabels.forEach { $0.alpha = 0.0 }
             }, completion: { _ in
-                prevLabels.forEach { $0.removeFromSuperview() }
+                for label in prevLabels where label.alpha <= 0.01 {
+                    label.removeFromSuperview()
+                }
             })
         }
 
@@ -195,6 +197,7 @@ private final class DateLabel: UILabel
         self.unique = dateOfStr
         super.init(frame: .zero)
 
+        self.translatesAutoresizingMaskIntoConstraints = true
         
         self.text = dateOfStr
         self.font = font

@@ -20,7 +20,7 @@ internal final class IntervalLabel: UIView
         didSet { updateFrame() }
     }
     
-    private let font: UIFont = UIFont.systemFont(ofSize: 15.0, weight: .semibold)
+    private let font: UIFont = UIFont.systemFont(ofSize: 14.0)
     private let label: UILabel = UILabel(frame: .zero)
     
     private let callFrequenceLimiter = CallFrequenceLimiter()
