@@ -7,9 +7,9 @@ My telegram content account: https://contest.dev/chart-ios/entry45
 
 
 I consume time:
-Around 40 hours for Stage1 (March) during two weeks. 
-And 55 hours for Stage2 (April) during one weeks.
-All this in parallel with the main work.
+* Around 40 hours for Stage1 (March) during two weeks. 
+* And 55 hours for Stage2 (April) during one weeks.
+* All this in parallel with the main work.
 
 
 In both cases I took the 4th place.
